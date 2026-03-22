@@ -7,791 +7,538 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Nirmit">
 <meta name="theme-color" content="#08090d">
-<title>Nirmit</title>
+<title>Nirmit — Builder AI</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
-/* ═══════════════════════════════════════
-   DESIGN: Deep indigo-earth, warm amber
-   accents. Feels like a serious ledger
-   book but digital. Telugu-first.
-═══════════════════════════════════════ */
 :root {
-  --bg:    #08090d;
-  --s1:    #0f1117;
-  --s2:    #161b26;
-  --s3:    #1e2535;
-  --s4:    #263040;
-  --bd:    #2a3347;
-  --bd2:   #384560;
-  --amb:   #e8b84a;  /* amber gold */
-  --amb2:  #f5d070;
-  --teal:  #3de8c8;
-  --rose:  #e85d7a;
-  --sky:   #5aafe8;
-  --sage:  #7ac85a;
-  --tx:    #dce8f0;
-  --tx2:   #7a90a8;
-  --tx3:   #3a4a5a;
-  --r:     14px;
-  --rsm:   9px;
+  --bg:#08090d; --s1:#0f1117; --s2:#161b26; --s3:#1e2535; --s4:#263040;
+  --bd:#2a3347; --bd2:#384560;
+  --amb:#e8b84a; --amb2:#f5d070;
+  --teal:#3de8c8; --rose:#e85d7a; --sky:#5aafe8; --sage:#7ac85a;
+  --tx:#dce8f0; --tx2:#7a90a8; --tx3:#3a4a5a;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
-body{
-  background:var(--bg);color:var(--tx);
-  font-family:'Noto Sans Telugu',sans-serif;
-  position:fixed;width:100%;height:100%;height:-webkit-fill-available;
-}
-/* scrollbars hidden everywhere */
 *::-webkit-scrollbar{display:none}
-*{scrollbar-width:none}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-serif;
+  position:fixed;width:100%;height:100%;height:-webkit-fill-available}
 
-/* ── SPLASH ──────────────────────────── */
-#splash{
-  position:fixed;inset:0;z-index:9000;
-  background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-  transition:opacity 0.7s ease;
-}
+/* SPLASH */
+#splash{position:fixed;inset:0;z-index:9000;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  transition:opacity 0.6s}
 #splash.out{opacity:0;pointer-events:none}
-.sp-emblem{
-  width:96px;height:96px;border-radius:26px;
-  background:linear-gradient(145deg,#1a2a4a,#2a4a6a);
-  border:1px solid var(--bd2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:46px;position:relative;
-  box-shadow:0 0 60px rgba(232,184,74,0.15);
-}
-.sp-emblem::after{
-  content:'';position:absolute;inset:-1px;border-radius:27px;
-  background:linear-gradient(145deg,rgba(232,184,74,0.3),transparent,rgba(58,232,200,0.2));
-  pointer-events:none;
-}
-.sp-name{font-size:28px;font-weight:700;color:var(--amb);font-family:'Noto Serif Telugu'}
-.sp-tag{font-size:13px;color:var(--tx2);letter-spacing:0.5px}
-.sp-progress{
-  width:160px;height:2px;background:var(--s3);border-radius:1px;overflow:hidden;
-}
-.sp-bar{height:100%;background:linear-gradient(90deg,var(--amb),var(--teal));
-  border-radius:1px;animation:sp-load 2.2s ease forwards}
-@keyframes sp-load{0%{width:0}100%{width:100%}}
+.sp-box{width:88px;height:88px;border-radius:22px;
+  background:linear-gradient(145deg,#1a2a4a,#2a4a6a);border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;font-size:42px;
+  box-shadow:0 0 60px rgba(232,184,74,0.15)}
+.sp-name{font-size:26px;font-weight:700;color:var(--amb);font-family:'Noto Serif Telugu'}
+.sp-tag{font-size:13px;color:var(--tx2)}
+.sp-bar{width:180px;height:2px;background:var(--s3);border-radius:1px;overflow:hidden}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--amb),var(--teal));
+  animation:fill 2.2s ease forwards}
+@keyframes fill{to{width:100%}}
 
-/* ── SETUP WIZARD ────────────────────── */
-#setup{
-  position:fixed;inset:0;z-index:5000;
-  background:rgba(8,9,13,0.96);backdrop-filter:blur(8px);
+/* SETUP */
+#setup{position:fixed;inset:0;z-index:5000;background:rgba(8,9,13,0.96);
   display:none;align-items:flex-end;justify-content:center;
-  opacity:0;transition:opacity 0.4s;
-}
-#setup.out{opacity:0;pointer-events:none;display:none}
-.wiz{
-  background:var(--s1);
-  border:1px solid var(--bd);
-  border-radius:24px 24px 0 0;
-  width:100%;max-width:500px;
-  padding:0 0 max(60px,env(safe-area-inset-bottom,60px));
-  max-height:88vh;overflow-y:scroll;
-  -webkit-overflow-scrolling:touch;
-}
-.wiz-grip{width:40px;height:4px;background:var(--bd2);border-radius:2px;margin:14px auto 0}
-.wiz-head{padding:22px 22px 0}
-.wiz-step-indicator{
-  display:flex;gap:6px;margin-bottom:20px;
-}
-.wsi{height:3px;flex:1;border-radius:2px;background:var(--s4);transition:background 0.4s}
-.wsi.done{background:var(--teal)}.wsi.active{background:var(--amb)}
-.wiz-title{font-size:21px;font-weight:700;color:var(--amb);font-family:'Noto Serif Telugu';margin-bottom:8px}
-.wiz-sub{font-size:13px;color:var(--tx2);line-height:1.75;margin-bottom:20px}
-.wiz-body{padding:0 22px 0}
-
-/* steps */
-.step{display:none}.step.active{display:block}
-
-/* info panels */
-.ipanel{
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:12px;padding:14px;margin-bottom:14px;
-  font-size:15px;line-height:1.75;color:var(--tx2);
-}
-.ipanel .ip-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
-.ipanel .ip-ico{font-size:22px}
-.ipanel .ip-label{font-size:13px;font-weight:700;color:var(--tx)}
-.ipanel.highlight{border-color:rgba(232,184,74,0.35);background:rgba(232,184,74,0.05)}
-.ipanel.highlight .ip-label{color:var(--amb)}
-.ipanel.teal{border-color:rgba(58,232,200,0.3);background:rgba(58,232,200,0.04)}
-.ipanel.teal .ip-label{color:var(--teal)}
-.cost-table{width:100%;border-collapse:collapse;font-size:12px}
-.cost-table td{padding:5px 0;border-bottom:1px solid var(--bd);vertical-align:top}
-.cost-table tr:last-child td{border-bottom:none}
-.cost-table .ck{color:var(--tx2)}.cost-table .cv{color:var(--amb);font-family:'JetBrains Mono';text-align:right}
-
-/* form */
-.fg{margin-bottom:13px}
-.fl{font-size:11px;color:var(--tx2);margin-bottom:6px;display:block;letter-spacing:0.4px;font-family:'JetBrains Mono'}
-.fi{
-  width:100%;background:var(--s2);border:1px solid var(--bd);
-  border-radius:10px;padding:12px 14px;color:var(--tx);
-  font-family:'Noto Sans Telugu',sans-serif;font-size:14px;outline:none;
-  transition:border-color 0.2s;
-}
+  opacity:0;transition:opacity 0.4s}
+.wiz{background:var(--s1);border:1px solid var(--bd);border-radius:24px 24px 0 0;
+  width:100%;max-width:500px;padding:0 0 max(32px,env(safe-area-inset-bottom,32px));
+  max-height:90vh;overflow-y:auto}
+.wiz-grip{width:38px;height:4px;background:var(--bd2);border-radius:2px;margin:14px auto 0}
+.wiz-head{padding:20px 20px 0}
+.step-bar{display:flex;gap:6px;margin-bottom:18px}
+.sb{height:3px;flex:1;border-radius:2px;background:var(--s4);transition:background 0.4s}
+.sb.done{background:var(--teal)}.sb.active{background:var(--amb)}
+.wiz-title{font-size:21px;font-weight:700;color:var(--amb);font-family:'Noto Serif Telugu';margin-bottom:7px}
+.wiz-sub{font-size:13px;color:var(--tx2);line-height:1.75;margin-bottom:18px}
+.wiz-body{padding:0 20px}
+.step{display:none}.step.on{display:block}
+.panel{background:var(--s2);border:1px solid var(--bd);border-radius:11px;
+  padding:13px;margin-bottom:13px;font-size:13px;color:var(--tx2);line-height:1.7}
+.panel .ph{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.panel .pi{font-size:20px}
+.panel .pt{font-size:13px;font-weight:700;color:var(--tx)}
+.panel.hl{border-color:rgba(232,184,74,0.35);background:rgba(232,184,74,0.05)}
+.panel.hl .pt{color:var(--amb)}
+.panel.tl{border-color:rgba(58,232,200,0.3);background:rgba(58,232,200,0.04)}
+.panel.tl .pt{color:var(--teal)}
+.steps-list{counter-reset:sl;list-style:none}
+.steps-list li{counter-increment:sl;padding:8px 0 8px 38px;position:relative;
+  font-size:13px;color:var(--tx2);border-bottom:1px solid var(--bd);line-height:1.6}
+.steps-list li:last-child{border-bottom:none}
+.steps-list li::before{content:counter(sl);position:absolute;left:0;top:7px;
+  width:24px;height:24px;border-radius:7px;background:var(--s3);border:1px solid var(--bd2);
+  display:grid;place-items:center;font-size:11px;font-family:'JetBrains Mono';color:var(--amb)}
+.steps-list li strong{color:var(--tx)}
+.steps-list li a{color:var(--teal)}
+.fl{font-size:11px;color:var(--tx2);margin-bottom:6px;display:block;font-family:'JetBrains Mono'}
+.fi{width:100%;background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+  padding:12px 14px;color:var(--tx);font-family:'Noto Sans Telugu',sans-serif;
+  font-size:14px;outline:none;transition:border-color 0.2s;margin-bottom:12px}
 .fi:focus{border-color:var(--amb)}
 .fi::placeholder{color:var(--tx3)}
 .fi-mono{font-family:'JetBrains Mono';font-size:13px}
-.wiz-footer{padding:16px 22px 20px;display:flex;gap:9px;flex-wrap:wrap}
-.wiz-footer .btn{min-height:56px;font-size:15px;border-radius:12px;flex:1}
+.script-copy-btn{width:100%;background:var(--s2);border:1px solid var(--bd);
+  border-radius:10px;padding:11px;color:var(--sky);font-family:'Noto Sans Telugu',sans-serif;
+  font-size:13px;cursor:pointer;margin-bottom:13px}
+.wiz-footer{padding:14px 20px 0;display:flex;gap:9px}
+.wiz-footer .btn{min-height:52px;font-size:15px}
 
-/* steps key visual */
-.key-steps{counter-reset:ks;list-style:none;margin-bottom:14px}
-.key-steps li{
-  counter-increment:ks;padding:9px 0 9px 42px;position:relative;
-  font-size:13px;color:var(--tx2);border-bottom:1px solid var(--bd);line-height:1.6;
-}
-.key-steps li:last-child{border-bottom:none}
-.key-steps li::before{
-  content:counter(ks);position:absolute;left:0;top:8px;
-  width:26px;height:26px;border-radius:8px;
-  background:var(--s3);border:1px solid var(--bd2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-family:'JetBrains Mono';color:var(--amb);
-  display:grid;place-items:center;
-}
-.key-steps li strong{color:var(--tx)}
-.key-steps li a{color:var(--teal);text-decoration:none}
+/* APP */
+#app{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available;
+  opacity:0;transition:opacity 0.4s;pointer-events:none}
+#app.on{opacity:1;pointer-events:all}
 
-/* ── APP SHELL ────────────────────────── */
-#app{
-  display:flex;flex-direction:column;
-  height:100%;height:-webkit-fill-available;
-  opacity:0;transition:opacity 0.5s;pointer-events:none;
-}
-#app.visible{opacity:1;pointer-events:all}
+/* HEADER */
+.hdr{background:var(--s1);border-bottom:1px solid var(--bd);
+  padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top,12px));
+  display:flex;align-items:center;gap:11px;flex-shrink:0}
+.hdr-logo{width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(145deg,var(--s3),var(--s4));border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;font-size:17px}
+.hdr-info{flex:1;min-width:0}
+.hdr-title{font-size:16px;font-weight:700;color:var(--amb);font-family:'Noto Serif Telugu'}
+.hdr-sub{font-size:11px;color:var(--tx2);margin-top:1px;display:flex;align-items:center;gap:5px}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--sage);transition:background 0.3s}
+.sync-dot.spin{animation:blink 0.7s infinite}
+.sync-dot.err{background:var(--rose)}.sync-dot.off{background:var(--amb)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.hdr-right{flex-shrink:0}
+.pill{background:var(--s2);border:1px solid var(--bd);border-radius:20px;
+  padding:4px 10px;font-size:11px;color:var(--tx2);font-family:'JetBrains Mono'}
+.pill b{color:var(--rose)}
 
-/* header */
-.hdr{
-  background:var(--s1);
-  border-bottom:1px solid var(--bd);
-  padding:12px 16px;
-  padding-top:max(12px,env(safe-area-inset-top,12px));
-  display:flex;align-items:center;gap:11px;flex-shrink:0;
-}
-.hdr-logo{
-  width:34px;height:34px;border-radius:9px;
-  background:linear-gradient(145deg,var(--s3),var(--s4));
-  border:1px solid var(--bd2);
-  display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;
-}
-.hdr-text{flex:1;min-width:0}
-.hdr-title{font-size:17px;font-weight:700;color:var(--amb);font-family:'Noto Serif Telugu'}
-.hdr-sub{font-size:12px;color:var(--tx2);margin-top:1px;display:flex;align-items:center;gap:5px}
-.sync-pip{
-  width:7px;height:7px;border-radius:50%;background:var(--sage);flex-shrink:0;
-  transition:background 0.3s;
-}
-.sync-pip.syncing{animation:pip-blink 0.7s infinite}
-.sync-pip.error{background:var(--rose)}
-.sync-pip.offline{background:var(--amb)}
-@keyframes pip-blink{0%,100%{opacity:1}50%{opacity:0.2}}
-.hdr-pills{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.hp{
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:20px;padding:4px 10px;
-  font-size:10px;color:var(--tx2);font-family:'JetBrains Mono';white-space:nowrap;
-}
-.hp b{color:var(--amb)}
-.hp.red b{color:var(--rose)}
-
-/* nav */
-.nav{
-  display:flex;background:var(--s1);
-  border-bottom:1px solid var(--bd);flex-shrink:0;
-}
-.ni{
-  flex:1;min-width:52px;
-  display:flex;flex-direction:column;align-items:center;
-  padding:9px 4px 7px;cursor:pointer;
-  border-bottom:2px solid transparent;transition:all 0.2s;gap:3px;
-}
+/* NAV */
+.nav{display:flex;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0}
+.ni{flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;
+  padding:9px 4px 7px;cursor:pointer;border-bottom:2.5px solid transparent;
+  transition:all 0.18s;gap:3px}
 .ni .ico{font-size:18px}
-.ni .lbl{font-size:11px;color:var(--tx3);font-weight:600;letter-spacing:0.3px;white-space:nowrap}
+.ni .lbl{font-size:10px;color:var(--tx3);font-weight:600;white-space:nowrap}
 .ni.on{border-bottom-color:var(--amb)}
 .ni.on .lbl{color:var(--amb)}
 
-/* screens */
+/* SCREENS */
 .screens{flex:1;overflow:hidden;position:relative}
-.sc{
-  position:absolute;inset:0;
-  overflow-y:auto;overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  padding:0 0 28px;display:none;
-}
+.sc{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:0 0 30px;display:none}
 .sc.on{display:block}
 
-/* ── HOME ──────────────────────────────── */
-.sum-row{
-  display:grid;grid-template-columns:1fr 1fr;gap:9px;
-  padding:14px 15px 0;
-}
-.scard{
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:13px;padding:13px 12px;
-}
-.scard .sc-l{font-size:11px;color:var(--tx3);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:6px;font-family:'JetBrains Mono'}
-.scard .sc-v{font-size:22px;font-weight:700;font-family:'JetBrains Mono';line-height:1}
-.scard .sc-v.amb{color:var(--amb)}
-.scard .sc-v.teal{color:var(--teal)}
-.scard .sc-v.rose{color:var(--rose)}
-.scard .sc-v.sky{color:var(--sky)}
-.scard .sc-s{font-size:12px;color:var(--tx3);margin-top:4px}
+/* HOME */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:13px 15px 0}
+.sc-card{background:var(--s2);border:1px solid var(--bd);border-radius:12px;padding:12px}
+.sc-card .l{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-family:'JetBrains Mono'}
+.sc-card .v{font-size:20px;font-weight:700;font-family:'JetBrains Mono'}
+.sc-card .v.amb{color:var(--amb)}.sc-card .v.teal{color:var(--teal)}
+.sc-card .v.rose{color:var(--rose)}.sc-card .v.sky{color:var(--sky)}
+.sc-card .s{font-size:11px;color:var(--tx3);margin-top:3px}
+.seg{padding:13px 15px 0}
+.seg-t{font-size:11px;letter-spacing:0.7px;text-transform:uppercase;color:var(--tx3);
+  margin-bottom:10px;font-family:'JetBrains Mono';display:flex;align-items:center;justify-content:space-between}
 
-.seg{padding:14px 15px 0}
-.seg-t{
-  font-size:13px;letter-spacing:0.8px;text-transform:uppercase;
-  color:var(--tx3);margin-bottom:10px;font-family:'JetBrains Mono';
-  display:flex;align-items:center;justify-content:space-between;
-}
-
-/* transaction item */
-.txn{
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:12px;padding:11px 13px;
-  margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;
-}
-.txn-ico{
-  width:34px;height:34px;border-radius:9px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;flex-shrink:0;margin-top:1px;
-}
-.txn-ico.ord{background:rgba(232,184,74,0.1)}
-.txn-ico.pay{background:rgba(58,232,200,0.1)}
-.txn-ico.doc{background:rgba(90,175,232,0.1)}
+/* TRANSACTION ITEM */
+.txn{background:var(--s2);border:1px solid var(--bd);border-radius:11px;
+  padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.txn-ico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px}
+.txn-ico.ord{background:rgba(232,184,74,0.1)}.txn-ico.pay{background:rgba(58,232,200,0.1)}
 .txn-body{flex:1;min-width:0}
-.txn-v{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.txn-d{font-size:13px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.txn-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
-.tag{
-  font-size:12px;padding:2px 7px;border-radius:7px;
-  border:1px solid var(--bd);color:var(--tx2);font-family:'JetBrains Mono';white-space:nowrap;
-}
-.tag.s{border-color:#5a4010;color:#c49040}
-.tag.m{border-color:#5a1010;color:#c46060}
-.tag.e{border-color:#10407a;color:#60a0d0}
-.tag.h{border-color:#10604a;color:#60c0a0}
-.tag.c{border-color:#50506a;color:#a0a0c0}
-.tag.l{border-color:#604010;color:#c09060}
+.txn-v{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-d{font-size:12px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-tags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap}
+.tag{font-size:11px;padding:2px 7px;border-radius:7px;border:1px solid var(--bd);
+  color:var(--tx2);font-family:'JetBrains Mono';white-space:nowrap}
+.tag.s{border-color:#5a4010;color:#c49040}.tag.m{border-color:#5a1010;color:#c46060}
+.tag.e{border-color:#10407a;color:#60a0d0}.tag.h{border-color:#10604a;color:#60c0a0}
+.tag.c{border-color:#50506a;color:#a0a0c0}.tag.l{border-color:#604010;color:#c09060}
 .tag.p{border-color:rgba(58,232,200,0.3);color:var(--teal)}
 .tag.due{border-color:rgba(232,93,122,0.3);color:var(--rose)}
 .txn-right{text-align:right;flex-shrink:0}
-.txn-amt{font-size:16px;font-weight:700;font-family:'JetBrains Mono'}
+.txn-amt{font-size:14px;font-weight:700;font-family:'JetBrains Mono'}
 .txn-amt.cr{color:var(--teal)}.txn-amt.dr{color:var(--rose)}
-.txn-date{font-size:12px;color:var(--tx3);margin-top:3px;font-family:'JetBrains Mono'}
+.txn-dt{font-size:11px;color:var(--tx3);margin-top:2px;font-family:'JetBrains Mono'}
 
-/* ── CHAT ──────────────────────────────── */
+/* CHAT */
 .chat-wrap{display:flex;flex-direction:column;position:absolute;inset:0}
-.chat-msgs{
-  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:13px 13px 8px;display:flex;flex-direction:column;gap:11px;
-}
+.chat-msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:13px 13px 6px;display:flex;flex-direction:column;gap:11px}
 .bw{display:flex;gap:8px;max-width:94%}
 .bw.usr{align-self:flex-end;flex-direction:row-reverse}
 .bw.ai{align-self:flex-start}
-.bav{
-  width:28px;height:28px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;flex-shrink:0;margin-top:3px;
-}
+.bav{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:13px;flex-shrink:0;margin-top:3px}
 .bw.ai .bav{background:linear-gradient(145deg,var(--s3),var(--s4));border:1px solid var(--bd2)}
 .bw.usr .bav{background:var(--s3);border:1px solid var(--bd)}
-.bbl{
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:13px;padding:10px 13px;
-  font-size:15px;line-height:1.7;
-}
+.bbl{background:var(--s2);border:1px solid var(--bd);border-radius:13px;
+  padding:11px 14px;font-size:14px;line-height:1.65}
 .bw.usr .bbl{background:var(--s3);border-color:var(--bd2)}
-.bbl strong,.bbl b{color:var(--amb)}
+.bbl b,.bbl strong{color:var(--amb)}
 .bbl .ok{color:var(--teal)}.bbl .bad{color:var(--rose)}.bbl .inf{color:var(--sky)}.bbl .wrn{color:var(--amb)}
-.btime{font-size:9px;color:var(--tx3);margin-top:4px;padding:0 2px;font-family:'JetBrains Mono'}
+.btime{font-size:10px;color:var(--tx3);margin-top:4px;padding:0 2px;font-family:'JetBrains Mono'}
+.td{display:flex;gap:4px;padding:4px 0}
+.td span{width:7px;height:7px;background:var(--amb);border-radius:50%;animation:tdot 1.2s infinite}
+.td span:nth-child(2){animation-delay:.2s}.td span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 
-/* confirm entry card */
-.ccard{
-  background:var(--s3);border:1.5px solid rgba(232,184,74,0.3);
-  border-radius:11px;padding:12px;margin-top:10px;
-}
-.ccard-t{color:var(--amb);font-weight:700;font-size:12px;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+/* CONFIRM CARD */
+.ccard{background:var(--s3);border:1.5px solid rgba(232,184,74,0.3);
+  border-radius:11px;padding:13px;margin-top:10px}
+.ccard-t{color:var(--amb);font-weight:700;font-size:13px;margin-bottom:9px}
 .crow{display:flex;justify-content:space-between;align-items:flex-start;
-  padding:6px 0;border-bottom:1px solid var(--bd);font-size:14px}
+  padding:6px 0;border-bottom:1px solid var(--bd);font-size:13px}
 .crow:last-of-type{border-bottom:none}
-.ck{color:var(--tx2)}.cv{font-weight:600;font-family:'JetBrains Mono';font-size:13px;text-align:right;word-break:break-word;max-width:60%}
+.ck{color:var(--tx2);flex-shrink:0;max-width:45%}
+.cv{font-weight:600;font-family:'JetBrains Mono';font-size:12px;text-align:right;
+  word-break:break-word;max-width:55%}
 .cv.ok{color:var(--teal)}.cv.w{color:var(--amb)}.cv.bad{color:var(--rose)}
 .cacts{display:flex;gap:7px;margin-top:10px}
 
-/* chat input area */
-.cin-area{
-  padding:9px 12px;
-  padding-bottom:max(10px,env(safe-area-inset-bottom,10px));
-  background:var(--s1);border-top:1px solid var(--bd);flex-shrink:0;
-}
-.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:9px;padding-bottom:1px}
-.chip{
-  flex-shrink:0;padding:7px 14px;border-radius:20px;
-  border:1px solid var(--bd);background:var(--s2);
-  color:var(--tx2);font-size:13px;font-weight:500;cursor:pointer;
-  white-space:nowrap;font-family:'Noto Sans Telugu',sans-serif;
-  transition:all 0.15s;
-}
-.chip:active{border-color:var(--amb);color:var(--amb);background:rgba(232,184,74,0.08)}
+/* CHAT INPUT */
+.cin-area{padding:9px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom,10px));
+  background:var(--s1);border-top:1px solid var(--bd);flex-shrink:0}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px;padding-bottom:2px}
+.chip{flex-shrink:0;padding:6px 13px;border-radius:20px;border:1px solid var(--bd);
+  background:var(--s2);color:var(--tx2);font-size:12px;cursor:pointer;
+  white-space:nowrap;font-family:'Noto Sans Telugu',sans-serif}
+.chip:active{border-color:var(--amb);color:var(--amb)}
 .cin-row{display:flex;gap:8px;align-items:flex-end}
 .cin-acts{display:flex;gap:6px}
-.iab{
-  width:42px;height:42px;border-radius:10px;
-  border:1px solid var(--bd);background:var(--s2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:17px;cursor:pointer;flex-shrink:0;
-  transition:all 0.15s;
-}
+.iab{width:44px;height:44px;border-radius:10px;border:1px solid var(--bd);
+  background:var(--s2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;flex-shrink:0}
 .iab:active{background:var(--s3)}
 .iab.rec{background:rgba(232,93,122,0.15);border-color:var(--rose);animation:rp 1s infinite}
 @keyframes rp{0%,100%{opacity:1}50%{opacity:0.5}}
-.cin{
-  flex:1;background:var(--s2);border:1px solid var(--bd);
-  border-radius:10px;padding:11px 14px;
-  color:var(--tx);font-family:'Noto Sans Telugu',sans-serif;
-  font-size:16px;resize:none;outline:none;
-  min-height:42px;max-height:100px;
-  transition:border-color 0.2s;line-height:1.5;
-}
+.cin{flex:1;background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+  padding:11px 13px;color:var(--tx);font-family:'Noto Sans Telugu',sans-serif;
+  font-size:15px;resize:none;outline:none;min-height:44px;max-height:100px;
+  transition:border-color 0.2s;line-height:1.5}
 .cin:focus{border-color:var(--amb)}
 .cin::placeholder{color:var(--tx3)}
-.sbtn{
-  width:42px;height:42px;border-radius:10px;border:none;
-  background:var(--amb);color:var(--bg);font-size:18px;
-  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  transition:all 0.15s;
-}
+.sbtn{width:44px;height:44px;border-radius:10px;border:none;
+  background:var(--amb);color:var(--bg);font-size:20px;cursor:pointer;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .sbtn:disabled{opacity:0.35}
-.sbtn:active{filter:brightness(0.9)}
 
-/* typing dots */
-.td{display:flex;gap:4px;padding:3px 0}
-.td span{width:6px;height:6px;background:var(--amb);border-radius:50%;animation:tdot 1.2s infinite}
-.td span:nth-child(2){animation-delay:.2s}
-.td span:nth-child(3){animation-delay:.4s}
-@keyframes tdot{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
-
-/* ── DOCS ──────────────────────────────── */
-.doc-zone{
-  border:2px dashed var(--bd2);border-radius:var(--r);
-  padding:32px 20px;text-align:center;cursor:pointer;
-  background:var(--s2);margin:14px 15px 0;
-  transition:all 0.2s;
-}
+/* DOCS */
+.doc-zone{border:2px dashed var(--bd2);border-radius:14px;padding:30px 20px;
+  text-align:center;cursor:pointer;background:var(--s2);margin:13px 15px 0}
 .doc-zone:active{border-color:var(--amb);background:rgba(232,184,74,0.04)}
-.dz-ico{font-size:42px;margin-bottom:10px}
+.dz-ico{font-size:40px;margin-bottom:10px}
 .dz-t{font-size:16px;font-weight:600;margin-bottom:5px}
-.dz-s{font-size:12px;color:var(--tx2);line-height:1.6}
-.dz-chips{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
-.dz-chip{font-size:10px;padding:3px 9px;border-radius:7px;background:var(--s3);color:var(--tx2);border:1px solid var(--bd)}
+.dz-s{font-size:13px;color:var(--tx2);line-height:1.6}
+.dz-chips{display:flex;gap:6px;justify-content:center;margin-top:11px;flex-wrap:wrap}
+.dz-chip{font-size:11px;padding:3px 10px;border-radius:7px;background:var(--s3);
+  color:var(--tx2);border:1px solid var(--bd)}
 
-.doc-result{
-  margin:10px 15px 0;background:var(--s2);
-  border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;
-}
-.dr-top{padding:13px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
-.dr-ico{font-size:22px}
-.dr-name{font-size:16px;font-weight:700;color:var(--amb)}
-.dr-date{font-size:13px;color:var(--tx2);margin-top:3px}
-.dr-badge{
-  margin-left:auto;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:700;
-  font-family:'JetBrains Mono';
-}
-.dr-badge.reg{background:rgba(90,175,232,0.12);color:var(--sky)}
-.dr-badge.agr{background:rgba(232,184,74,0.12);color:var(--amb)}
-.dr-badge.bil{background:rgba(58,232,200,0.12);color:var(--teal)}
-.dr-fields{padding:10px 14px}
-.drf{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}
-.drf:last-child{border-bottom:none}
-.drf-k{color:var(--tx2);min-width:110px;flex-shrink:0;padding-top:1px;font-size:13px}
-.drf-v{font-weight:600;word-break:break-word}
-.drf-v.alrt{color:var(--amb)}
-.drf-v.good{color:var(--teal)}
-.alert-strip{
-  margin:0 14px 10px;
-  background:rgba(232,184,74,0.1);border:1px solid rgba(232,184,74,0.4);
-  border-radius:9px;padding:12px 14px;font-size:14px;color:var(--amb);line-height:1.7;
-}
-.alert-strip b{display:block;margin-bottom:4px;font-size:15px}
+/* DOC RESULT CARD */
+.doc-card{background:var(--s2);border:1px solid var(--bd);border-radius:13px;
+  margin-bottom:10px;overflow:hidden}
+.dc-hdr{padding:13px 14px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;gap:10px}
+.dc-ico{font-size:22px}
+.dc-name{font-size:15px;font-weight:700;color:var(--amb)}
+.dc-date{font-size:11px;color:var(--tx2);margin-top:2px}
+.dc-badge{margin-left:auto;padding:3px 9px;border-radius:7px;font-size:11px;font-weight:700;font-family:'JetBrains Mono'}
+.dc-badge.reg{background:rgba(90,175,232,0.12);color:var(--sky)}
+.dc-badge.agr{background:rgba(232,184,74,0.12);color:var(--amb)}
+.dc-badge.bil{background:rgba(58,232,200,0.12);color:var(--teal)}
 
-/* ── VENDORS ────────────────────────────── */
-.vc{
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:12px;padding:12px 13px;margin-bottom:8px;
-}
+/* FINANCIALS GRID */
+.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:11px 13px}
+.fin-card{background:var(--s3);border:1px solid var(--bd2);border-radius:10px;padding:11px 12px}
+.fin-card.hl{border-color:rgba(232,184,74,0.5);background:rgba(232,184,74,0.08)}
+.fin-card.full{grid-column:1/-1}
+.fin-card.invest{border-color:rgba(58,232,200,0.4);background:rgba(58,232,200,0.06);grid-column:1/-1}
+.fin-lbl{font-size:12px;color:var(--sky);font-weight:700;margin-bottom:5px}
+.fin-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono';color:var(--amb)}
+.fin-val.teal{color:var(--teal)}.fin-val.sm{font-size:13px}
+.fin-tel{font-size:11px;color:var(--tx2);margin-top:3px}
+
+/* OWNERSHIP CHAIN */
+.chain-wrap{padding:0 13px 11px}
+.chain-title{font-size:14px;color:var(--sky);font-weight:700;margin-bottom:10px}
+.chain-item{border-radius:9px;padding:11px 12px;margin-bottom:8px}
+.chain-item.current{background:rgba(58,232,200,0.05);border:1px solid rgba(58,232,200,0.4)}
+.chain-item.prev{background:var(--s3);border:1px solid var(--bd2)}
+.chain-meta{display:flex;align-items:center;gap:7px;margin-bottom:8px;flex-wrap:wrap}
+.chain-num{width:24px;height:24px;border-radius:6px;background:var(--s4);
+  display:grid;place-items:center;font-size:12px;font-weight:700;font-family:'JetBrains Mono'}
+.chain-num.c{border:1px solid var(--teal);color:var(--teal)}
+.chain-num.p{border:1px solid var(--amb);color:var(--amb)}
+.chain-date{font-size:14px;font-weight:700;color:var(--teal)}
+.chain-reg{font-size:12px;color:var(--amb);background:rgba(232,184,74,0.12);
+  padding:2px 8px;border-radius:6px;border:1px solid rgba(232,184,74,0.3)}
+.chain-curr-badge{font-size:11px;background:rgba(58,232,200,0.15);color:var(--teal);
+  padding:2px 7px;border-radius:5px}
+.chain-seller{font-size:14px;margin-bottom:4px}
+.chain-seller span{color:var(--sky);font-weight:700}
+.chain-buyer{font-size:14px;margin-bottom:4px}
+.chain-buyer span{color:var(--teal);font-weight:700}
+.chain-extent{font-size:13px;color:var(--tx2);margin-bottom:3px}
+.chain-amount{font-size:14px;color:var(--amb);font-weight:700;
+  margin-top:6px;padding-top:6px;border-top:1px solid var(--bd)}
+
+/* ALL FIELDS TABLE */
+.fields-wrap{padding:0 13px 11px}
+.field-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.field-row:last-child{border-bottom:none}
+.field-key{color:var(--tx2);min-width:140px;flex-shrink:0;font-size:12px;padding-top:1px}
+.field-val{font-weight:600;word-break:break-word}
+.field-val.alrt{color:var(--amb)}
+.field-val.low-conf{color:var(--rose)}
+
+/* ALERT STRIP */
+.alrt-strip{margin:0 13px 9px;background:rgba(232,184,74,0.08);
+  border:1px solid rgba(232,184,74,0.35);border-radius:9px;
+  padding:10px 12px;font-size:13px;color:var(--amb);line-height:1.65}
+.alrt-strip b{display:block;margin-bottom:3px;font-size:14px}
+.alrt-strip.high{border-color:rgba(232,93,122,0.4);background:rgba(232,93,122,0.07);color:var(--rose)}
+
+/* VENDOR CARD */
+.vc{background:var(--s2);border:1px solid var(--bd);border-radius:12px;
+  padding:12px 13px;margin-bottom:8px}
 .vc-top{display:flex;align-items:center;gap:10px}
-.vc-av{
-  width:38px;height:38px;border-radius:10px;
-  background:var(--s3);border:1px solid var(--bd2);
-  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
-}
-.vc-n{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vc-c{font-size:12px;color:var(--tx2);margin-top:2px}
-.vc-bal{font-size:16px;font-weight:700;font-family:'JetBrains Mono'}
+.vc-av{width:38px;height:38px;border-radius:10px;background:var(--s3);
+  border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:19px}
+.vc-n{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc-c{font-size:11px;color:var(--tx2);margin-top:2px}
+.vc-bal{font-size:14px;font-weight:700;font-family:'JetBrains Mono'}
 .vc-bar{height:2px;background:var(--s4);border-radius:1px;margin-top:9px;overflow:hidden}
-.vc-bf{height:100%;border-radius:1px;transition:width 0.5s ease}
-.vc-nums{display:flex;justify-content:space-between;margin-top:5px;font-size:12px;color:var(--tx3);font-family:'JetBrains Mono'}
+.vc-bf{height:100%;border-radius:1px;transition:width 0.5s}
+.vc-nums{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--tx3);font-family:'JetBrains Mono'}
 
-/* ── PRICES ─────────────────────────────── */
-.price-group{
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:12px;margin-bottom:9px;overflow:hidden;
-}
-.pg-head{
-  padding:11px 13px;border-bottom:1px solid var(--bd);
-  display:flex;align-items:center;justify-content:space-between;
-}
+/* PRICE */
+.price-group{background:var(--s2);border:1px solid var(--bd);border-radius:12px;margin-bottom:9px;overflow:hidden}
+.pg-head{padding:11px 13px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
 .pg-title{font-size:13px;font-weight:700;color:var(--amb)}
 .pg-latest{font-size:12px;font-family:'JetBrains Mono';color:var(--teal)}
-.pr{
-  display:flex;align-items:center;gap:9px;
-  padding:8px 13px;border-bottom:1px solid var(--bd);font-size:12px;
-}
+.pr{display:flex;align-items:center;gap:9px;padding:8px 13px;border-bottom:1px solid var(--bd);font-size:13px}
 .pr:last-child{border-bottom:none}
-.pr-d{color:var(--tx3);font-family:'JetBrains Mono';font-size:12px;min-width:72px}
+.pr-d{color:var(--tx3);font-family:'JetBrains Mono';font-size:11px;min-width:72px}
 .pr-v{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)}
-.pr-p{font-family:'JetBrains Mono';font-weight:600;color:var(--tx)}
-.pr-c{font-size:10px;font-family:'JetBrains Mono';min-width:38px;text-align:right}
+.pr-p{font-family:'JetBrains Mono';font-weight:600}
+.pr-c{font-size:11px;font-family:'JetBrains Mono';min-width:38px;text-align:right}
 .pr-c.up{color:var(--rose)}.pr-c.dn{color:var(--teal)}
 
-/* ── SETTINGS ───────────────────────────── */
-.set-item{
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:11px;padding:13px 14px;margin-bottom:8px;
-  display:flex;align-items:center;gap:12px;
-}
+/* SETTINGS */
+.si{background:var(--s2);border:1px solid var(--bd);border-radius:11px;
+  padding:13px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
 .si-ico{font-size:22px;flex-shrink:0}
 .si-body{flex:1;min-width:0}
-.si-t{font-size:15px;font-weight:600}
-.si-s{font-size:13px;color:var(--tx2);margin-top:3px;word-break:break-all}
-.si-val{font-size:13px;color:var(--teal);font-family:'JetBrains Mono';margin-top:3px}
+.si-t{font-size:14px;font-weight:600}
+.si-s{font-size:12px;color:var(--tx2);margin-top:3px;word-break:break-all}
+.si-v{font-size:12px;color:var(--teal);font-family:'JetBrains Mono';margin-top:3px}
 
-/* ── BUTTONS ────────────────────────────── */
-.btn{
-  padding:11px 18px;border-radius:10px;border:none;
-  font-family:'Noto Sans Telugu',sans-serif;font-weight:700;font-size:13px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
-  transition:all 0.15s;
-}
+/* BUTTONS */
+.btn{padding:11px 18px;border-radius:10px;border:none;
+  font-family:'Noto Sans Telugu',sans-serif;font-weight:700;font-size:14px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.15s}
 .btn:active{transform:scale(0.97)}
-.btn-amb{background:var(--amb);color:var(--bg)}
-.btn-amb:active{filter:brightness(0.9)}
-.btn-teal{background:var(--teal);color:var(--bg)}
-.btn-ghost{background:var(--s2);color:var(--tx2);border:1px solid var(--bd)}
-.btn-full{width:100%}
-.btn-sm{padding:7px 13px;font-size:12px;border-radius:8px}
-.btn-outline{background:transparent;color:var(--amb);border:1px solid rgba(232,184,74,0.4)}
+.btn.amb{background:var(--amb);color:var(--bg)}
+.btn.teal{background:var(--teal);color:var(--bg)}
+.btn.ghost{background:var(--s2);color:var(--tx2);border:1px solid var(--bd)}
+.btn.rose{background:rgba(232,93,122,0.12);color:var(--rose);border:1px solid rgba(232,93,122,0.35)}
+.btn.full{width:100%}
+.btn.sm{padding:7px 12px;font-size:12px;border-radius:8px}
 
-/* ── PROCESSING ─────────────────────────── */
-#proc{
-  position:fixed;inset:0;z-index:700;
-  background:rgba(8,9,13,0.88);backdrop-filter:blur(6px);
+/* MODAL */
+.mover{position:fixed;inset:0;z-index:400;background:rgba(8,9,13,0.9);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(4px)}
+.mover.on{opacity:1;pointer-events:all}
+.msheet{background:var(--s1);border:1px solid var(--bd);border-radius:20px 20px 0 0;
+  width:100%;max-width:500px;padding:18px 18px max(20px,env(safe-area-inset-bottom,20px));
+  max-height:80vh;overflow-y:auto;transform:translateY(30px);transition:transform 0.3s}
+.mover.on .msheet{transform:translateY(0)}
+.mgrip{width:34px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 16px}
+.mt{font-size:17px;font-weight:700;color:var(--amb);margin-bottom:14px}
+
+/* PROCESSING */
+#proc{position:fixed;inset:0;z-index:700;background:rgba(8,9,13,0.9);
   display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-}
+  backdrop-filter:blur(5px)}
 #proc.on{display:flex}
-.proc-ring{
-  width:48px;height:48px;border-radius:50%;
-  border:2px solid var(--s4);border-top-color:var(--amb);
-  animation:spin 0.9s linear infinite;
-}
+.proc-ring{width:48px;height:48px;border-radius:50%;border:2.5px solid var(--s4);
+  border-top-color:var(--amb);animation:spin 0.9s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#proc-text{font-size:13px;color:var(--tx2);text-align:center;line-height:1.7}
+#proc-text{font-size:14px;color:var(--tx2);text-align:center;line-height:1.7;max-width:280px}
 
-/* ── TOAST ──────────────────────────────── */
-#toast{
-  position:fixed;z-index:800;
-  top:calc(env(safe-area-inset-top,0px) + 68px);
+/* TOAST */
+#toast{position:fixed;z-index:800;top:calc(env(safe-area-inset-top,0px)+68px);
   left:50%;transform:translateX(-50%) translateY(-12px);
   background:var(--s2);border:1px solid var(--bd);border-radius:10px;
-  padding:10px 18px;font-size:13px;
-  opacity:0;transition:all 0.3s;pointer-events:none;
-  white-space:nowrap;max-width:88vw;text-align:center;
-}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  padding:10px 18px;font-size:13px;opacity:0;transition:all 0.3s;pointer-events:none;
+  white-space:nowrap;max-width:88vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{border-color:rgba(58,232,200,0.4);color:var(--teal)}
 #toast.err{border-color:rgba(232,93,122,0.4);color:var(--rose)}
 #toast.info{border-color:rgba(232,184,74,0.4);color:var(--amb)}
 
-/* ── MODAL ──────────────────────────────── */
-.moverlay{
-  position:fixed;inset:0;z-index:400;
-  background:rgba(8,9,13,0.9);backdrop-filter:blur(4px);
-  display:flex;align-items:flex-end;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity 0.25s;
-}
-.moverlay.on{opacity:1;pointer-events:all}
-.msheet{
-  background:var(--s1);border:1px solid var(--bd);
-  border-radius:20px 20px 0 0;width:100%;max-width:500px;
-  padding:18px 18px max(20px,env(safe-area-inset-bottom,20px));
-  max-height:82vh;overflow-y:auto;
-  transform:translateY(30px);transition:transform 0.3s;
-}
-.moverlay.on .msheet{transform:translateY(0)}
-.mgrip{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 16px}
-.mt{font-size:17px;font-weight:700;color:var(--amb);margin-bottom:14px}
+/* INSTALL BANNER */
+.install-banner{margin:13px 15px 0;background:var(--s2);border:1px solid rgba(90,175,232,0.3);
+  border-radius:12px;padding:13px 14px;display:flex;align-items:flex-start;gap:11px}
+.ib-ico{font-size:24px;flex-shrink:0;margin-top:2px}
+.ib-body{flex:1}.ib-t{font-size:13px;font-weight:600;color:var(--sky);margin-bottom:3px}
+.ib-s{font-size:11px;color:var(--tx2);line-height:1.6}
+.ib-x{font-size:18px;color:var(--tx3);cursor:pointer}
 
-/* ownership chain */
-.own-chain{padding:11px 14px}
-.own-step{
-  display:flex;gap:11px;padding:10px 0;
-  border-bottom:1px solid var(--bd);position:relative;
-}
-.own-step:last-child{border-bottom:none}
-.own-num{
-  width:28px;height:28px;border-radius:8px;flex-shrink:0;
-  background:linear-gradient(135deg,var(--s3),var(--s4));
-  border:1px solid var(--bd2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:700;color:var(--amb);font-family:'JetBrains Mono';
-  margin-top:1px;
-}
-.own-body{flex:1;min-width:0}
-.own-date{font-size:10px;color:var(--teal);font-family:'JetBrains Mono';margin-bottom:4px}
-.own-row{display:flex;gap:6px;font-size:12px;margin-bottom:3px;align-items:flex-start}
-.own-label{color:var(--tx2);min-width:50px;flex-shrink:0}
-.own-val{font-weight:600;word-break:break-word}
-.own-amount{font-size:12px;font-family:'JetBrains Mono';color:var(--amb);font-weight:700;margin-top:4px}
-.own-arrow{
-  text-align:center;font-size:16px;color:var(--tx3);
-  padding:4px 0;
-}
-
-/* financials grid */
-.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:11px 14px}
-.fin-card{
-  background:var(--s2);border:1px solid var(--bd2);
-  border-radius:10px;padding:13px 13px;
-}
-.fin-card.highlight{border-color:rgba(232,184,74,0.5);background:rgba(232,184,74,0.1)}
-.fin-card.full{grid-column:1/-1}
-.fin-label{font-size:13px;color:var(--sky);font-weight:700;margin-bottom:6px;font-family:'Noto Sans Telugu',sans-serif;letter-spacing:0}
-.fin-value{font-size:17px;font-weight:700;font-family:'JetBrains Mono';color:var(--amb)}
-.fin-value.teal{color:var(--teal)}
-.fin-value.sm{font-size:15px}
-
-/* selective delete */
-.sel-bar{
-  display:none;align-items:center;gap:10px;
-  padding:10px 15px;background:var(--s2);
-  border:1px solid rgba(232,93,122,0.3);
-  border-radius:11px;margin-bottom:10px;
-}
-.sel-bar.show{display:flex}
-.sel-count{flex:1;font-size:13px;color:var(--rose);font-weight:600}
-.sel-check{
-  width:22px;height:22px;border-radius:6px;
-  border:2px solid var(--bd2);background:var(--s3);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;transition:all 0.15s;font-size:12px;
-}
-.sel-check.checked{background:var(--rose);border-color:var(--rose);color:#fff}
-.doc-item-wrap{position:relative}
-.doc-item-wrap .sel-check{
-  position:absolute;top:12px;left:12px;z-index:10;
-  display:none;
-}
-.select-mode .doc-item-wrap .sel-check{display:flex}
-.select-mode .doc-result{margin-left:38px;transition:margin 0.2s}
-
-/* empty state */
-.empty{text-align:center;padding:42px 20px;color:var(--tx3)}
-.empty .ei{font-size:42px;margin-bottom:12px}
-.empty .et{font-size:15px;color:var(--tx2);margin-bottom:5px;font-weight:500}
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--tx3)}
+.empty .ei{font-size:40px;margin-bottom:11px}
+.empty .et{font-size:14px;color:var(--tx2);margin-bottom:5px;font-weight:500}
 .empty .es{font-size:12px;line-height:1.6}
 
-/* install banner */
-.install-banner{
-  margin:13px 15px 0;
-  background:var(--s2);border:1px solid rgba(90,175,232,0.3);
-  border-radius:12px;padding:13px 14px;
-  display:flex;align-items:flex-start;gap:11px;
-}
-.ib-ico{font-size:24px;flex-shrink:0;margin-top:2px}
-.ib-text{flex:1}
-.ib-t{font-size:13px;font-weight:600;color:var(--sky);margin-bottom:3px}
-.ib-s{font-size:11px;color:var(--tx2);line-height:1.6}
-.ib-x{font-size:18px;color:var(--tx3);cursor:pointer;flex-shrink:0}
+/* SELECT MODE */
+.sel-bar{display:none;align-items:center;gap:9px;padding:9px 14px;
+  background:rgba(232,93,122,0.08);border:1px solid rgba(232,93,122,0.25);
+  border-radius:10px;margin-bottom:9px}
+.sel-bar.on{display:flex}
+.sel-count{flex:1;font-size:13px;color:var(--rose);font-weight:600}
+.doc-wrap{position:relative}
+.sel-chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--bd2);
+  background:var(--s3);display:none;align-items:center;justify-content:center;
+  cursor:pointer;position:absolute;top:12px;left:12px;z-index:5;font-size:12px;font-weight:700}
+.sel-chk.checked{background:var(--rose);border-color:var(--rose);color:#fff}
+.select-mode .sel-chk{display:flex}
+.select-mode .doc-card{margin-left:36px}
 
-@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fi-anim{animation:fadein 0.25s ease both}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeup 0.24s ease both}
 </style>
 </head>
 <body>
 
-<!-- Splash -->
+<!-- SPLASH -->
 <div id="splash">
-  <div class="sp-emblem">🏗️</div>
+  <div class="sp-box">🏗️</div>
   <div class="sp-name">Nirmit</div>
   <div class="sp-tag">Kadapa Builder · AI Ledger · Cloud Sync</div>
-  <div class="sp-progress"><div class="sp-bar"></div></div>
+  <div class="sp-bar"><div class="sp-fill"></div></div>
 </div>
 
-<!-- Processing -->
+<!-- PROCESSING -->
 <div id="proc"><div class="proc-ring"></div><div id="proc-text">Processing...</div></div>
 
-<!-- Toast -->
+<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- ═══════════════════════════ SETUP WIZARD ════════════════════════════ -->
+<!-- ===================== SETUP WIZARD ===================== -->
 <div id="setup">
 <div class="wiz">
   <div class="wiz-grip"></div>
   <div class="wiz-head">
-    <div class="wiz-step-indicator">
-      <div class="wsi active" id="wi0"></div>
-      <div class="wsi" id="wi1"></div>
-      <div class="wsi" id="wi2"></div>
+    <div class="step-bar">
+      <div class="sb active" id="sb0"></div>
+      <div class="sb" id="sb1"></div>
+      <div class="sb" id="sb2"></div>
     </div>
   </div>
 
-  <!-- STEP 0: Welcome + explain -->
-  <div class="step active" id="stp0">
+  <!-- STEP 0: Welcome -->
+  <div class="step on" id="stp0">
     <div class="wiz-head" style="padding-top:0">
       <div class="wiz-title">నమస్కారం! 🏗️</div>
-      <div class="wiz-sub">
-        మీ Construction Ledger ని setup చేద్దాం.<br>
-        <strong>3 minutes</strong> లో ready అవుతుంది.
-      </div>
+      <div class="wiz-sub">Nirmit — మీ AI construction manager. 3 minutes లో setup అవుతుంది.</div>
     </div>
     <div class="wiz-body">
-      <div class="ipanel teal">
-        <div class="ip-head"><span class="ip-ico">☁️</span><span class="ip-label">ఎలా పని చేస్తుంది?</span></div>
+      <div class="panel tl">
+        <div class="ph"><span class="pi">☁️</span><span class="pt">ఎలా పని చేస్తుంది?</span></div>
         మీరు enter చేసిన ప్రతి transaction వెంటనే మీ <strong>Google Sheet లో save</strong> అవుతుంది.<br><br>
-        📱 iPhone పోయినా → New phone లో open చేయండి → Data ready<br>
-        📱 Android లో కూడా same data చూడవచ్చు<br>
-        🔒 మీ Gmail account లో మాత్రమే — private గా ఉంటుంది<br>
-        💰 పూర్తిగా Free — Google Sheets free, Gemini AI free
+        📱 Phone పోయినా data పోదు<br>
+        📱 iPhone + Android రెండింట్లో same data<br>
+        💰 పూర్తిగా Free — Google Sheets + Gemini AI
       </div>
-      <div class="ipanel highlight">
-        <div class="ip-head"><span class="ip-ico">🤖</span><span class="ip-label">AI ఏది వాడుతున్నారు?</span></div>
-        <strong>Google Gemini</strong> — Google's free AI.<br>
-        • Day కి 1500 requests free<br>
-        • మీ daily use కి ఇది చాలా ఎక్కువ<br>
-        • కొన్నాళ్ళ తర్వాత limit పెరిగినా key మార్చవచ్చు<br>
-        • Telugu చదవగలదు — registration documents, bills అన్నీ
+      <div class="panel hl">
+        <div class="ph"><span class="pi">🤖</span><span class="pt">Gemini AI — Free tier</span></div>
+        Google's free AI — Day కి 1500 requests free. Telugu documents చదవగలదు.
       </div>
     </div>
     <div class="wiz-footer">
-      <button class="btn btn-amb btn-full" onclick="gotoStep(1)">Setup Start చేద్దాం →</button>
+      <button class="btn amb full" onclick="gotoStep(1)">Setup Start చేద్దాం →</button>
     </div>
   </div>
 
-  <!-- STEP 1: Google Sheets setup -->
+  <!-- STEP 1: Google Sheet -->
   <div class="step" id="stp1">
     <div class="wiz-head" style="padding-top:0">
       <div class="wiz-title">☁️ Google Sheet Setup</div>
-      <div class="wiz-sub">మీ Google Sheet ID enter చేయండి — ఇక్కడే అన్ని data save అవుతుంది.</div>
+      <div class="wiz-sub">మీ data ఇక్కడ save అవుతుంది — forever safe.</div>
     </div>
     <div class="wiz-body">
-      <div class="ipanel">
-        <div class="ip-head"><span class="ip-ico">📋</span><span class="ip-label">Sheet ఎలా create చేయాలి? (2 minutes)</span></div>
-        <ol class="key-steps">
-          <li>మీ phone లో <strong>Google Sheets app</strong> open చేయండి (లేదా sheets.google.com)</li>
-          <li>"<strong>+</strong>" tap చేసి new spreadsheet create చేయండి</li>
-          <li>Name: <strong>"Nirmit Ledger"</strong> అని పెట్టండి</li>
-          <li>Top లో URL చూడండి: <code style="color:var(--teal);font-size:11px">docs.google.com/spreadsheets/d/<strong>XXXXXX</strong>/edit</code></li>
-          <li>ఆ <strong>XXXXXX</strong> part copy చేసి below paste చేయండి</li>
+      <div class="panel">
+        <div class="ph"><span class="pi">📋</span><span class="pt">Sheet create చేయండి (2 min)</span></div>
+        <ol class="steps-list">
+          <li><strong>sheets.google.com</strong> లో new spreadsheet create చేయండి</li>
+          <li>Name: <strong>"Nirmit Ledger"</strong> పెట్టండి</li>
+          <li>URL లో <code style="color:var(--teal)">/d/XXXXXX/edit</code> లో XXXXXX copy చేయండి</li>
+          <li><strong>Extensions → Apps Script</strong> → old code delete → below script paste చేయండి</li>
+          <li>Save → <strong>Deploy → New deployment → Web app → Anyone → Deploy</strong></li>
+          <li>Web app URL copy చేయండి</li>
         </ol>
       </div>
-      <div class="ipanel teal">
-        <div class="ip-head"><span class="ip-ico">🔑</span><span class="ip-label">Apps Script కూడా కావాలి (1 min)</span></div>
-        <ol class="key-steps">
-          <li>Sheet లో <strong>Extensions → Apps Script</strong> click చేయండి</li>
-          <li>అక్కడ ఉన్న code అంతా delete చేయండి</li>
-          <li>Below ఉన్న "Copy Script" button click చేయండి — paste చేయండి</li>
-          <li><strong>Save (💾)</strong> చేయండి → <strong>Deploy → New deployment</strong></li>
-          <li>Type: <strong>Web app</strong>, Execute as: <strong>Me</strong>, Access: <strong>Anyone</strong></li>
-          <li>Deploy click → URL copy చేసి below paste చేయండి</li>
-        </ol>
-      </div>
-      <button class="btn btn-ghost btn-sm btn-full" onclick="copyScript()" style="margin-bottom:14px">
-        📋 Apps Script Code Copy చేయండి
-      </button>
-      <div class="fg">
-        <label class="fl">Google Sheet ID *</label>
-        <input class="fi fi-mono" id="sheet-id" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
-        <div style="font-size:10px;color:var(--tx3);margin-top:5px">URL లో /d/ తర్వాత ఉన్న long code</div>
-      </div>
-      <div class="fg">
-        <label class="fl">Apps Script Web App URL *</label>
-        <input class="fi fi-mono" id="script-url" placeholder="https://script.google.com/macros/s/XXXXX/exec">
-      </div>
+      <button class="script-copy-btn" onclick="copyScript()">📋 Apps Script Code Copy చేయండి</button>
+      <label class="fl">Google Sheet ID *</label>
+      <input class="fi fi-mono" id="inp-sheet" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+      <label class="fl">Apps Script Web App URL *</label>
+      <input class="fi fi-mono" id="inp-script" placeholder="https://script.google.com/macros/s/XXXXX/exec">
     </div>
     <div class="wiz-footer">
-      <button class="btn btn-ghost btn-sm" onclick="gotoStep(0)">← Back</button>
-      <button class="btn btn-amb" style="flex:1" onclick="validateSheetAndNext()">Test & Next →</button>
+      <button class="btn ghost sm" onclick="gotoStep(0)">← Back</button>
+      <button class="btn amb" style="flex:1" onclick="saveSheet()">Save & Next →</button>
     </div>
   </div>
 
-  <!-- STEP 2: Gemini API Key -->
+  <!-- STEP 2: Gemini Key -->
   <div class="step" id="stp2">
     <div class="wiz-head" style="padding-top:0">
       <div class="wiz-title">🤖 Gemini API Key</div>
-      <div class="wiz-sub">Google's free AI key — No credit card, No payment needed.</div>
+      <div class="wiz-sub">Free key — No credit card needed.</div>
     </div>
     <div class="wiz-body">
-      <div class="ipanel highlight">
-        <div class="ip-head"><span class="ip-ico">💰</span><span class="ip-label">పూర్తిగా Free!</span></div>
-        <table class="cost-table">
-          <tr><td class="ck">Daily free limit</td><td class="cv">1,500 requests</td></tr>
-          <tr><td class="ck">మీ daily usage</td><td class="cv">~30-50 requests</td></tr>
-          <tr><td class="ck">Cost</td><td class="cv">₹0 / month</td></tr>
-          <tr><td class="ck">Telugu support</td><td class="cv">✓ Yes</td></tr>
-        </table>
+      <div class="panel hl">
+        <div class="ph"><span class="pi">💰</span><span class="pt">Cost: ₹0 / month</span></div>
+        Day కి 1500 free requests · మీ daily use కి ~30-50 requests చాలు
       </div>
-      <div class="ipanel">
-        <div class="ip-head"><span class="ip-ico">🔑</span><span class="ip-label">Key ఎలా తీసుకోవాలి? (2 minutes)</span></div>
-        <ol class="key-steps">
-          <li><a href="https://aistudio.google.com/app/apikey" target="_blank"><strong>aistudio.google.com/app/apikey</strong></a> కి వెళ్ళండి</li>
-          <li>మీ <strong>same Gmail account</strong> తో sign in చేయండి</li>
-          <li>"<strong>Create API Key</strong>" click చేయండి</li>
+      <div class="panel">
+        <div class="ph"><span class="pi">🔑</span><span class="pt">Key ఎలా తీసుకోవాలి? (2 min)</span></div>
+        <ol class="steps-list">
+          <li><a href="https://aistudio.google.com/app/apikey" target="_blank"><strong>aistudio.google.com/app/apikey</strong></a> open చేయండి</li>
+          <li>మీ Gmail తో sign in చేయండి</li>
+          <li><strong>"Create API Key"</strong> click చేయండి</li>
           <li>Key copy చేసి below paste చేయండి</li>
-          <li>అంతే! No payment, No credit card</li>
         </ol>
       </div>
-      <div class="fg">
-        <label class="fl">Gemini API Key *</label>
-        <input class="fi fi-mono" id="gemini-key" type="password" placeholder="AIzaSy...">
-      </div>
-      <div style="font-size:11px;color:var(--tx3);margin-bottom:14px;line-height:1.6">
-        🔒 Key మీ phone లో మాత్రమే save అవుతుంది. Google Sheets లో కాదు. ఎవరికీ కనిపించదు.
-      </div>
+      <label class="fl">Gemini API Key *</label>
+      <input class="fi fi-mono" id="inp-key" type="password" placeholder="AIzaSy...">
+      <div style="font-size:11px;color:var(--tx3)">🔒 Key మీ phone లో మాత్రమే save అవుతుంది</div>
     </div>
     <div class="wiz-footer">
-      <button class="btn btn-ghost btn-sm" onclick="gotoStep(1)">← Back</button>
-      <button class="btn btn-teal" style="flex:1" onclick="finishSetup()">✓ Complete Setup</button>
+      <button class="btn ghost sm" onclick="gotoStep(1)">← Back</button>
+      <button class="btn teal" style="flex:1" onclick="finishSetup()">✓ Complete Setup</button>
     </div>
   </div>
+</div>
+</div>
 
-</div><!-- /wiz -->
-</div><!-- /setup -->
-
-<!-- ═══════════════════════════ MAIN APP ════════════════════════════════ -->
+<!-- ===================== MAIN APP ===================== -->
 <div id="app">
-  <!-- Header -->
   <div class="hdr">
     <div class="hdr-logo">🏗️</div>
-    <div class="hdr-text">
+    <div class="hdr-info">
       <div class="hdr-title">Nirmit</div>
       <div class="hdr-sub">
-        <div class="sync-pip" id="sync-pip"></div>
-        <span id="sync-label">Synced</span> · Kadapa Builder
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-lbl">Ready</span>
       </div>
     </div>
-    <div class="hdr-pills">
-      <div class="hp red">బకాయి: <b id="hdr-due">₹0</b></div>
+    <div class="hdr-right">
+      <div class="pill">బకాయి: <b id="hdr-due">₹0</b></div>
     </div>
   </div>
 
-  <!-- Nav -->
   <div class="nav">
     <div class="ni on" onclick="showSc('home')"><div class="ico">🏠</div><div class="lbl">Home</div></div>
     <div class="ni" onclick="showSc('chat')"><div class="ico">💬</div><div class="lbl">AI Chat</div></div>
@@ -802,33 +549,26 @@ body{
   </div>
 
   <div class="screens">
+
     <!-- HOME -->
     <div class="sc on" id="sc-home">
-      <div id="install-banner" class="install-banner" style="display:none">
+      <div class="install-banner" id="install-banner" style="display:none">
         <div class="ib-ico">📲</div>
-        <div class="ib-text">
+        <div class="ib-body">
           <div class="ib-t">Home Screen కి Add చేయండి</div>
-          <div class="ib-s">
-            <b>iPhone:</b> Safari → Share (□↑) → "Add to Home Screen"<br>
-            <b>Android:</b> Chrome menu (⋮) → "Add to Home screen"
-          </div>
+          <div class="ib-s"><b>iPhone:</b> Safari → Share → "Add to Home Screen"<br><b>Android:</b> Chrome → Menu → "Add to Home screen"</div>
         </div>
-        <div class="ib-x" onclick="document.getElementById('install-banner').style.display='none'">✕</div>
+        <div class="ib-x" onclick="this.closest('.install-banner').style.display='none'">✕</div>
       </div>
-      <div class="sum-row">
-        <div class="scard"><div class="sc-l">మొత్తం ఆర్డర్లు</div><div class="sc-v amb" id="s-ord">₹0</div><div class="sc-s" id="s-ord-c">0 orders</div></div>
-        <div class="scard"><div class="sc-l">చెల్లించినది</div><div class="sc-v teal" id="s-paid">₹0</div><div class="sc-s" id="s-paid-c">0 payments</div></div>
-        <div class="scard"><div class="sc-l">బకాయి మొత్తం</div><div class="sc-v rose" id="s-due">₹0</div><div class="sc-s">outstanding</div></div>
-        <div class="scard"><div class="sc-l">Vendors</div><div class="sc-v sky" id="s-vcount">0</div><div class="sc-s">suppliers</div></div>
+      <div class="sum-grid">
+        <div class="sc-card"><div class="l">మొత్తం ఆర్డర్లు</div><div class="v amb" id="s-ord">₹0</div><div class="s" id="s-ordc">0 orders</div></div>
+        <div class="sc-card"><div class="l">చెల్లించినది</div><div class="v teal" id="s-paid">₹0</div><div class="s" id="s-paidc">0 payments</div></div>
+        <div class="sc-card"><div class="l">బకాయి మొత్తం</div><div class="v rose" id="s-due">₹0</div><div class="s">outstanding</div></div>
+        <div class="sc-card"><div class="l">Vendors</div><div class="v sky" id="s-vc">0</div><div class="s">suppliers</div></div>
       </div>
       <div class="seg">
-        <div class="seg-t">
-          <span>Recent Transactions</span>
-          <span id="last-sync" style="color:var(--tx3);font-size:11px"></span>
-        </div>
-        <div id="recent-list">
-          <div class="empty"><div class="ei">📋</div><div class="et">ఇంకా ఏమీ లేదు</div><div class="es">AI Chat లో మీ ఆర్డర్లు చెప్పండి</div></div>
-        </div>
+        <div class="seg-t"><span>Recent Transactions</span><span id="last-sync" style="font-size:10px;color:var(--tx3)"></span></div>
+        <div id="recent-list"><div class="empty"><div class="ei">📋</div><div class="et">ఇంకా ఏమీ లేదు</div><div class="es">AI Chat లో మీ ఆర్డర్లు చెప్పండి</div></div></div>
       </div>
     </div>
 
@@ -837,7 +577,7 @@ body{
       <div class="chat-wrap">
         <div class="chat-msgs" id="chat-msgs"></div>
         <div class="cin-area">
-          <div class="chips" id="quick-chips">
+          <div class="chips">
             <div class="chip" onclick="qt('ఇసుక ఆర్డర్: ')">🪨 ఇసుక</div>
             <div class="chip" onclick="qt('electrical items ')">⚡ Electrical</div>
             <div class="chip" onclick="qt('steel TMT bars ')">🔩 Steel</div>
@@ -853,7 +593,7 @@ body{
               <button class="iab" onclick="document.getElementById('chat-photo').click()">📷</button>
             </div>
             <textarea class="cin" id="chat-in"
-              placeholder="Telugu లో చెప్పండి... ఉదా: ఇసుక 3 ట్రాక్టర్ మురళి దగ్గర ₹4500"
+              placeholder="Telugu లేదా English లో చెప్పండి..."
               rows="1" onkeydown="handleKey(event)" oninput="autoR(this)"></textarea>
             <button class="sbtn" id="sbtn" onclick="sendMsg()">➤</button>
           </div>
@@ -866,11 +606,8 @@ body{
     <div class="sc" id="sc-docs">
       <div class="doc-zone" onclick="document.getElementById('doc-file').click()">
         <div class="dz-ico">📄</div>
-        <div class="dz-t">Document Scan చేయండి</div>
-        <div class="dz-s">
-          Registration, Agreement, Bill — photo తీసి upload చేయండి<br>
-          AI Telugu లో చదివి key points చెప్తుంది
-        </div>
+        <div class="dz-t">Document Upload చేయండి</div>
+        <div class="dz-s">Registration, Agreement, Bill — photo తీసి upload చేయండి<br>AI Telugu లో చదివి key points చెప్తుంది</div>
         <div class="dz-chips">
           <span class="dz-chip">📷 Photo</span>
           <span class="dz-chip">📄 PDF</span>
@@ -880,37 +617,31 @@ body{
         </div>
       </div>
       <input type="file" id="doc-file" accept="image/*,application/pdf" style="display:none" onchange="handlePhoto(event,'docs')">
-      <div class="seg" style="margin-top:12px">
+      <div class="seg">
         <div class="seg-t">
           <span>Scanned Documents</span>
           <div style="display:flex;gap:7px">
-            <button class="btn btn-ghost btn-sm" id="select-mode-btn" onclick="toggleSelectMode()" style="font-size:12px;color:var(--sky);border-color:rgba(90,175,232,0.3)">☑️ Select</button>
-            <button class="btn btn-ghost btn-sm" onclick="clearDocs()" style="font-size:12px;color:var(--rose);border-color:rgba(232,93,122,0.3)">🗑️ Clear All</button>
+            <button class="btn ghost sm" id="sel-mode-btn" onclick="toggleSelMode()" style="font-size:11px;color:var(--sky);border-color:rgba(90,175,232,0.3)">☑️ Select</button>
+            <button class="btn ghost sm" onclick="clearDocs()" style="font-size:11px;color:var(--rose);border-color:rgba(232,93,122,0.3)">🗑️ Clear All</button>
           </div>
         </div>
-        <!-- Selection action bar -->
-        <div class="sel-bar" id="sel-action-bar">
-          <span class="sel-count" id="sel-count-label">0 selected</span>
-          <button class="btn btn-ghost btn-sm" onclick="selectAllDocs()" style="font-size:12px;color:var(--sky)">Select All</button>
-          <button class="btn btn-ghost btn-sm" onclick="deleteSelectedDocs()" style="font-size:12px;color:var(--rose);border-color:rgba(232,93,122,0.3)">🗑️ Delete Selected</button>
-          <button class="btn btn-ghost btn-sm" onclick="toggleSelectMode()" style="font-size:12px">✕ Cancel</button>
+        <div class="sel-bar" id="sel-bar">
+          <span class="sel-count" id="sel-count">0 selected</span>
+          <button class="btn ghost sm" onclick="selectAllDocs()" style="font-size:11px;color:var(--sky)">All</button>
+          <button class="btn ghost sm" onclick="deleteSelected()" style="font-size:11px;color:var(--rose)">🗑️ Delete</button>
+          <button class="btn ghost sm" onclick="toggleSelMode()" style="font-size:11px">✕</button>
         </div>
-        <div id="doc-list">
-          <div class="empty"><div class="ei">🏛️</div><div class="et">Documents లేవు</div><div class="es">Registration, Agreement docs scan చేయండి</div></div>
-        </div>
+        <div id="doc-list"><div class="empty"><div class="ei">🏛️</div><div class="et">Documents లేవు</div><div class="es">Registration, Agreement docs upload చేయండి</div></div></div>
       </div>
     </div>
 
     <!-- VENDORS -->
     <div class="sc" id="sc-vendors">
       <div class="seg">
-        <div class="seg-t">
-          <span>All Vendors</span>
-          <button class="btn btn-amb btn-sm" onclick="openModal('add-vendor')">+ Add</button>
+        <div class="seg-t"><span>All Vendors</span>
+          <button class="btn amb sm" onclick="openModal('add-vendor')">+ Add</button>
         </div>
-        <div id="vendor-list">
-          <div class="empty"><div class="ei">🏪</div><div class="et">Vendors లేవు</div><div class="es">Orders ఇవ్వండి, auto add అవుతారు</div></div>
-        </div>
+        <div id="vendor-list"><div class="empty"><div class="ei">🏪</div><div class="et">Vendors లేవు</div><div class="es">Orders ఇవ్వండి, auto add అవుతారు</div></div></div>
       </div>
     </div>
 
@@ -918,9 +649,7 @@ body{
     <div class="sc" id="sc-prices">
       <div class="seg">
         <div class="seg-t">Price History — ధరల చరిత్ర</div>
-        <div id="price-list">
-          <div class="empty"><div class="ei">📈</div><div class="et">Price history లేదు</div><div class="es">Orders తర్వాత trends ఇక్కడ కనపడతాయి</div></div>
-        </div>
+        <div id="price-list"><div class="empty"><div class="ei">📈</div><div class="et">Price history లేదు</div><div class="es">Orders తర్వాత trends ఇక్కడ కనపడతాయి</div></div></div>
       </div>
     </div>
 
@@ -928,883 +657,855 @@ body{
     <div class="sc" id="sc-settings">
       <div class="seg">
         <div class="seg-t">Configuration</div>
-        <div class="set-item">
+        <div class="si">
           <div class="si-ico">📊</div>
-          <div class="si-body">
-            <div class="si-t">Google Sheet</div>
-            <div class="si-s">Data ఇక్కడ save అవుతుంది</div>
-            <div class="si-val" id="cfg-sheet">Not configured</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="openSheetInBrowser()">Open</button>
+          <div class="si-body"><div class="si-t">Google Sheet</div><div class="si-s">Data ఇక్కడ save అవుతుంది</div><div class="si-v" id="cfg-sheet">Not configured</div></div>
+          <button class="btn ghost sm" onclick="openSheetInBrowser()">Open ↗</button>
         </div>
-        <div class="set-item">
+        <div class="si">
           <div class="si-ico">🤖</div>
-          <div class="si-body">
-            <div class="si-t">Gemini AI</div>
-            <div class="si-s">Free AI — 1500 requests/day</div>
-            <div class="si-val" id="cfg-ai">Not configured</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="reconfigureAI()">Change</button>
+          <div class="si-body"><div class="si-t">Gemini AI</div><div class="si-s">Free AI — Telugu support</div><div class="si-v" id="cfg-ai">Not configured</div></div>
+          <button class="btn ghost sm" onclick="changeKey()">Change</button>
         </div>
-        <div class="set-item">
+        <div class="si">
           <div class="si-ico">☁️</div>
-          <div class="si-body">
-            <div class="si-t">Sync Status</div>
-            <div class="si-s" id="cfg-sync-detail">Last sync: Never</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="syncNow()">Sync Now</button>
+          <div class="si-body"><div class="si-t">Sync Status</div><div class="si-s" id="cfg-sync">Last sync: Never</div></div>
+          <button class="btn ghost sm" onclick="syncNow()">Sync</button>
         </div>
-        <div class="set-item">
-          <div class="si-ico">📥</div>
-          <div class="si-body">
-            <div class="si-t">New Phone Setup</div>
-            <div class="si-s">నుండి open చేయండి, Same Sheet ID + Gemini Key enter చేయండి</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" onclick="showReconfigGuide()">Guide</button>
+        <div class="si">
+          <div class="si-ico">📱</div>
+          <div class="si-body"><div class="si-t">New Phone Setup</div><div class="si-s">Same Sheet ID + Gemini Key enter చేయండి → Data వస్తుంది</div></div>
+          <button class="btn ghost sm" onclick="showGuide()">Guide</button>
         </div>
-        <div style="height:1px;background:var(--bd);margin:8px 0 14px"></div>
+        <div style="height:1px;background:var(--bd);margin:10px 0 14px"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px">
-          <button class="btn btn-ghost btn-full btn-sm" style="color:var(--rose);border-color:rgba(232,93,122,0.3);font-size:12px" onclick="clearDocs()">🗑️ Clear Documents</button>
-          <button class="btn btn-ghost btn-full btn-sm" style="color:var(--rose);border-color:rgba(232,93,122,0.3);font-size:12px" onclick="clearTransactions()">🗑️ Clear Transactions</button>
+          <button class="btn rose sm full" onclick="clearDocs()">🗑️ Clear Docs</button>
+          <button class="btn rose sm full" onclick="clearTxns()">🗑️ Clear Transactions</button>
         </div>
-        <button class="btn btn-ghost btn-full btn-sm" style="color:var(--rose);border-color:rgba(232,93,122,0.3);font-size:12px;margin-bottom:9px" onclick="clearAllData()">🗑️ Clear ALL Data (Transactions + Documents + Vendors)</button>
-        <div style="height:1px;background:var(--bd);margin:8px 0 14px"></div>
-        <button class="btn btn-ghost btn-full" style="color:var(--tx3);font-size:12px" onclick="if(confirm('Reset all settings? You will need to re-enter Sheet ID and API key.'))clearConfig()">
-          🔄 Reconfigure from scratch
-        </button>
+        <button class="btn rose sm full" style="margin-bottom:9px" onclick="clearAll()">🗑️ Clear ALL Data</button>
+        <button class="btn ghost sm full" style="color:var(--tx3)" onclick="resetApp()">🔄 Reconfigure from scratch</button>
       </div>
     </div>
-  </div><!-- /screens -->
-</div><!-- /app -->
+
+  </div>
+</div>
 
 <!-- Add Vendor Modal -->
-<div class="moverlay" id="add-vendor">
+<div class="mover" id="add-vendor">
   <div class="msheet">
     <div class="mgrip"></div>
     <div class="mt">🏪 Vendor Add చేయండి</div>
-    <div class="fg"><label class="fl">Vendor పేరు *</label><input class="fi" id="v-name" placeholder="ఉదా: మురళి Sand, రాం Electricals"></div>
-    <div class="fg"><label class="fl">Phone Number</label><input class="fi" id="v-phone" type="tel" placeholder="9xxxxxxxxx"></div>
+    <label class="fl">Vendor పేరు *</label>
+    <input class="fi" id="v-name" placeholder="ఉదా: మురళి Sand, రాం Electricals">
+    <label class="fl">Phone Number</label>
+    <input class="fi" id="v-phone" type="tel" placeholder="9xxxxxxxxx">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fg">
+      <div>
         <label class="fl">Category</label>
         <select class="fi" id="v-cat">
-          <option value="Sand">🪨 Sand</option><option value="Steel">🔩 Steel</option>
-          <option value="Electrical">⚡ Electrical</option><option value="Hardware">🔧 Hardware</option>
-          <option value="Cement">🏗️ Cement</option><option value="Labour">👷 Labour</option>
-          <option value="Land">🌾 Land</option><option value="Other">📦 Other</option>
+          <option value="Sand">🪨 Sand</option>
+          <option value="Steel">🔩 Steel</option>
+          <option value="Electrical">⚡ Electrical</option>
+          <option value="Hardware">🔧 Hardware</option>
+          <option value="Cement">🏗️ Cement</option>
+          <option value="Labour">👷 Labour</option>
+          <option value="Land">🌾 Land</option>
+          <option value="Other">📦 Other</option>
         </select>
       </div>
-      <div class="fg"><label class="fl">Location</label><input class="fi" id="v-loc" placeholder="Kadapa"></div>
+      <div>
+        <label class="fl">Location</label>
+        <input class="fi" id="v-loc" placeholder="Kadapa">
+      </div>
     </div>
-    <div style="display:flex;gap:9px;margin-top:4px">
-      <button class="btn btn-ghost btn-full" onclick="closeModal('add-vendor')">Cancel</button>
-      <button class="btn btn-amb btn-full" onclick="saveVendor()">✓ Save చేయి</button>
+    <div style="display:flex;gap:9px">
+      <button class="btn ghost full" onclick="closeModal('add-vendor')">Cancel</button>
+      <button class="btn amb full" onclick="saveVendor()">✓ Save</button>
     </div>
   </div>
 </div>
 
-<!-- Reconfig Guide Modal -->
-<div class="moverlay" id="reconfig-guide">
+<!-- New Phone Guide Modal -->
+<div class="mover" id="guide-modal">
   <div class="msheet">
     <div class="mgrip"></div>
-    <div class="mt">📱 New Phone Setup Guide</div>
-    <div class="ipanel teal" style="margin-bottom:12px">
-      <div class="ip-head"><span class="ip-ico">✅</span><span class="ip-label">ఇది చేయండి (5 minutes)</span></div>
-      <ol class="key-steps">
-        <li>New phone లో <strong>Chrome / Safari</strong> open చేయండి</li>
-        <li>ఈ HTML file open చేయండి (WhatsApp or Google Drive through చేయండి)</li>
-        <li>Setup screen వస్తుంది → <strong>Same Google Sheet ID</strong> enter చేయండి</li>
-        <li><strong>Same Gemini API key</strong> enter చేయండి</li>
-        <li>App automatically మీ data sync చేసుకుంటుంది!</li>
-        <li>Home screen కి add చేయండి ✓</li>
+    <div class="mt">📱 New Phone Setup</div>
+    <div class="panel tl" style="margin-bottom:12px">
+      <div class="ph"><span class="pi">✅</span><span class="pt">5 minutes లో ready</span></div>
+      <ol class="steps-list">
+        <li>New phone లో Chrome / Safari open చేయండి</li>
+        <li>GitHub URL open చేయండి</li>
+        <li>Same <strong>Sheet ID</strong> enter చేయండి</li>
+        <li>Same <strong>Gemini API Key</strong> enter చేయండి</li>
+        <li>App automatically sync చేసుకుంటుంది ✓</li>
       </ol>
     </div>
-    <div class="ipanel">
-      <div class="ip-head"><span class="ip-ico">💡</span><span class="ip-label">Safe గా ఉంచుకోండి</span></div>
-      మీ <strong>Sheet ID</strong> మరియు <strong>Gemini Key</strong> ఒక safe place లో note చేసుకోండి.<br>
-      ఉదా: Google Keep లో, లేదా trusted person కి పంపండి.
-    </div>
-    <div class="fg" style="margin-top:4px">
-      <label class="fl">మీ Sheet ID (Copy చేయండి)</label>
-      <input class="fi fi-mono" id="reconfig-sheet-display" readonly onclick="this.select()">
-    </div>
-    <button class="btn btn-amb btn-full" onclick="closeModal('reconfig-guide')">OK</button>
+    <label class="fl">మీ Sheet ID (save చేసుకోండి)</label>
+    <input class="fi fi-mono" id="guide-sheet" readonly onclick="this.select()" style="color:var(--teal)">
+    <button class="btn amb full" onclick="closeModal('guide-modal')">OK</button>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════
-// APPS SCRIPT CODE (to be pasted in Google Apps Script)
-// ═══════════════════════════════════════════════════
-const APPS_SCRIPT_CODE = `
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.openById(data.sheetId);
-    var action = data.action;
-    
-    if (action === 'append') {
-      var sheet = ss.getSheetByName(data.sheetName) || ss.insertSheet(data.sheetName);
-      if (sheet.getLastRow() === 0) sheet.appendRow(data.headers);
-      sheet.appendRow(data.row);
-      return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    if (action === 'readAll') {
-      var result = {};
-      var sheets = ['Entries','Vendors','Prices','Documents'];
-      sheets.forEach(function(name) {
-        var sh = ss.getSheetByName(name);
-        if (sh && sh.getLastRow() > 1) {
-          var rows = sh.getDataRange().getValues();
-          result[name] = rows;
-        } else { result[name] = []; }
-      });
-      return ContentService.createTextOutput(JSON.stringify({ok:true,data:result})).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    if (action === 'ping') {
-      return ContentService.createTextOutput(JSON.stringify({ok:true,msg:'Connected!'})).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({ok:false,error:err.toString()})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
+// ════════════════════════════════════════════════════════
+// APPS SCRIPT CODE
+// ════════════════════════════════════════════════════════
+var APPS_SCRIPT_CODE = 'function doPost(e){try{var data=JSON.parse(e.postData.contents);var ss=SpreadsheetApp.openById(data.sheetId);var action=data.action;if(action==="append"){var sheet=ss.getSheetByName(data.sheetName)||ss.insertSheet(data.sheetName);if(sheet.getLastRow()===0)sheet.appendRow(data.headers);sheet.appendRow(data.row);return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);}if(action==="readAll"){var result={};["Entries","Vendors","Prices","Documents"].forEach(function(name){var sh=ss.getSheetByName(name);result[name]=sh&&sh.getLastRow()>1?sh.getDataRange().getValues():[];});return ContentService.createTextOutput(JSON.stringify({ok:true,data:result})).setMimeType(ContentService.MimeType.JSON);}if(action==="ping"){return ContentService.createTextOutput(JSON.stringify({ok:true})).setMimeType(ContentService.MimeType.JSON);}}catch(err){return ContentService.createTextOutput(JSON.stringify({ok:false,error:err.toString()})).setMimeType(ContentService.MimeType.JSON);}}function doGet(e){return ContentService.createTextOutput(JSON.stringify({ok:true,msg:"Nirmit API"})).setMimeType(ContentService.MimeType.JSON);}';
 
-function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({ok:true,msg:'Nirmit API'})).setMimeType(ContentService.MimeType.JSON);
-}
-`.trim();
-
-// ═══════════════════════════════════════════════════
-// CONFIG — stored in localStorage
-// ═══════════════════════════════════════════════════
-const CFG_KEY = 'nirmanam_cfg_v2';
-const DATA_KEY = 'nirmanam_data_v2';
-
-// Safe storage wrapper — works even if localStorage is blocked (iPhone Files app)
-const STORE = (() => {
-  let mem = {};
-  let hasLS = false;
+// ════════════════════════════════════════════════════════
+// STORAGE — safe wrapper (works even if localStorage blocked)
+// ════════════════════════════════════════════════════════
+var STORE = (function() {
+  var mem = {};
+  var hasLS = false;
   try { localStorage.setItem('_t','1'); localStorage.removeItem('_t'); hasLS = true; } catch(e){}
   return {
-    get(k){ try{ if(hasLS) return JSON.parse(localStorage.getItem(k)); } catch(e){} return mem[k]||null; },
-    set(k,v){ try{ if(hasLS) localStorage.setItem(k,JSON.stringify(v)); } catch(e){} mem[k]=v; }
+    get: function(k) { try { if(hasLS) { var v=localStorage.getItem(k); return v?JSON.parse(v):null; } } catch(e){} return mem[k]||null; },
+    set: function(k,v) { try { if(hasLS) localStorage.setItem(k,JSON.stringify(v)); } catch(e){} mem[k]=v; }
   };
 })();
 
-function loadCfg() { try { return STORE.get(CFG_KEY) || {}; } catch(e){ return {}; } }
-function saveCfg(cfg) { try { STORE.set(CFG_KEY, cfg); } catch(e){} }
-function loadData() { try { return STORE.get(DATA_KEY) || mkFreshData(); } catch(e){ return mkFreshData(); } }
-function saveLocalData() { try { STORE.set(DATA_KEY, state); } catch(e){} }
-function mkFreshData() { return { entries:[], vendors:{}, priceHistory:{}, documents:[], nextId:1, chatHistory:[], lastSync:null }; }
+var CFG_KEY = 'nirmit_cfg_v1';
+var DATA_KEY = 'nirmit_data_v1';
 
-let cfg   = loadCfg();
-let state = loadData();
+function loadCfg()  { return STORE.get(CFG_KEY)  || {}; }
+function saveCfg()  { STORE.set(CFG_KEY, cfg); }
+function loadData() { return STORE.get(DATA_KEY) || freshData(); }
+function saveData() { STORE.set(DATA_KEY, state); }
+function freshData(){ return {entries:[],vendors:{},priceHistory:{},documents:[],nextId:1,chatHistory:[],lastSync:null}; }
 
-// ═══════════════════════════════════════════════════
-// SETUP WIZARD
-// ═══════════════════════════════════════════════════
-let currentStep = 0;
+var cfg   = loadCfg();
+var state = loadData();
 
-function gotoStep(n) {
-  document.querySelectorAll('.step').forEach((s,i)=>s.classList.toggle('active',i===n));
-  document.querySelectorAll('.wsi').forEach((w,i)=>{
-    w.classList.remove('active','done');
-    if(i<n) w.classList.add('done');
-    if(i===n) w.classList.add('active');
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+var CAT_EMO = {Sand:'🪨',Steel:'🔩',Electrical:'⚡',Hardware:'🔧',Cement:'🏗️',Labour:'👷',Land:'🌾',Other:'📦'};
+var CAT_CLS = {Sand:'s',Steel:'m',Electrical:'e',Hardware:'h',Cement:'c',Labour:'l',Land:'s',Other:''};
+
+function rup(n) { return '₹' + Math.abs(n||0).toLocaleString('en-IN'); }
+function today() { return new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }
+function nowt()  { return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}); }
+function escH(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function fileToB64(file) {
+  return new Promise(function(res, rej) {
+    var r = new FileReader();
+    r.onload = function() { res(r.result.split(',')[1]); };
+    r.onerror = function() { rej(new Error('File read failed')); };
+    r.readAsDataURL(file);
   });
-  currentStep = n;
+}
+
+function getBalance(v) {
+  var vd = state.vendors[v];
+  if (!vd) return 0;
+  return (vd.totalOrdered||0) - (vd.totalPaid||0);
+}
+
+function ensureVendor(name, cat, phone) {
+  if (!name) return;
+  if (!state.vendors[name]) {
+    state.vendors[name] = {totalOrdered:0,totalPaid:0,category:cat||'Other',phone:phone||null};
+  }
+  if (phone && !state.vendors[name].phone) state.vendors[name].phone = phone;
+}
+
+// ════════════════════════════════════════════════════════
+// SETUP WIZARD
+// ════════════════════════════════════════════════════════
+function gotoStep(n) {
+  document.querySelectorAll('.step').forEach(function(s,i){ s.classList.toggle('on', i===n); });
+  document.querySelectorAll('.sb').forEach(function(b,i){
+    b.classList.remove('active','done');
+    if (i < n) b.classList.add('done');
+    if (i === n) b.classList.add('active');
+  });
 }
 
 function copyScript() {
-  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(()=>{
-    toast('✓ Script copied! Apps Script లో paste చేయండి','ok');
-  }).catch(()=>{
-    // fallback
-    const ta = document.createElement('textarea');
+  try {
+    navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(function(){
+      toast('Script copied! Apps Script లో paste చేయండి', 'ok');
+    });
+  } catch(e) {
+    var ta = document.createElement('textarea');
     ta.value = APPS_SCRIPT_CODE;
     document.body.appendChild(ta); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
-    toast('✓ Script copied!','ok');
-  });
-}
-
-function validateSheetAndNext() {
-  document.activeElement && document.activeElement.blur();
-  const sheetId = document.getElementById('sheet-id').value.trim();
-  const scriptUrl = document.getElementById('script-url').value.trim();
-  if (!sheetId) { toast('Sheet ID enter చేయండి','err'); return; }
-  if (!scriptUrl) { toast('Apps Script URL enter చేయండి','err'); return; }
-  cfg.sheetId = sheetId;
-  cfg.scriptUrl = scriptUrl;
-  saveCfg(cfg);
-  toast('✓ Saved!','ok');
-  setTimeout(() => { try { gotoStep(2); } catch(e){ console.log(e); } }, 600);
-}
-
-function finishSetup() {
-  // Dismiss keyboard first on iPhone
-  document.activeElement && document.activeElement.blur();
-  const key = document.getElementById('gemini-key').value.trim();
-  if (!key) { toast('Gemini API key enter చేయండి','err'); return; }
-  if (!key.startsWith('AIza')) { toast('AIza తో start అయ్యే key enter చేయండి','err'); return; }
-  cfg.geminiKey = key;
-  cfg.setupDone = true;
-  saveCfg(cfg);
-  toast('✓ Setup complete! App లోడ్ అవుతోంది...','ok');
-  setTimeout(launchApp, 800);
-}
-
-function launchApp() {
-  // Hide setup completely
-  const setupEl = document.getElementById('setup');
-  setupEl.style.opacity = '0';
-  setTimeout(() => { setupEl.style.display = 'none'; }, 400);
-
-  // Show app
-  const appEl = document.getElementById('app');
-  appEl.style.opacity = '1';
-  appEl.style.pointerEvents = 'all';
-  appEl.classList.add('visible');
-
-  // Init all screens safely
-  try { refreshUI(); } catch(e){ console.log('refreshUI err',e); }
-  try { renderDocList(); } catch(e){ console.log('renderDocList err',e); }
-  try { injectWelcomeMsg(); } catch(e){ console.log('injectWelcomeMsg err',e); }
-  try { updateSettingsUI(); } catch(e){ console.log('updateSettingsUI err',e); }
-  try { syncFromSheet(); } catch(e){ console.log('syncFromSheet err',e); }
-
-  // Install banner
-  try {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-    if ((isIOS || isAndroid) && !isStandalone) {
-      document.getElementById('install-banner').style.display = 'flex';
-    }
-  } catch(e){}
-
-  // Auto-sync every 5 min
-  setInterval(() => { try { syncFromSheet(); } catch(e){} }, 5 * 60 * 1000);
-}
-
-// ═══════════════════════════════════════════════════
-// GOOGLE SHEETS SYNC
-// ═══════════════════════════════════════════════════
-let isSyncing = false;
-
-async function pushToSheet(sheetName, headers, row) {
-  if (!cfg.scriptUrl || !cfg.sheetId) return;
-  try {
-    await fetch(cfg.scriptUrl, {
-      method:'POST',
-      mode:'no-cors', // needed for Apps Script
-      body: JSON.stringify({ action:'append', sheetId:cfg.sheetId, sheetName, headers, row })
-    });
-    setSyncStatus('ok');
-    state.lastSync = new Date().toISOString();
-    saveLocalData();
-    document.getElementById('last-sync').textContent = 'Synced '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-  } catch(e) {
-    setSyncStatus('error');
+    toast('Script copied!', 'ok');
   }
 }
 
-async function syncFromSheet() {
+function saveSheet() {
+  document.activeElement && document.activeElement.blur();
+  var sid = document.getElementById('inp-sheet').value.trim();
+  var url = document.getElementById('inp-script').value.trim();
+  if (!sid) { toast('Sheet ID enter చేయండి', 'err'); return; }
+  if (!url) { toast('Script URL enter చేయండి', 'err'); return; }
+  cfg.sheetId = sid;
+  cfg.scriptUrl = url;
+  saveCfg();
+  toast('Saved!', 'ok');
+  setTimeout(function(){ gotoStep(2); }, 600);
+}
+
+function finishSetup() {
+  document.activeElement && document.activeElement.blur();
+  var key = document.getElementById('inp-key').value.trim();
+  if (!key) { toast('Gemini API key enter చేయండి', 'err'); return; }
+  if (!key.startsWith('AIza')) { toast('AIza తో start అయ్యే key enter చేయండి', 'err'); return; }
+  cfg.geminiKey = key;
+  cfg.setupDone = true;
+  saveCfg();
+  toast('Setup complete!', 'ok');
+  setTimeout(launchApp, 700);
+}
+
+// ════════════════════════════════════════════════════════
+// LAUNCH APP
+// ════════════════════════════════════════════════════════
+function launchApp() {
+  var setup = document.getElementById('setup');
+  var app   = document.getElementById('app');
+  setup.style.opacity = '0';
+  setTimeout(function(){ setup.style.display = 'none'; }, 400);
+  app.classList.add('on');
+  refreshUI();
+  renderDocList();
+  injectWelcome();
+  updateSettingsUI();
+  syncFromSheet();
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isAnd = /android/i.test(navigator.userAgent);
+  var isSA  = window.navigator.standalone || window.matchMedia('(display-mode:standalone)').matches;
+  if ((isIOS||isAnd) && !isSA) document.getElementById('install-banner').style.display = 'flex';
+  setInterval(function(){ syncFromSheet(); }, 5*60*1000);
+}
+
+// ════════════════════════════════════════════════════════
+// GOOGLE SHEETS SYNC
+// ════════════════════════════════════════════════════════
+var isSyncing = false;
+
+function setSyncStatus(s) {
+  var dot = document.getElementById('sync-dot');
+  var lbl = document.getElementById('sync-lbl');
+  dot.className = 'sync-dot';
+  if (s === 'syncing') { dot.classList.add('spin'); lbl.textContent = 'Syncing...'; }
+  else if (s === 'ok')  { lbl.textContent = 'Synced'; }
+  else if (s === 'err') { dot.classList.add('err'); lbl.textContent = 'Sync error'; }
+  else if (s === 'off') { dot.classList.add('off'); lbl.textContent = 'Offline'; }
+}
+
+function pushToSheet(sheetName, headers, row) {
+  if (!cfg.scriptUrl || !cfg.sheetId) return;
+  setSyncStatus('syncing');
+  fetch(cfg.scriptUrl, {
+    method:'POST', mode:'no-cors',
+    body: JSON.stringify({action:'append',sheetId:cfg.sheetId,sheetName:sheetName,headers:headers,row:row})
+  }).then(function(){ setSyncStatus('ok'); state.lastSync = new Date().toISOString(); saveData();
+    document.getElementById('last-sync').textContent = 'Synced '+nowt();
+  }).catch(function(){ setSyncStatus('err'); });
+}
+
+function syncFromSheet() {
   if (!cfg.scriptUrl || !cfg.sheetId || isSyncing) return;
   isSyncing = true;
   setSyncStatus('syncing');
-  try {
-    const res = await fetch(cfg.scriptUrl, {
-      method:'POST',
-      body: JSON.stringify({ action:'readAll', sheetId:cfg.sheetId })
-    });
-    const data = await res.json();
+  fetch(cfg.scriptUrl, {
+    method:'POST',
+    body: JSON.stringify({action:'readAll',sheetId:cfg.sheetId})
+  }).then(function(r){ return r.json(); }).then(function(data){
     if (data.ok && data.data) {
       mergeSheetData(data.data);
       setSyncStatus('ok');
       state.lastSync = new Date().toISOString();
-      saveLocalData();
-      refreshUI();
-      document.getElementById('last-sync').textContent = 'Synced '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-      document.getElementById('cfg-sync-detail').textContent = 'Last sync: '+new Date().toLocaleTimeString('en-IN');
+      saveData(); refreshUI();
+      document.getElementById('last-sync').textContent = 'Synced '+nowt();
+      document.getElementById('cfg-sync').textContent = 'Last sync: '+new Date(state.lastSync).toLocaleString('en-IN');
     }
-  } catch(e) {
-    setSyncStatus('offline');
-  }
-  isSyncing = false;
-}
-
-async function syncNow() {
-  toast('Syncing...','info');
-  await syncFromSheet();
-  toast('✓ Sync complete','ok');
+  }).catch(function(){ setSyncStatus('off'); }).finally(function(){ isSyncing = false; });
 }
 
 function mergeSheetData(sheetData) {
-  // Merge Entries
-  if (sheetData.Entries && sheetData.Entries.length > 1) {
-    const hdrs = sheetData.Entries[0];
-    const rows = sheetData.Entries.slice(1);
-    const remoteEntries = rows.map(r => {
-      const obj = {};
-      hdrs.forEach((h,i)=>obj[h]=r[i]);
-      return obj;
-    });
-    // Add any remote entries not in local
-    const localIds = new Set(state.entries.map(e=>e.id));
-    remoteEntries.forEach(e => {
-      if (!localIds.has(e.id)) {
-        state.entries.push(e);
-        // rebuild vendors
-        ensureVendor(e.vendor, e.category);
-        if (e.type==='order') state.vendors[e.vendor].totalOrdered = (state.vendors[e.vendor].totalOrdered||0) + Number(e.amount||0);
-        if (e.type==='payment') state.vendors[e.vendor].totalPaid = (state.vendors[e.vendor].totalPaid||0) + Number(e.amount||0);
-      }
-    });
-  }
+  if (!sheetData.Entries || sheetData.Entries.length < 2) return;
+  var hdrs = sheetData.Entries[0];
+  var rows = sheetData.Entries.slice(1);
+  var localIds = new Set(state.entries.map(function(e){ return e.id; }));
+  rows.forEach(function(r){
+    var obj = {};
+    hdrs.forEach(function(h,i){ obj[h]=r[i]; });
+    if (!localIds.has(obj.id)) {
+      state.entries.push(obj);
+      ensureVendor(obj.vendor, obj.category);
+      if (obj.type==='order')   state.vendors[obj.vendor].totalOrdered = (state.vendors[obj.vendor].totalOrdered||0)+Number(obj.amount||0);
+      if (obj.type==='payment') state.vendors[obj.vendor].totalPaid    = (state.vendors[obj.vendor].totalPaid||0)   +Number(obj.amount||0);
+    }
+  });
+  refreshUI();
 }
 
-function setSyncStatus(s) {
-  const pip = document.getElementById('sync-pip');
-  const lbl = document.getElementById('sync-label');
-  pip.className = 'sync-pip';
-  if (s==='syncing') { pip.classList.add('syncing'); lbl.textContent='Syncing...'; }
-  else if (s==='ok') { lbl.textContent='Synced'; }
-  else if (s==='error') { pip.classList.add('error'); lbl.textContent='Sync error'; }
-  else if (s==='offline') { pip.classList.add('offline'); lbl.textContent='Offline'; }
-}
+function syncNow() { toast('Syncing...','info'); syncFromSheet(); }
 
-// ═══════════════════════════════════════════════════
-// DATA MANAGEMENT
-// ═══════════════════════════════════════════════════
-const rup = n => '₹'+Math.abs(n||0).toLocaleString('en-IN');
-const today = ()=>new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-const now = ()=>new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
-
-const CAT_EMO = {Sand:'🪨',Steel:'🔩',Electrical:'⚡',Hardware:'🔧',Cement:'🏗️',Labour:'👷',Land:'🌾',Other:'📦'};
-const CAT_CLS = {Sand:'s',Steel:'m',Electrical:'e',Hardware:'h',Cement:'c',Labour:'l',Land:'s',Other:''};
-
-function ensureVendor(name, cat, phone) {
-  if (!name) return;
-  if (!state.vendors[name]) state.vendors[name]={totalOrdered:0,totalPaid:0,category:cat||'Other',phone:phone||null};
-  if (phone && !state.vendors[name].phone) state.vendors[name].phone = phone;
-}
-
-function getBalance(v) { return (state.vendors[v]?.totalOrdered||0)-(state.vendors[v]?.totalPaid||0); }
-
+// ════════════════════════════════════════════════════════
+// DATA — add entry
+// ════════════════════════════════════════════════════════
 function addEntry(entry) {
-  entry.id = entry.id || ('e'+Date.now());
+  entry.id   = entry.id || ('e'+Date.now());
   entry.date = entry.date || today();
   state.entries.push(entry);
   ensureVendor(entry.vendor, entry.category, entry.phone);
-
-  if (entry.type==='order') {
-    state.vendors[entry.vendor].totalOrdered = (state.vendors[entry.vendor].totalOrdered||0)+Number(entry.amount);
+  if (entry.type === 'order') {
+    state.vendors[entry.vendor].totalOrdered = (state.vendors[entry.vendor].totalOrdered||0) + Number(entry.amount||0);
     if (entry.priceKey && entry.unitPrice) {
-      if (!state.priceHistory[entry.priceKey]) state.priceHistory[entry.priceKey]=[];
+      if (!state.priceHistory[entry.priceKey]) state.priceHistory[entry.priceKey] = [];
       state.priceHistory[entry.priceKey].push({date:entry.date,price:Number(entry.unitPrice),vendor:entry.vendor,unit:entry.priceUnit||''});
     }
-  } else {
-    state.vendors[entry.vendor].totalPaid = (state.vendors[entry.vendor].totalPaid||0)+Number(entry.amount);
+  } else if (entry.type === 'payment') {
+    state.vendors[entry.vendor].totalPaid = (state.vendors[entry.vendor].totalPaid||0) + Number(entry.amount||0);
   }
-
-  saveLocalData();
-  refreshUI();
-
-  // Push to Google Sheet
-  if (entry.type==='order') {
-    pushToSheet('Entries',
-      ['id','date','type','vendor','category','amount','description','unitPrice','priceKey'],
-      [entry.id,entry.date,entry.type,entry.vendor,entry.category,entry.amount,entry.description||'',entry.unitPrice||'',entry.priceKey||'']
-    );
-  } else {
-    pushToSheet('Entries',
-      ['id','date','type','vendor','category','amount','description','unitPrice','priceKey'],
-      [entry.id,entry.date,entry.type,entry.vendor,entry.category,entry.amount,entry.description||'','','']
-    );
-  }
+  saveData(); refreshUI();
+  pushToSheet('Entries',
+    ['id','date','type','vendor','category','amount','description','unitPrice','priceKey'],
+    [entry.id,entry.date,entry.type,entry.vendor,entry.category,entry.amount,entry.description||'',entry.unitPrice||'',entry.priceKey||'']
+  );
 }
 
-// ═══════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 // REFRESH UI
-// ═══════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 function refreshUI() {
-  let ordered=0,paid=0,oc=0,pc=0;
-  state.entries.forEach(e=>{
-    if(e.type==='order'){ordered+=Number(e.amount||0);oc++;}
-    if(e.type==='payment'){paid+=Number(e.amount||0);pc++;}
+  var ordered=0, paid=0, oc=0, pc=0;
+  state.entries.forEach(function(e){
+    if(e.type==='order')  { ordered+=Number(e.amount||0); oc++; }
+    if(e.type==='payment'){ paid   +=Number(e.amount||0); pc++; }
   });
-  const due=ordered-paid;
-  document.getElementById('s-ord').textContent=rup(ordered);
-  document.getElementById('s-ord-c').textContent=oc+' orders';
-  document.getElementById('s-paid').textContent=rup(paid);
-  document.getElementById('s-paid-c').textContent=pc+' payments';
-  document.getElementById('s-due').textContent=rup(due);
-  document.getElementById('s-vcount').textContent=Object.keys(state.vendors).length;
-  document.getElementById('hdr-due').textContent=rup(due);
+  var due = ordered - paid;
+  document.getElementById('s-ord').textContent   = rup(ordered);
+  document.getElementById('s-ordc').textContent  = oc+' orders';
+  document.getElementById('s-paid').textContent  = rup(paid);
+  document.getElementById('s-paidc').textContent = pc+' payments';
+  document.getElementById('s-due').textContent   = rup(due);
+  document.getElementById('s-vc').textContent    = Object.keys(state.vendors).length;
+  document.getElementById('hdr-due').textContent = rup(due);
   renderRecent(); renderVendors(); renderPrices();
 }
 
 function renderRecent() {
-  const el=document.getElementById('recent-list');
-  if(!state.entries.length){el.innerHTML='<div class="empty"><div class="ei">📋</div><div class="et">ఇంకా ఏమీ లేదు</div></div>';return;}
-  const sorted=[...state.entries].sort((a,b)=>b.id>a.id?1:-1).slice(0,25);
-  el.innerHTML=sorted.map(e=>{
-    const cat=e.category||'Other';
-    const isPay=e.type==='payment';
-    const bal=getBalance(e.vendor);
-    return`<div class="txn fi-anim">
-      <div class="txn-ico ${isPay?'pay':'ord'}">${isPay?'💰':CAT_EMO[cat]||'📦'}</div>
-      <div class="txn-body">
-        <div class="txn-v">${e.vendor||''}</div>
-        <div class="txn-d">${e.description||''}</div>
-        <div class="txn-tags">
-          <span class="tag ${CAT_CLS[cat]||''}">${cat}</span>
-          ${isPay?'<span class="tag p">Payment</span>':''}
-          ${!isPay&&bal>0?`<span class="tag due">Due ${rup(bal)}</span>`:''}
-        </div>
-      </div>
-      <div class="txn-right">
-        <div class="txn-amt ${isPay?'cr':'dr'}">${isPay?'+':'-'}${rup(e.amount)}</div>
-        <div class="txn-date">${e.date}</div>
-      </div>
-    </div>`;
+  var el = document.getElementById('recent-list');
+  if (!state.entries.length) { el.innerHTML = '<div class="empty"><div class="ei">📋</div><div class="et">ఇంకా ఏమీ లేదు</div></div>'; return; }
+  var sorted = state.entries.slice().sort(function(a,b){ return b.id>a.id?1:-1; }).slice(0,25);
+  el.innerHTML = sorted.map(function(e){
+    var cat=e.category||'Other';
+    var isPay = e.type==='payment';
+    var bal = getBalance(e.vendor);
+    return '<div class="txn fu">'
+      +'<div class="txn-ico '+(isPay?'pay':'ord')+'">'+(isPay?'💰':(CAT_EMO[cat]||'📦'))+'</div>'
+      +'<div class="txn-body">'
+        +'<div class="txn-v">'+escH(e.vendor||'')+'</div>'
+        +'<div class="txn-d">'+escH(e.description||'')+'</div>'
+        +'<div class="txn-tags">'
+          +'<span class="tag '+(CAT_CLS[cat]||'')+'">'+cat+'</span>'
+          +(isPay?'<span class="tag p">Payment</span>':'')
+          +(!isPay&&bal>0?'<span class="tag due">Due '+rup(bal)+'</span>':'')
+        +'</div>'
+      +'</div>'
+      +'<div class="txn-right">'
+        +'<div class="txn-amt '+(isPay?'cr':'dr')+'">'+(isPay?'+':'-')+rup(e.amount)+'</div>'
+        +'<div class="txn-dt">'+e.date+'</div>'
+      +'</div>'
+    +'</div>';
   }).join('');
 }
 
 function renderVendors() {
-  const el=document.getElementById('vendor-list');
-  const vn=Object.keys(state.vendors);
-  if(!vn.length){el.innerHTML='<div class="empty"><div class="ei">🏪</div><div class="et">Vendors లేవు</div></div>';return;}
-  el.innerHTML=vn.map(name=>{
-    const v=state.vendors[name];
-    const bal=(v.totalOrdered||0)-(v.totalPaid||0);
-    const pct=v.totalOrdered?Math.min(100,(v.totalPaid/v.totalOrdered)*100):0;
-    const cat=v.category||'Other';
-    const balColor=bal>0?'var(--rose)':bal<0?'var(--teal)':'var(--tx2)';
-    const barColor=bal>0?'var(--rose)':'var(--teal)';
-    return`<div class="vc fi-anim">
-      <div class="vc-top">
-        <div class="vc-av">${CAT_EMO[cat]||'🏪'}</div>
-        <div style="flex:1;min-width:0">
-          <div class="vc-n">${name}</div>
-          <div class="vc-c">${cat}${v.phone?' · 📞 '+v.phone:''}${v.location?' · '+v.location:''}</div>
-        </div>
-        <div class="vc-bal" style="color:${balColor}">${bal>0?rup(bal)+' due':bal<0?rup(Math.abs(bal))+' adv':'✓'}</div>
-      </div>
-      <div class="vc-bar"><div class="vc-bf" style="width:${pct}%;background:${barColor}"></div></div>
-      <div class="vc-nums"><span>Ordered: ${rup(v.totalOrdered)}</span><span>Paid: ${rup(v.totalPaid)}</span></div>
-      ${v.phone?`<button class="btn btn-ghost btn-sm" style="margin-top:9px;width:100%" onclick="window.location='tel:${v.phone}'">📞 Call ${name}</button>`:''}
-    </div>`;
+  var el = document.getElementById('vendor-list');
+  var vnames = Object.keys(state.vendors);
+  if (!vnames.length) { el.innerHTML = '<div class="empty"><div class="ei">🏪</div><div class="et">Vendors లేవు</div></div>'; return; }
+  el.innerHTML = vnames.map(function(name){
+    var v = state.vendors[name];
+    var bal = (v.totalOrdered||0)-(v.totalPaid||0);
+    var pct = v.totalOrdered ? Math.min(100,(v.totalPaid/v.totalOrdered)*100) : 0;
+    var cat = v.category||'Other';
+    var bc  = bal>0?'var(--rose)':bal<0?'var(--teal)':'var(--tx2)';
+    return '<div class="vc fu">'
+      +'<div class="vc-top">'
+        +'<div class="vc-av">'+(CAT_EMO[cat]||'🏪')+'</div>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div class="vc-n">'+escH(name)+'</div>'
+          +'<div class="vc-c">'+cat+(v.phone?' · 📞 '+v.phone:'')+(v.location?' · '+v.location:'')+'</div>'
+        +'</div>'
+        +'<div class="vc-bal" style="color:'+bc+'">'+( bal>0?rup(bal)+' due':bal<0?rup(Math.abs(bal))+' adv':'✓' )+'</div>'
+      +'</div>'
+      +'<div class="vc-bar"><div class="vc-bf" style="width:'+pct+'%;background:'+(bal>0?'var(--rose)':'var(--teal)')+'"></div></div>'
+      +'<div class="vc-nums"><span>Ordered: '+rup(v.totalOrdered)+'</span><span>Paid: '+rup(v.totalPaid)+'</span></div>'
+      +(v.phone?'<button class="btn ghost sm" style="margin-top:9px;width:100%" onclick="window.location=\'tel:'+v.phone+'\'">📞 Call '+escH(name)+'</button>':'')
+    +'</div>';
   }).join('');
 }
 
 function renderPrices() {
-  const el=document.getElementById('price-list');
-  const keys=Object.keys(state.priceHistory);
-  if(!keys.length){el.innerHTML='<div class="empty"><div class="ei">📈</div><div class="et">Price history లేదు</div></div>';return;}
-  el.innerHTML=keys.map(key=>{
-    const hist=state.priceHistory[key];
-    const latest=hist[hist.length-1];
-    return`<div class="price-group fi-anim">
-      <div class="pg-head"><span class="pg-title">${key}</span><span class="pg-latest">${rup(latest.price)}${latest.unit?' / '+latest.unit:''}</span></div>
-      ${hist.map((h,i)=>{
-        const prev=hist[i-1];
-        const pct=prev?((h.price-prev.price)/prev.price*100).toFixed(1):null;
-        return`<div class="pr">
-          <span class="pr-d">${h.date}</span>
-          <span class="pr-v">${h.vendor}</span>
-          <span class="pr-p">${rup(h.price)}${h.unit?' /'+h.unit:''}</span>
-          ${pct!==null?`<span class="pr-c ${Number(pct)>0?'up':'dn'}">${Number(pct)>0?'▲':'▼'}${Math.abs(pct)}%</span>`:'<span class="pr-c"></span>'}
-        </div>`;
-      }).join('')}
-    </div>`;
+  var el = document.getElementById('price-list');
+  var keys = Object.keys(state.priceHistory);
+  if (!keys.length) { el.innerHTML = '<div class="empty"><div class="ei">📈</div><div class="et">Price history లేదు</div></div>'; return; }
+  el.innerHTML = keys.map(function(key){
+    var hist = state.priceHistory[key];
+    var latest = hist[hist.length-1];
+    return '<div class="price-group fu">'
+      +'<div class="pg-head"><span class="pg-title">'+key+'</span><span class="pg-latest">'+rup(latest.price)+(latest.unit?' / '+latest.unit:'')+'</span></div>'
+      +hist.map(function(h,i){
+        var prev = hist[i-1];
+        var pct = prev ? ((h.price-prev.price)/prev.price*100).toFixed(1) : null;
+        return '<div class="pr">'
+          +'<span class="pr-d">'+h.date+'</span>'
+          +'<span class="pr-v">'+escH(h.vendor)+'</span>'
+          +'<span class="pr-p">'+rup(h.price)+(h.unit?' /'+h.unit:'')+'</span>'
+          +(pct!==null?'<span class="pr-c '+(Number(pct)>0?'up':'dn')+'">'+(Number(pct)>0?'▲':'▼')+Math.abs(pct)+'%</span>':'')
+        +'</div>';
+      }).join('')
+    +'</div>';
   }).join('');
 }
+
+// ════════════════════════════════════════════════════════
+// DOCUMENT LIST RENDER
+// ════════════════════════════════════════════════════════
+var selMode = false;
+var selIds  = new Set();
 
 function renderDocList() {
-  const el=document.getElementById('doc-list');
-  if(!state.documents.length){el.innerHTML='<div class="empty"><div class="ei">🏛️</div><div class="et">Documents లేవు</div></div>';return;}
-  const sorted=[...state.documents].reverse();
-  el.innerHTML=sorted.map((doc,idx)=>{
-    const r=doc.result||{};
-    const badge={Registration:'reg',Agreement:'agr',Bill:'bil'}[r.docType]||'reg';
-    const emoji={Registration:'🏛️',Agreement:'📝',Bill:'🧾',Other:'📄'}[r.docType]||'📄';
+  var el = document.getElementById('doc-list');
+  if (!state.documents.length) {
+    el.innerHTML = '<div class="empty"><div class="ei">🏛️</div><div class="et">Documents లేవు</div><div class="es">Upload చేయండి</div></div>';
+    return;
+  }
+  var sorted = state.documents.slice().reverse();
+  el.innerHTML = sorted.map(function(doc){
+    var r = doc.result || {};
+    var emoji  = {Registration:'🏛️',Agreement:'📝',Bill:'🧾'}[r.docType] || '📄';
+    var badge  = {Registration:'reg',Agreement:'agr',Bill:'bil'}[r.docType] || 'reg';
+    var isLand = r.propertyType==='Land'||r.propertyType==='Plot'||r.propertyType==='Agricultural';
+    var fin    = r.financials || {};
+
+    // Helper
+    function fv(f){ return f ? (typeof f==='object' ? f.value : f) : null; }
+    function ft(f){ return f ? (typeof f==='object' ? f.telugu : null) : null; }
+    function fc(f){ return f ? (typeof f==='object' ? (f.confidence||100) : 100) : 100; }
+    function cb(c){ return c<70?'<span style="font-size:10px;color:var(--rose)"> ('+c+'%)</span>':c<85?'<span style="font-size:10px;color:var(--amb)"> ('+c+'%)</span>':''; }
+
     // Financials
-    let finHtml='';
-    const fin=r.financials;
-    if(fin && Object.values(fin).some(v=>v&&v!=='N/A'&&v!=='Not mentioned')){
-      const isLandOnly = r.propertyType === 'Land' || r.propertyType === 'Plot' || r.propertyType === 'Agricultural';
-      // Helper: get value from both old format (string) and new format ({value, telugu, confidence})
-      const fv = (f) => f ? (typeof f === 'object' ? f.value : f) : null;
-      const ft = (f) => f ? (typeof f === 'object' ? f.telugu : null) : null;
-      const fc = (f) => f ? (typeof f === 'object' ? (f.confidence||100) : 100) : 100;
-      const confBadge = (c) => c < 70 ? `<span style="font-size:10px;background:rgba(232,93,122,0.2);color:var(--rose);padding:1px 6px;border-radius:5px;margin-left:6px">⚠️ ${c}% sure</span>` : c < 85 ? `<span style="font-size:10px;background:rgba(232,184,74,0.15);color:var(--amb);padding:1px 6px;border-radius:5px;margin-left:6px">${c}%</span>` : '';
-      finHtml=`<div class="fin-grid">
-        ${fv(fin.saleAmount)?`<div class="fin-card highlight"><div class="fin-label">💰 విక్రయ మొత్తం (Sale Amount)${confBadge(fc(fin.saleAmount))}</div><div class="fin-value">${fv(fin.saleAmount)}</div>${ft(fin.saleAmount)?`<div style="font-size:12px;color:var(--tx2);margin-top:3px">${ft(fin.saleAmount)}</div>`:''}</div>`:''}
-        ${fv(fin.marketValue)?`<div class="fin-card"><div class="fin-label">🏠 మార్కెట్ విలువ (Market Value)${confBadge(fc(fin.marketValue))}</div><div class="fin-value teal">${fv(fin.marketValue)}</div></div>`:''}
-        ${fv(fin.stampDuty)?`<div class="fin-card"><div class="fin-label">📋 స్టాంప్ డ్యూటీ (Stamp Duty)${confBadge(fc(fin.stampDuty))}</div><div class="fin-value sm">${fv(fin.stampDuty)}</div></div>`:''}
-        ${fv(fin.registrationFee)?`<div class="fin-card"><div class="fin-label">🏛️ రిజి. రుసుము (Reg Fee)${confBadge(fc(fin.registrationFee))}</div><div class="fin-value sm">${fv(fin.registrationFee)}</div></div>`:''}
-        ${fv(fin.totalInvestment)?`<div class="fin-card highlight full" style="border-color:rgba(58,232,200,0.4);background:rgba(58,232,200,0.07)"><div class="fin-label" style="color:var(--teal)">💎 మొత్తం పెట్టుబడి (Total Investment = Land/House + Stamp Duty + Reg Fee)</div><div class="fin-value" style="color:var(--teal)">${fv(fin.totalInvestment)}</div>${ft(fin.totalInvestment)?`<div style="font-size:13px;color:var(--tx2);margin-top:3px">${ft(fin.totalInvestment)}</div>`:''}</div>`:''}
-        ${(fv(fin.pricePerCent) && isLandOnly)?`<div class="fin-card highlight full"><div class="fin-label">📐 సెంట్ కి ధర (Rate/Cent)${confBadge(fc(fin.pricePerCent))}</div><div class="fin-value">${fv(fin.pricePerCent)}</div></div>`:''}
-        ${r.propertyType?`<div class="fin-card full"><div class="fin-label">🏘️ ఆస్తి రకం (Property Type)</div><div class="fin-value sm" style="color:var(--sky)">${r.propertyType}${r.transactionType?' · '+r.transactionType:''}</div></div>`:''}
-        ${(r.confidence && r.confidence < 80)?`<div class="fin-card full" style="border-color:rgba(232,93,122,0.3)"><div class="fin-label" style="color:var(--rose)">⚠️ AI Confidence</div><div class="fin-value sm" style="color:var(--rose)">${r.confidence}% — కొన్ని values verify చేయండి</div></div>`:''}
-      </div>`;
+    var finHtml = '';
+    var hasAnyFin = fv(fin.saleAmount)||fv(fin.stampDuty)||fv(fin.totalInvestment);
+    if (hasAnyFin) {
+      finHtml = '<div class="fin-grid">';
+      if (fv(fin.saleAmount))    finHtml += '<div class="fin-card hl"><div class="fin-lbl">💰 విక్రయ మొత్తం (Sale Amount)'+cb(fc(fin.saleAmount))+'</div><div class="fin-val">'+fv(fin.saleAmount)+'</div>'+(ft(fin.saleAmount)?'<div class="fin-tel">'+ft(fin.saleAmount)+'</div>':'')+'</div>';
+      if (fv(fin.marketValue))   finHtml += '<div class="fin-card"><div class="fin-lbl">🏠 మార్కెట్ విలువ'+cb(fc(fin.marketValue))+'</div><div class="fin-val teal">'+fv(fin.marketValue)+'</div></div>';
+      if (fv(fin.stampDuty))     finHtml += '<div class="fin-card"><div class="fin-lbl">📋 స్టాంప్ డ్యూటీ</div><div class="fin-val sm">'+fv(fin.stampDuty)+'</div></div>';
+      if (fv(fin.registrationFee)) finHtml += '<div class="fin-card"><div class="fin-lbl">🏛️ రిజి. రుసుము</div><div class="fin-val sm">'+fv(fin.registrationFee)+'</div></div>';
+      if (fv(fin.totalInvestment)) finHtml += '<div class="fin-card invest"><div class="fin-lbl" style="color:var(--teal)">💎 మొత్తం పెట్టుబడి (Sale+Stamp+RegFee)'+cb(fc(fin.totalInvestment))+'</div><div class="fin-val teal">'+fv(fin.totalInvestment)+'</div>'+(ft(fin.totalInvestment)?'<div class="fin-tel">'+ft(fin.totalInvestment)+'</div>':'')+'</div>';
+      if (fv(fin.pricePerCent)&&isLand) finHtml += '<div class="fin-card full"><div class="fin-lbl">📐 సెంట్ కి ధర</div><div class="fin-val sm">'+fv(fin.pricePerCent)+'</div></div>';
+      if (r.propertyType)        finHtml += '<div class="fin-card full"><div class="fin-lbl">🏘️ ఆస్తి రకం</div><div class="fin-val sm" style="color:var(--sky)">'+r.propertyType+(r.transactionType?' · '+r.transactionType:'')+'</div></div>';
+      finHtml += '</div>';
     }
 
-    // Ownership chain - show ALL transactions
-    let chainHtml='';
-    if(r.ownershipChain && r.ownershipChain.length){
-      const chainCount = r.ownershipChain.length;
-      let chainItems = '';
+    // Ownership chain
+    var chainHtml = '';
+    if (r.ownershipChain && r.ownershipChain.length) {
+      var cnt = r.ownershipChain.length;
+      chainHtml = '<div class="chain-wrap">'
+        +'<div class="chain-title">🔗 Ownership Chain · యాజమాన్య చరిత్ర ('+cnt+' transaction'+(cnt>1?'s':'')+')</div>';
       r.ownershipChain.forEach(function(step, i){
-        const isCurrent = i===0;
-        const bc = isCurrent ? 'rgba(58,232,200,0.4)' : '#2a3347';
-        const bg = isCurrent ? 'rgba(58,232,200,0.05)' : '#1e2535';
-        const nc = isCurrent ? 'var(--teal)' : 'var(--amb)';
-        let item = '<div style="background:'+bg+';border:1px solid '+bc+';border-radius:9px;padding:11px 13px;margin-bottom:8px">';
-        item += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
-        item += '<div style="width:26px;height:26px;border-radius:7px;background:#263040;border:1px solid '+nc+';display:grid;place-items:center;font-size:13px;font-weight:700;color:'+nc+';font-family:JetBrains Mono">'+(step.order||i+1)+'</div>';
-        item += '<span style="font-size:14px;color:var(--teal);font-weight:700;font-family:JetBrains Mono">'+(step.date||'Date N/A')+'</span>';
-        if(step.regNumber) item += '<span style="font-size:12px;color:var(--amb);font-weight:600;background:rgba(232,184,74,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(232,184,74,0.3)"> Reg# '+step.regNumber+'</span>';
-        if(isCurrent) item += '<span style="font-size:11px;background:rgba(58,232,200,0.15);color:var(--teal);padding:2px 7px;border-radius:5px">Current</span>';
-        item += '</div>';
-        item += '<div style="font-size:14px;margin-bottom:5px"><span style="color:var(--sky);font-weight:700">విక్రేత (Seller): </span><b style="color:#dce8f0">'+(step.seller||'—')+'</b></div>';
-        item += '<div style="font-size:14px;margin-bottom:5px"><span style="color:var(--teal);font-weight:700">కొనుగోలుదారు (Buyer): </span><b style="color:#dce8f0">'+(step.buyer||'—')+'</b></div>';
-        if(step.surveyNumber) item += '<div style="font-size:13px;margin-bottom:3px"><span style="color:var(--tx2)">సర్వే నంబర్: </span><b>'+step.surveyNumber+'</b></div>';
-        if(step.extent) item += '<div style="font-size:13px;margin-bottom:3px"><span style="color:var(--tx2)">విస్తీర్ణం: </span><b>'+step.extent+'</b></div>';
-        if(step.amount) item += '<div style="font-size:15px;color:var(--amb);font-family:JetBrains Mono;font-weight:700;margin-top:6px;padding:6px 0;border-top:1px solid #2a3347">'+step.amount+'</div>';
-        item += '</div>';
-        chainItems += item;
+        var isCur = i===0;
+        chainHtml += '<div class="chain-item '+(isCur?'current':'prev')+'">'
+          +'<div class="chain-meta">'
+            +'<span class="chain-num '+(isCur?'c':'p')+'">'+(step.order||i+1)+'</span>'
+            +'<span class="chain-date">'+(step.date||'Date N/A')+'</span>'
+            +(step.regNumber?'<span class="chain-reg">Reg# '+escH(step.regNumber)+'</span>':'')
+            +(isCur?'<span class="chain-curr-badge">Current</span>':'')
+          +'</div>'
+          +'<div class="chain-seller"><span>విక్రేత (Seller): </span>'+escH(step.seller||'—')+'</div>'
+          +'<div class="chain-buyer"><span>కొనుగోలుదారు (Buyer): </span>'+escH(step.buyer||'—')+'</div>'
+          +(step.surveyNumber?'<div class="chain-extent">సర్వే నంబర్: '+escH(step.surveyNumber)+'</div>':'')
+          +(step.extent?'<div class="chain-extent">విస్తీర్ణం: '+escH(step.extent)+'</div>':'')
+          +(step.amount?'<div class="chain-amount">'+escH(step.amount)+'</div>':'')
+        +'</div>';
       });
-      chainHtml = '<div style="padding:0 14px 12px">'
-        + '<div style="font-size:14px;color:var(--sky);font-weight:700;margin-bottom:11px">🔗 Ownership Chain · యాజమాన్య చరిత్ర ('+chainCount+' transaction'+(chainCount>1?'s':'')+')</div>'
-        + chainItems
-        + '</div>';
+      chainHtml += '</div>';
     }
 
-    // Basic fields
-    let fields='';
-    if(r.fields?.length){
-      const fieldRows = r.fields.map(f=>{
-        const conf = f.confidence||100;
-        const confStyle = conf < 70 ? 'color:var(--rose)' : conf < 85 ? 'color:var(--amb)' : '';
-        const confTxt = conf < 85 ? ` <span style="font-size:10px;opacity:0.8">(${conf}%)</span>` : '';
-        return `<div class="drf"><span class="drf-k">${f.key}</span><span class="drf-v ${f.alert?'alrt':''}" style="${confStyle}">${f.value}${confTxt}</span></div>`;
-      }).join('');
-      fields=`<div class="dr-fields">${fieldRows}</div>`;
-    }
-    let alerts='';
-    if(r.alerts?.length){
-      alerts=r.alerts.map(a=>{
-        const msg = typeof a === 'object' ? a.message : a;
-        const sev = typeof a === 'object' ? a.severity : 'medium';
-        const sevColor = sev==='high'?'var(--rose)':sev==='low'?'var(--teal)':'var(--amb)';
-        return `<div class="alert-strip" style="border-color:${sevColor}40;color:${sevColor}"><b>⚠️ గమనించండి</b>${msg}</div>`;
-      }).join('');
+    // All fields
+    var fieldsHtml = '';
+    if (r.fields && r.fields.length) {
+      fieldsHtml = '<div class="fields-wrap">';
+      r.fields.forEach(function(f){
+        var conf = f.confidence||100;
+        var cls  = conf<70?'field-val low-conf':f.alert?'field-val alrt':'field-val';
+        fieldsHtml += '<div class="field-row">'
+          +'<span class="field-key">'+escH(f.key||'')+'</span>'
+          +'<span class="'+cls+'">'+escH(f.value||'—')+(conf<85?' <span style="font-size:10px;opacity:0.7">('+conf+'%)</span>':'')+'</span>'
+        +'</div>';
+      });
+      fieldsHtml += '</div>';
     }
 
-    return`<div class="doc-item-wrap" data-doc-id="${doc.id}">
-      <div class="sel-check" id="chk-${doc.id}" onclick="toggleDocSelect('${doc.id}')"></div>
-      <div class="doc-result fi-anim">
-        <div class="dr-top"><div class="dr-ico">${emoji}</div>
-          <div>
-            <div class="dr-name">${r.docType||'Document'}${r.transactionType?' · '+r.transactionType:''}</div>
-            <div class="dr-date">📅 ${doc.date}${r.propertyType?' · 🏘️ '+r.propertyType:''}</div>
-          </div>
-          <span class="dr-badge ${badge}">${r.docType||'Doc'}</span>
-        </div>
-        ${finHtml}${chainHtml}${fields}${alerts}
-      </div>
-    </div>`;
+    // Alerts
+    var alertsHtml = '';
+    if (r.alerts && r.alerts.length) {
+      r.alerts.forEach(function(a){
+        var msg = typeof a==='object' ? a.message : a;
+        var sev = typeof a==='object' ? a.severity : 'medium';
+        alertsHtml += '<div class="alrt-strip'+(sev==='high'?' high':'')+'" style="margin:0 13px 9px"><b>⚠️ గమనించండి</b>'+escH(msg)+'</div>';
+      });
+    }
+
+    var confWarn = (r.confidence && r.confidence<80)
+      ? '<div class="alrt-strip high" style="margin:0 13px 9px"><b>⚠️ AI Confidence: '+r.confidence+'%</b> — Some fields may need verification</div>' : '';
+
+    return '<div class="doc-wrap" data-id="'+doc.id+'">'
+      +'<div class="sel-chk" id="chk-'+doc.id+'" onclick="toggleDocSel(\''+doc.id+'\')"></div>'
+      +'<div class="doc-card fu">'
+        +'<div class="dc-hdr">'
+          +'<div class="dc-ico">'+emoji+'</div>'
+          +'<div><div class="dc-name">'+escH(r.docType||'Document')+(r.transactionType?' · '+r.transactionType:'')+'</div>'
+          +'<div class="dc-date">📅 '+doc.date+(r.propertyType?' · 🏘️ '+r.propertyType:'')+'</div></div>'
+          +'<span class="dc-badge '+badge+'">'+(r.docType||'Doc')+'</span>'
+        +'</div>'
+        +finHtml+chainHtml+fieldsHtml+alertsHtml+confWarn
+      +'</div>'
+    +'</div>';
   }).join('');
 }
 
-// ═══════════════════════════════════════════════════
-// GEMINI AI CHAT
-// ═══════════════════════════════════════════════════
-function injectWelcomeMsg() {
-  const msgs=document.getElementById('chat-msgs');
-  if(msgs.children.length>0) return;
-  const w=document.createElement('div');
-  w.className='bw ai fi-anim';
-  w.innerHTML=`<div class="bav">🤖</div>
-    <div>
-      <div class="bbl">
-        <b>నమస్కారం! నేను మీ Nirmit 🏗️</b><br><br>
-        Telugu లేదా English లో చెప్పండి:<br>
-        • "ఇసుక 3 ట్రాక్టర్ మురళి దగ్గర ₹4500 ఆర్డర్"<br>
-        • "రాం Electricals కి ₹10000 advance ఇచ్చాను"<br>
-        • "అందరికీ ఎంత బకాయి ఉంది?"<br>
-        • 📷 Bill photo upload చేయండి<br><br>
-        <span class="ok">☁️ మీ data Google Sheet లో safe గా save అవుతోంది!</span>
-      </div>
-      <div class="btime">${now()}</div>
-    </div>`;
+// ════════════════════════════════════════════════════════
+// DOCUMENT SELECT MODE
+// ════════════════════════════════════════════════════════
+function toggleSelMode() {
+  selMode = !selMode;
+  selIds.clear();
+  var dl  = document.getElementById('doc-list');
+  var bar = document.getElementById('sel-bar');
+  var btn = document.getElementById('sel-mode-btn');
+  dl.classList.toggle('select-mode', selMode);
+  bar.classList.toggle('on', selMode);
+  btn.textContent = selMode ? '✕ Cancel' : '☑️ Select';
+  btn.style.color = selMode ? 'var(--rose)' : 'var(--sky)';
+  updateSelCount();
+}
+
+function toggleDocSel(id) {
+  if (!selMode) return;
+  var chk = document.getElementById('chk-'+id);
+  if (!chk) return;
+  if (selIds.has(id)) { selIds.delete(id); chk.classList.remove('checked'); chk.textContent=''; }
+  else { selIds.add(id); chk.classList.add('checked'); chk.textContent='✓'; }
+  updateSelCount();
+}
+
+function selectAllDocs() {
+  state.documents.forEach(function(d){
+    selIds.add(d.id);
+    var chk = document.getElementById('chk-'+d.id);
+    if (chk) { chk.classList.add('checked'); chk.textContent='✓'; }
+  });
+  updateSelCount();
+}
+
+function updateSelCount() {
+  var lbl = document.getElementById('sel-count');
+  if (lbl) lbl.textContent = selIds.size + ' selected';
+}
+
+function deleteSelected() {
+  if (!selIds.size) { toast('Select at least one document', 'err'); return; }
+  if (!confirm('Delete '+selIds.size+' document(s)?')) return;
+  state.documents = state.documents.filter(function(d){ return !selIds.has(d.id); });
+  selIds.clear(); saveData();
+  if (selMode) toggleSelMode();
+  renderDocList();
+  toast('Deleted', 'ok');
+}
+
+function clearDocs() {
+  if (!confirm('Delete all documents? (Sheet data stays safe)')) return;
+  state.documents = []; saveData(); renderDocList(); toast('Documents cleared', 'ok');
+}
+
+function clearTxns() {
+  if (!confirm('Delete all transactions locally? Sheet data stays safe.')) return;
+  state.entries=[]; state.vendors={}; state.priceHistory={}; state.chatHistory=[];
+  saveData(); refreshUI(); toast('Transactions cleared', 'ok');
+}
+
+function clearAll() {
+  if (!confirm('Delete ALL local data? Sheet data stays safe.')) return;
+  state = freshData(); saveData(); refreshUI(); renderDocList(); toast('All data cleared', 'ok');
+}
+
+// ════════════════════════════════════════════════════════
+// AI CHAT — GEMINI
+// ════════════════════════════════════════════════════════
+function injectWelcome() {
+  var msgs = document.getElementById('chat-msgs');
+  if (msgs.children.length) return;
+  var w = document.createElement('div');
+  w.className = 'bw ai fu';
+  w.innerHTML = '<div class="bav">🤖</div>'
+    +'<div><div class="bbl">'
+    +'<b>నమస్కారం! నేను మీ Nirmit AI 🏗️</b><br><br>'
+    +'Telugu లేదా English లో చెప్పండి:<br>'
+    +'• "ఇసుక 3 ట్రాక్టర్ మురళి దగ్గర ₹4500"<br>'
+    +'• "రాం Electricals కి ₹10000 advance"<br>'
+    +'• "అందరికీ ఎంత బకాయి ఉంది?"<br>'
+    +'• 📷 Bill photo upload చేయండి<br><br>'
+    +'<span class="ok">☁️ Data Google Sheet లో save అవుతోంది!</span>'
+    +'</div><div class="btime">Ready</div></div>';
   msgs.appendChild(w);
 }
 
 function addBubble(role, html) {
-  const msgs=document.getElementById('chat-msgs');
-  const w=document.createElement('div');
-  w.className=`bw ${role} fi-anim`;
-  w.innerHTML=`<div class="bav">${role==='ai'?'🤖':'👤'}</div>
-    <div><div class="bbl">${html}</div><div class="btime">${now()}</div></div>`;
+  var msgs = document.getElementById('chat-msgs');
+  var w = document.createElement('div');
+  w.className = 'bw '+role+' fu';
+  w.innerHTML = '<div class="bav">'+(role==='ai'?'🤖':'👤')+'</div>'
+    +'<div><div class="bbl">'+html+'</div><div class="btime">'+nowt()+'</div></div>';
   msgs.appendChild(w);
-  msgs.scrollTop=msgs.scrollHeight;
+  msgs.scrollTop = msgs.scrollHeight;
   return w;
 }
 
-function showTyping(){
-  const msgs=document.getElementById('chat-msgs');
-  const w=document.createElement('div');
-  w.className='bw ai';w.id='typing-w';
-  w.innerHTML=`<div class="bav">🤖</div><div class="bbl"><div class="td"><span></span><span></span><span></span></div></div>`;
-  msgs.appendChild(w);msgs.scrollTop=msgs.scrollHeight;
+function showTyping() {
+  var msgs = document.getElementById('chat-msgs');
+  var w = document.createElement('div');
+  w.className='bw ai'; w.id='typing-w';
+  w.innerHTML='<div class="bav">🤖</div><div class="bbl"><div class="td"><span></span><span></span><span></span></div></div>';
+  msgs.appendChild(w); msgs.scrollTop=msgs.scrollHeight;
 }
-function hideTyping(){document.getElementById('typing-w')?.remove()}
+function hideTyping() { var t=document.getElementById('typing-w'); if(t)t.remove(); }
 
-function qt(t){
-  const inp=document.getElementById('chat-in');
-  inp.value=t;inp.focus();autoR(inp);showSc('chat');
+function qt(text) {
+  var inp=document.getElementById('chat-in');
+  inp.value=text; inp.focus(); autoR(inp); showSc('chat');
 }
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
-function autoR(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px'}
+function handleKey(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();} }
+function autoR(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
 
-async function doSend(text) {
+function doSend(text) {
   showSc('chat');
-  await new Promise(r=>setTimeout(r,80));
-  document.getElementById('chat-in').value=text;
-  sendMsg();
+  setTimeout(function(){
+    document.getElementById('chat-in').value=text; sendMsg();
+  }, 80);
 }
 
-async function sendMsg() {
-  const inp=document.getElementById('chat-in');
-  const text=inp.value.trim();
-  if(!text||document.getElementById('sbtn').disabled) return;
-  inp.value='';autoR(inp);
-  document.getElementById('sbtn').disabled=true;
-  addBubble('usr',escH(text));
+function sendMsg() {
+  var inp = document.getElementById('chat-in');
+  var sbtn = document.getElementById('sbtn');
+  var text = inp.value.trim();
+  if (!text || sbtn.disabled) return;
+  inp.value=''; autoR(inp); sbtn.disabled=true;
+  addBubble('usr', escH(text));
   showTyping();
-  state.chatHistory.push({role:'user',parts:[{text}]});
-  if(state.chatHistory.length>16) state.chatHistory=state.chatHistory.slice(-16);
-  await callGemini();
-  document.getElementById('sbtn').disabled=false;
+  state.chatHistory.push({role:'user',parts:[{text:text}]});
+  if (state.chatHistory.length>16) state.chatHistory=state.chatHistory.slice(-16);
+  callGemini(null, null, null).finally(function(){ sbtn.disabled=false; });
 }
 
-async function callGemini(imageData, imageMime, extraInstruction) {
-  if(!cfg.geminiKey){ hideTyping(); addBubble('ai','<span class="bad">⚠️ Gemini key not set. Settings లో configure చేయండి.</span>'); return; }
+function confirmEntry(entry, btn) {
+  addEntry(entry);
+  btn.closest('.cacts').innerHTML = '<span class="ok">✓ Google Sheet లో Saved!</span>';
+}
 
-  const ledgerCtx = JSON.stringify({
-    vendors: state.vendors,
-    recentEntries: state.entries.slice(-12).map(e=>({date:e.date,type:e.type,vendor:e.vendor,category:e.category,amount:e.amount,description:e.description})),
-    priceHistory: state.priceHistory,
-    totalOrdered: Object.values(state.vendors).reduce((s,v)=>s+(Number(v.totalOrdered)||0),0),
-    totalPaid:    Object.values(state.vendors).reduce((s,v)=>s+(Number(v.totalPaid)||0),0),
-  });
-
-  const systemText = `You are "Nirmit", an AI site manager for a builder from Kadapa, Andhra Pradesh, India.
-He builds small houses on 3-cent plots. He buys materials from local vendors and pays in installments.
-He speaks Telugu and English. 
-- If he writes in Telugu → reply in Telugu
-- If he writes in English → reply in English  
-- For all amounts, vendor names, item names — always show BOTH Telugu and English
-- Field labels in responses: use format "English (తెలుగు)"
-- Keep replies clear and easy to read at larger font sizes
-
-LEDGER STATE: ${ledgerCtx}
-
-ANDHRA PRADESH MARKET RATES (Kadapa approx):
-- Sand/ఇసుక: ₹1800-3500 per tractor
-- TMT Steel: ₹58-75 per kg
-- Cement (50kg bag): ₹340-430
-- Electrical rough: ₹85-140 per sqft
-- Labour: ₹450-700 per day
-
-TASK: Parse transactions and give smart advice.
-When user mentions an order or payment, output ONE <ENTRY> block:
-For order: <ENTRY>{"type":"order","vendor":"Name","category":"Sand|Steel|Electrical|Hardware|Cement|Labour|Land|Other","amount":4500,"description":"3 tractor sand","unitPrice":1500,"priceKey":"Sand","priceUnit":"tractor","phone":null}</ENTRY>
-For payment: <ENTRY>{"type":"payment","vendor":"Name","category":"Sand","amount":5000,"description":"weekly payment","phone":null}</ENTRY>
-For queries, just answer clearly — no ENTRY block.
-Flag if price seems high vs market rates. Warn about large pending dues. Be like a smart local accountant.`;
-
-  // Build Gemini request
-  let userParts = [];
-  if (imageData) {
-    userParts.push({inlineData:{mimeType:imageMime,data:imageData}});
-    userParts.push({text: extraInstruction || 'Analyze this document'});
-  } else {
-    // Get last user message
-    const lastMsg = state.chatHistory[state.chatHistory.length-1];
-    userParts = lastMsg.parts;
+async function callGemini(imageData, imageMime, docPromptOverride) {
+  if (!cfg.geminiKey) {
+    hideTyping();
+    addBubble('ai','<span class="bad">⚠️ Gemini key not set. Settings లో configure చేయండి.</span>');
+    return;
   }
 
-  const contents = [
-    {role:'user', parts:[{text: systemText}]},
-    {role:'model', parts:[{text:'అర్థమైంది. నేను ready గా ఉన్నాను.'}]},
-    ...state.chatHistory.slice(0,-1),
-    {role:'user', parts: userParts}
-  ];
+  var ledgerCtx = JSON.stringify({
+    vendors: state.vendors,
+    recentEntries: state.entries.slice(-12).map(function(e){ return {date:e.date,type:e.type,vendor:e.vendor,category:e.category,amount:e.amount,description:e.description}; }),
+    priceHistory: state.priceHistory,
+    totalOrdered: Object.values(state.vendors).reduce(function(s,v){ return s+(Number(v.totalOrdered)||0); },0),
+    totalPaid:    Object.values(state.vendors).reduce(function(s,v){ return s+(Number(v.totalPaid)||0); },0)
+  });
 
-  // Call Gemini API - gemini-2.5-flash is free in India
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cfg.geminiKey}`;
-  let data = null;
-  let lastError = '';
+  var systemText = 'You are Nirmit AI, site manager for a builder from Kadapa, Andhra Pradesh. '
+    +'He builds small houses on 3-cent plots. He speaks Telugu and English. Reply in the same language he uses.\n\n'
+    +'LEDGER STATE: '+ledgerCtx+'\n\n'
+    +'ANDHRA MARKET RATES (Kadapa):\n'
+    +'- Sand: Rs.1800-3500/tractor\n- TMT Steel: Rs.58-75/kg\n- Cement: Rs.340-430/bag\n- Electrical rough: Rs.85-140/sqft\n- Labour: Rs.450-700/day\n\n'
+    +'When user mentions an order or payment, parse it and output ONE <ENTRY> block:\n'
+    +'For order: <ENTRY>{"type":"order","vendor":"Name","category":"Sand|Steel|Electrical|Hardware|Cement|Labour|Land|Other","amount":4500,"description":"3 tractor sand","unitPrice":1500,"priceKey":"Sand","priceUnit":"tractor","phone":null}</ENTRY>\n'
+    +'For payment: <ENTRY>{"type":"payment","vendor":"Name","category":"Sand","amount":5000,"description":"weekly payment","phone":null}</ENTRY>\n'
+    +'For queries just answer clearly. Flag if price seems high vs market rates.';
+
+  var contents = [];
+  contents.push({role:'user',parts:[{text:systemText}]});
+  contents.push({role:'model',parts:[{text:'అర్థమైంది. Ready గా ఉన్నాను.'}]});
+  state.chatHistory.slice(0,-1).forEach(function(m){ contents.push(m); });
+
+  var lastMsg = state.chatHistory[state.chatHistory.length-1];
+  if (imageData) {
+    contents.push({role:'user',parts:[{inlineData:{mimeType:imageMime,data:imageData}},{text:docPromptOverride||'Analyze this document'}]});
+  } else {
+    contents.push({role:'user',parts:lastMsg?lastMsg.parts:[{text:'Hello'}]});
+  }
+
   try {
-    const res = await fetch(GEMINI_URL, {
+    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+cfg.geminiKey, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({contents, generationConfig:{maxOutputTokens:900,temperature:0.3}})
+      body: JSON.stringify({contents:contents, generationConfig:{maxOutputTokens:1000,temperature:0.3}})
     });
-    data = await res.json();
-    lastError = data.error?.message || '';
-  } catch(e){ lastError = e.message; }
+    var data = await res.json();
 
-  try {
-    if (!data || data.error) {
+    if (data.error) {
       hideTyping();
-      const isQuota = lastError.includes('quota') || lastError.includes('429');
-      const msg = isQuota
-        ? '<span class="bad">⚠️ Quota limit.</span><br><span class="wrn">కొద్దిసేపు (1-2 min) వేచి మళ్ళీ try చేయండి.<br>Free tier: 15 requests/minute.</span>'
-        : `<span class="bad">AI Error: ${lastError}</span>`;
-      addBubble('ai', msg);
+      var isQuota = (data.error.message||'').includes('quota');
+      addBubble('ai','<span class="bad">AI Error: '+data.error.message+'</span>'+(isQuota?'<br><span class="wrn">కొద్దిసేపు wait చేసి retry చేయండి (1-2 min)</span>':''));
       return;
     }
 
-    const fullText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Response not received';
+    var fullText = (data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||'No response';
+    var entryMatches = Array.from(fullText.matchAll(/<ENTRY>([\s\S]*?)<\/ENTRY>/g));
+    var display = fullText.replace(/<ENTRY>[\s\S]*?<\/ENTRY>/g,'').trim();
+    display = display.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
 
-    // Parse ENTRY tags
-    const entryMatches = [...fullText.matchAll(/<ENTRY>([\s\S]*?)<\/ENTRY>/g)];
-    let display = fullText.replace(/<ENTRY>[\s\S]*?<\/ENTRY>/g,'').trim();
-    display = display.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code style="background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;font-family:JetBrains Mono">$1</code>');
+    var parsedEntries = [];
+    entryMatches.forEach(function(m){ try{ parsedEntries.push(JSON.parse(m[1].trim())); }catch(e){} });
 
-    let parsedEntries = [];
-    entryMatches.forEach(m=>{try{parsedEntries.push(JSON.parse(m[1].trim()));}catch(e){}});
-
-    let html = display;
-    parsedEntries.forEach(entry=>{
-      const bal = entry.type==='order' ? getBalance(entry.vendor)+Number(entry.amount) : getBalance(entry.vendor)-Number(entry.amount);
-      html += `<div class="ccard">
-        <div class="ccard-t">${entry.type==='payment'?'💰 Payment':'📦 Order'} — Confirm?</div>
-        <div class="crow"><span class="ck">Vendor</span><span class="cv">${entry.vendor}</span></div>
-        <div class="crow"><span class="ck">Category</span><span class="cv">${entry.category||'—'}</span></div>
-        <div class="crow"><span class="ck">Amount</span><span class="cv ${entry.type==='payment'?'ok':'w'}">${rup(entry.amount)}</span></div>
-        <div class="crow"><span class="ck">Details</span><span class="cv">${entry.description||'—'}</span></div>
-        ${entry.phone?`<div class="crow"><span class="ck">Phone</span><span class="cv">${entry.phone}</span></div>`:''}
-        <div class="crow"><span class="ck">Balance after</span><span class="cv ${bal>0?'bad':bal<0?'ok':''}">${rup(Math.abs(bal))} ${bal>0?'మీరు ఇవ్వాలి':bal<0?'advance':'Settled ✓'}</span></div>
-        <div class="cacts">
-          <button class="btn btn-amb btn-sm" style="flex:1" onclick='confirmEntry(${JSON.stringify(entry).replace(/'/g,"&#39;")},this)'>✓ Save to Sheet</button>
-          <button class="btn btn-ghost btn-sm" onclick="this.closest('.ccard').remove()">✗</button>
-        </div>
-      </div>`;
+    var html = display;
+    parsedEntries.forEach(function(entry){
+      var bal = entry.type==='order' ? getBalance(entry.vendor)+Number(entry.amount) : getBalance(entry.vendor)-Number(entry.amount);
+      html += '<div class="ccard">'
+        +'<div class="ccard-t">'+(entry.type==='payment'?'💰 Payment':'📦 Order')+' — Confirm?</div>'
+        +'<div class="crow"><span class="ck">Vendor</span><span class="cv">'+escH(entry.vendor)+'</span></div>'
+        +'<div class="crow"><span class="ck">Category</span><span class="cv">'+escH(entry.category||'—')+'</span></div>'
+        +'<div class="crow"><span class="ck">Amount</span><span class="cv '+(entry.type==='payment'?'ok':'w')+'">'+rup(entry.amount)+'</span></div>'
+        +'<div class="crow"><span class="ck">Details</span><span class="cv">'+escH(entry.description||'—')+'</span></div>'
+        +(entry.phone?'<div class="crow"><span class="ck">Phone</span><span class="cv">'+escH(entry.phone)+'</span></div>':'')
+        +'<div class="crow"><span class="ck">Balance after</span><span class="cv '+(bal>0?'bad':bal<0?'ok':'')+'">'
+          +rup(Math.abs(bal))+' '+(bal>0?'మీరు ఇవ్వాలి':bal<0?'advance':'Settled ✓')+'</span></div>'
+        +'<div class="cacts">'
+          +'<button class="btn amb sm" style="flex:1" onclick="confirmEntry('+JSON.stringify(entry).replace(/"/g,"'").replace(/'/g,"&#39;")+',this)">✓ Save to Sheet</button>'
+          +'<button class="btn ghost sm" onclick="this.closest(\'.ccard\').remove()">✗</button>'
+        +'</div>'
+      +'</div>';
     });
 
     hideTyping();
     addBubble('ai', html);
     state.chatHistory.push({role:'model',parts:[{text:fullText}]});
-    if(state.chatHistory.length>16) state.chatHistory=state.chatHistory.slice(-16);
-    saveLocalData();
+    if (state.chatHistory.length>16) state.chatHistory=state.chatHistory.slice(-16);
+    saveData();
 
-  } catch(e) {
+  } catch(err) {
     hideTyping();
-    addBubble('ai',`<span class="bad">⚠️ Network error: ${e.message}</span>`);
+    addBubble('ai','<span class="bad">⚠️ Network error: '+err.message+'</span>');
   }
 }
 
-// ═══════════════════════════════════════════════════
-// PHOTO / PDF DOCUMENT HANDLER
-// ═══════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// DOCUMENT UPLOAD — handlePhoto
+// ════════════════════════════════════════════════════════
+var DOC_PROMPT = 'You are a specialist reading Andhra Pradesh property documents (Telugu and English).\n\n'
+  +'EXTENT RULE: 1 cent=48.4 sqyards. ALWAYS show as: "X sq yards (X ch.ga.) = Y.YY cents (Y.YY centlu)". Show BOTH always.\n\n'
+  +'DATE RULE: documentDate = date in FIRST LINE of this document (tedi: DD.MM.YYYY or Telugu words for date). NEVER use a previous owners purchase date. NEVER use todays date.\n\n'
+  +'FINANCIALS: saleAmount=consideration amount. stampDuty=tax (small). registrationFee=fee (small). totalInvestment=saleAmount+stampDuty+registrationFee. totalRegistrationCost=stampDuty+regFee only (NEVER equals saleAmount).\n\n'
+  +'PROPERTY TYPE: gruha vikrayam/house/building=House. Plot/site=Plot. Agricultural=Agricultural. Land only=Land. pricePerCent: only for Land/Plot/Agricultural, null for House.\n\n'
+  +'FIELDS TO EXTRACT (extract all visible): Document Number, Registration Date, Property Type, Transaction Type, Sub-Registrar Office, District, Mandal, Village/Locality, Ward Number, Door Number, Survey Number, Land Extent (MUST show sq yards AND cents both), Built-up Area (sq feet), Seller Full Name, Seller Address, Buyer Full Name, Buyer Address, Sale Amount, Market Value, Stamp Duty, Registration Fee, Witnesses, Boundaries (East/West/North/South).\n\n'
+  +'OWNERSHIP CHAIN: Extract ALL transactions from endorsement pages. '
+  +'ownershipChain[0]=CURRENT (this document, most recent seller to buyer). '
+  +'ownershipChain[1]=Previous transaction. ownershipChain[2]=Before that. '
+  +'NEVER return only 1 entry if document has multiple transactions.\n\n'
+  +'CONFIDENCE: 100=exact text found, 80+=clear, 60-79=calculated, under60=uncertain.\n\n'
+  +'Return ONLY valid JSON:\n'
+  +'{"docType":"Registration","transactionType":"Sale","propertyType":"House","documentDate":"DD.MM.YYYY","language":"Telugu","summary":"summary","confidence":90,'
+  +'"fields":[{"key":"field name Telugu (English)","value":"value","confidence":95,"alert":false}],'
+  +'"financials":{"saleAmount":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":95},"marketValue":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":85},"stampDuty":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":95},"registrationFee":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":95},"totalRegistrationCost":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":90},"totalInvestment":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":95},"pricePerCent":{"value":null,"telugu":null,"confidence":0},"pricePerSqyard":{"value":null,"telugu":null,"confidence":0}},'
+  +'"ownershipChain":[{"order":1,"seller":"name","buyer":"name","date":"DD.MM.YYYY","regNumber":"X/YYYY","amount":"Rs. X/-","surveyNumber":"X/X","extent":"X sq yards = Y cents","confidence":95}],'
+  +'"alerts":[{"message":"alert text","severity":"high"}]}';
+
 async function handlePhoto(e, source) {
-  const file = e.target.files[0];
+  var file = e.target.files[0];
   if (!file) return;
   e.target.value = '';
 
-  const isPDF = file.type === 'application/pdf';
-  const isImage = file.type.startsWith('image/');
-  if (!isPDF && !isImage) { toast('PDF or Image only', 'err'); return; }
-
-  if (!cfg.geminiKey) {
-    toast('Gemini API key not set. Go to Settings.', 'err');
-    return;
+  if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+    toast('Image or PDF only', 'err'); return;
   }
 
-  // Step 1: Show processing
-  showProc('Uploading ' + (isPDF ? 'PDF' : 'Image') + '... File: ' + file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)');
+  if (!cfg.geminiKey) {
+    toast('Gemini API key not set. Settings లో configure చేయండి.', 'err'); return;
+  }
 
-  // Step 2: Convert to base64
-  let b64;
+  // Show progress
+  showProc('Uploading ' + (file.type==='application/pdf'?'PDF':'Image') + '...\nFile: ' + file.name + '\nSize: ' + (file.size/1024).toFixed(0) + ' KB');
+
+  var b64;
   try {
     b64 = await fileToB64(file);
   } catch(err) {
-    hideProc();
-    toast('File read failed: ' + err.message, 'err');
-    return;
+    hideProc(); toast('File read failed: ' + err.message, 'err'); return;
   }
 
-  // Step 3: Send to Gemini
-  showProc('AI analyzing document... Reading Telugu text... Please wait 10-30 seconds');
+  showProc('AI analyzing document...\nReading Telugu text...\nPlease wait 15-30 seconds');
 
   try {
-    const parts = [
+    var parts = [
       { inlineData: { mimeType: file.type, data: b64 } },
       { text: DOC_PROMPT }
     ];
 
-    const res = await fetch(
+    var res = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + cfg.geminiKey,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ role: 'user', parts: parts }] })
-      }
+      { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ contents: [{ role:'user', parts:parts }] }) }
     );
 
-    showProc('Processing results... Extracting fields...');
-
-    const data = await res.json();
+    showProc('Processing results...\nExtracting fields...');
+    var data = await res.json();
 
     if (data.error) {
       hideProc();
-      const msg = data.error.message || 'Unknown AI error';
-      if (source === 'chat') addBubble('ai', '<span class="bad">AI Error: ' + msg + '</span>');
-      else toast('AI Error: ' + msg, 'err');
+      var msg = data.error.message || 'Unknown error';
+      if (source==='chat') addBubble('ai','<span class="bad">AI Error: '+msg+'</span>');
+      else toast('AI Error: '+msg, 'err');
       return;
     }
 
-    const rawText = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || '{}';
+    var rawText = (data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text)||'{}';
 
-    // Parse JSON result
-    let result;
+    var result;
     try {
-      const clean = rawText.replace(/```json|```/g, '').trim();
-      const m = clean.match(/\{[\s\S]*\}/);
+      var clean = rawText.replace(/```json|```/g,'').trim();
+      var m = clean.match(/\{[\s\S]*\}/);
       result = JSON.parse(m ? m[0] : clean);
     } catch(pe) {
-      result = { docType: 'Unknown', summary: rawText.substring(0, 200), fields: [], alerts: [], confidence: 40 };
+      result = {docType:'Unknown',summary:rawText.substring(0,300),fields:[],alerts:[],confidence:40};
     }
 
     // Get actual document date
-    const docDate = result.documentDate
-      || (result.fields && result.fields.find(function(f){ return (f.key||'').toLowerCase().includes('registration date') || (f.key||'').includes('తేదీ'); }) || {}).value
-      || today();
+    var docDate = result.documentDate;
+    if (!docDate && result.fields) {
+      var df = result.fields.find(function(f){ var k=(f.key||'').toLowerCase(); return k.includes('registration date')||k.includes('document date')||k.includes('తేదీ'); });
+      if (df) docDate = df.value;
+    }
+    if (!docDate) docDate = today();
 
-    // Save record
-    const doc = {
-      id: 'd' + Date.now(),
+    var doc = {
+      id: 'd'+Date.now(),
       date: docDate,
       fileName: file.name,
-      type: result.docType || 'Document',
-      propertyType: result.propertyType || '',
+      type: result.docType||'Document',
+      propertyType: result.propertyType||'',
       result: result
     };
     state.documents.push(doc);
-    saveLocalData();
+    saveData();
     renderDocList();
 
-    // Push to Sheet
     pushToSheet('Documents',
       ['id','date','type','propertyType','summary','fileName'],
       [doc.id, doc.date, doc.type, doc.propertyType, (result.summary||'').substring(0,200), file.name]
@@ -1812,348 +1513,245 @@ async function handlePhoto(e, source) {
 
     hideProc();
 
-    if (source === 'chat') {
+    if (source==='chat') {
       showSc('chat');
-      addBubble('usr', '📄 Document: ' + file.name);
-      addBubble('ai', buildDocHtml(result));
+      addBubble('usr','📄 Document: '+file.name);
+      addBubble('ai', buildDocResultHtml(result));
     } else {
       showSc('docs');
-      const fieldCount = result.fields ? result.fields.length : 0;
-      toast('Document analyzed! ' + fieldCount + ' fields extracted.', 'ok');
+      var fc2 = result.fields ? result.fields.length : 0;
+      toast('Document analyzed! '+fc2+' fields extracted.', 'ok');
     }
 
   } catch(err) {
     hideProc();
-    if (source === 'chat') addBubble('ai', '<span class="bad">Network error: ' + err.message + '</span>');
-    else toast('Error: ' + err.message, 'err');
+    if (source==='chat') addBubble('ai','<span class="bad">Network error: '+err.message+'</span>');
+    else toast('Error: '+err.message, 'err');
   }
 }
 
-// ═══════════════════════════════════════════════════
-// BUILD DOC HTML FOR DISPLAY
-// ═══════════════════════════════════════════════════
-function buildDocHtml(r) {
-  var typeColor = {Registration:'inf', Agreement:'wrn', Bill:'ok'}[r.docType] || 'ok';
-  var html = '<b class="' + typeColor + '">📄 ' + (r.docType||'Document') + '</b><br>';
-  html += '<span style="color:var(--tx2);font-size:13px">' + (r.summary||'') + '</span>';
+function buildDocResultHtml(r) {
+  var fin = r.financials || {};
+  var isLand = r.propertyType==='Land'||r.propertyType==='Plot'||r.propertyType==='Agricultural';
+  function fv(f){ return f?(typeof f==='object'?f.value:f):null; }
+  function ft(f){ return f?(typeof f==='object'?f.telugu:null):null; }
+  function fc(f){ return f?(typeof f==='object'?(f.confidence||100):100):100; }
+  function cb(c){ return c<70?' <span style="font-size:10px;color:var(--rose)">('+c+'%)</span>':c<85?' <span style="font-size:10px;color:var(--amb)">('+c+'%)</span>':''; }
+
+  var html = '<b class="'+(r.docType==='Registration'?'inf':r.docType==='Agreement'?'wrn':'ok')+'">📄 '+(r.docType||'Document')+'</b><br>'
+    +'<span style="font-size:13px;color:var(--tx2)">'+(r.summary||'')+'</span>';
 
   // Financials
-  var fin = r.financials;
-  var fv = function(f){ return f ? (typeof f === 'object' ? f.value : f) : null; };
-  var ft = function(f){ return f ? (typeof f === 'object' ? f.telugu : null) : null; };
-  var fc = function(f){ return f ? (typeof f === 'object' ? (f.confidence||100) : 100) : 100; };
-  var cb = function(c){ return c < 70 ? ' <span style="font-size:10px;color:var(--rose)">('+c+'%)</span>' : c < 85 ? ' <span style="font-size:10px;color:var(--amb)">('+c+'%)</span>' : ''; };
-  var isLand = r.propertyType === 'Land' || r.propertyType === 'Plot' || r.propertyType === 'Agricultural';
-
-  if (fin) {
-    html += '<div class="ccard" style="margin-top:10px">';
-    html += '<div class="ccard-t">💰 Financial Details (ఆర్థిక వివరాలు)</div>';
-    if(fv(fin.saleAmount)) html += '<div class="crow"><span class="ck">💰 విక్రయ మొత్తం</span><span class="cv ok">' + fv(fin.saleAmount) + cb(fc(fin.saleAmount)) + '</span></div>';
-    if(fv(fin.marketValue)) html += '<div class="crow"><span class="ck">🏠 మార్కెట్ విలువ</span><span class="cv">' + fv(fin.marketValue) + cb(fc(fin.marketValue)) + '</span></div>';
-    if(fv(fin.stampDuty)) html += '<div class="crow"><span class="ck">📋 స్టాంప్ డ్యూటీ</span><span class="cv w">' + fv(fin.stampDuty) + '</span></div>';
-    if(fv(fin.registrationFee)) html += '<div class="crow"><span class="ck">🏛️ రిజి. రుసుము</span><span class="cv">' + fv(fin.registrationFee) + '</span></div>';
-    if(fv(fin.totalInvestment)) html += '<div class="crow"><span class="ck">💎 మొత్తం పెట్టుబడి</span><span class="cv ok" style="color:var(--teal)">' + fv(fin.totalInvestment) + '</span></div>';
-    if(fv(fin.pricePerCent) && isLand) html += '<div class="crow"><span class="ck">📐 సెంట్ కి ధర</span><span class="cv ok">' + fv(fin.pricePerCent) + '</span></div>';
-    if(r.propertyType) html += '<div class="crow"><span class="ck">🏘️ ఆస్తి రకం</span><span class="cv" style="color:var(--sky)">' + r.propertyType + (r.transactionType ? ' · ' + r.transactionType : '') + '</span></div>';
+  if (fv(fin.saleAmount)||fv(fin.totalInvestment)) {
+    html += '<div class="ccard" style="margin-top:10px"><div class="ccard-t">💰 Financial Details (ఆర్థిక వివరాలు)</div>';
+    if(fv(fin.saleAmount))     html+='<div class="crow"><span class="ck">💰 విక్రయ మొత్తం</span><span class="cv ok">'+fv(fin.saleAmount)+cb(fc(fin.saleAmount))+'</span></div>';
+    if(fv(fin.marketValue))    html+='<div class="crow"><span class="ck">🏠 మార్కెట్ విలువ</span><span class="cv">'+fv(fin.marketValue)+'</span></div>';
+    if(fv(fin.stampDuty))      html+='<div class="crow"><span class="ck">📋 స్టాంప్ డ్యూటీ</span><span class="cv w">'+fv(fin.stampDuty)+'</span></div>';
+    if(fv(fin.registrationFee))html+='<div class="crow"><span class="ck">🏛️ రిజి. రుసుము</span><span class="cv">'+fv(fin.registrationFee)+'</span></div>';
+    if(fv(fin.totalInvestment))html+='<div class="crow"><span class="ck">💎 మొత్తం పెట్టుబడి</span><span class="cv" style="color:var(--teal)">'+fv(fin.totalInvestment)+cb(fc(fin.totalInvestment))+'</span></div>';
+    if(fv(fin.pricePerCent)&&isLand)html+='<div class="crow"><span class="ck">📐 సెంట్ కి ధర</span><span class="cv ok">'+fv(fin.pricePerCent)+'</span></div>';
+    if(r.propertyType) html+='<div class="crow"><span class="ck">🏘️ ఆస్తి రకం</span><span class="cv" style="color:var(--sky)">'+r.propertyType+(r.transactionType?' · '+r.transactionType:'')+'</span></div>';
     html += '</div>';
   }
 
   // Ownership chain
   if (r.ownershipChain && r.ownershipChain.length) {
-    html += '<div class="ccard" style="margin-top:10px">';
-    html += '<div class="ccard-t">🔗 Ownership Chain · యాజమాన్య చరిత్ర (' + r.ownershipChain.length + ' transaction' + (r.ownershipChain.length > 1 ? 's' : '') + ')</div>';
-    r.ownershipChain.forEach(function(step, i) {
-      var isCurrent = i === 0;
-      var bc = isCurrent ? 'rgba(58,232,200,0.4)' : '#2a3347';
-      var bg = isCurrent ? 'rgba(58,232,200,0.05)' : '#1e2535';
-      html += '<div style="background:' + bg + ';border:1px solid ' + bc + ';border-radius:9px;padding:11px 13px;margin-bottom:8px">';
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap">';
-      html += '<span style="width:24px;height:24px;border-radius:6px;background:#263040;border:1px solid ' + (isCurrent?'var(--teal)':'var(--amb)') + ';display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:' + (isCurrent?'var(--teal)':'var(--amb)') + '">' + (step.order||i+1) + '</span>';
-      html += '<span style="font-size:14px;color:var(--teal);font-weight:700">' + (step.date||'Date N/A') + '</span>';
-      if(step.regNumber) html += '<span style="font-size:12px;color:var(--amb);background:rgba(232,184,74,0.12);padding:2px 8px;border-radius:6px;border:1px solid rgba(232,184,74,0.3)">Reg# ' + step.regNumber + '</span>';
-      if(isCurrent) html += '<span style="font-size:11px;background:rgba(58,232,200,0.15);color:var(--teal);padding:2px 7px;border-radius:5px">Current</span>';
-      html += '</div>';
-      html += '<div style="font-size:14px;margin-bottom:4px"><span style="color:var(--sky);font-weight:700">విక్రేత: </span><b>' + (step.seller||'—') + '</b></div>';
-      html += '<div style="font-size:14px;margin-bottom:4px"><span style="color:var(--teal);font-weight:700">కొనుగోలుదారు: </span><b>' + (step.buyer||'—') + '</b></div>';
-      if(step.extent) html += '<div style="font-size:13px;margin-bottom:3px"><span style="color:var(--tx2)">విస్తీర్ణం: </span>' + step.extent + '</div>';
-      if(step.amount) html += '<div style="font-size:14px;color:var(--amb);font-weight:700;margin-top:5px;padding-top:5px;border-top:1px solid #2a3347">' + step.amount + '</div>';
+    var cnt = r.ownershipChain.length;
+    html += '<div class="ccard" style="margin-top:10px"><div class="ccard-t">🔗 Ownership Chain · యాజమాన్య చరిత్ర ('+cnt+' transaction'+(cnt>1?'s':'')+')</div>';
+    r.ownershipChain.forEach(function(step,i){
+      var isCur = i===0;
+      html += '<div style="background:'+(isCur?'rgba(58,232,200,0.05)':'var(--s4)')
+        +';border:1px solid '+(isCur?'rgba(58,232,200,0.4)':'var(--bd2)')
+        +';border-radius:9px;padding:11px;margin-bottom:8px">';
+      html += '<div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap">'
+        +'<span style="width:22px;height:22px;border-radius:6px;background:var(--s3);border:1px solid '+(isCur?'var(--teal)':'var(--amb)')
+        +';display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:'+(isCur?'var(--teal)':'var(--amb)')
+        +';font-family:JetBrains Mono">'+(step.order||i+1)+'</span>'
+        +'<span style="font-size:14px;color:var(--teal);font-weight:700">'+(step.date||'Date N/A')+'</span>'
+        +(step.regNumber?'<span style="font-size:12px;color:var(--amb);background:rgba(232,184,74,0.12);padding:2px 7px;border-radius:5px;border:1px solid rgba(232,184,74,0.3)">Reg# '+escH(step.regNumber)+'</span>':'')
+        +(isCur?'<span style="font-size:11px;background:rgba(58,232,200,0.15);color:var(--teal);padding:2px 6px;border-radius:4px">Current</span>':'')
+        +'</div>';
+      html += '<div style="font-size:14px;margin-bottom:4px"><span style="color:var(--sky);font-weight:700">విక్రేత: </span>'+escH(step.seller||'—')+'</div>';
+      html += '<div style="font-size:14px;margin-bottom:4px"><span style="color:var(--teal);font-weight:700">కొనుగోలుదారు: </span>'+escH(step.buyer||'—')+'</div>';
+      if (step.extent) html += '<div style="font-size:13px;color:var(--tx2);margin-bottom:2px">విస్తీర్ణం: '+escH(step.extent)+'</div>';
+      if (step.amount) html += '<div style="font-size:14px;color:var(--amb);font-weight:700;margin-top:5px;padding-top:5px;border-top:1px solid var(--bd)">'+escH(step.amount)+'</div>';
       html += '</div>';
     });
     html += '</div>';
   }
 
-  // All fields
+  // Fields
   if (r.fields && r.fields.length) {
     html += '<div class="ccard" style="margin-top:10px"><div class="ccard-t">📋 All Details</div>';
-    r.fields.forEach(function(f) {
-      var conf = f.confidence || 100;
-      var cs = conf < 70 ? 'color:var(--rose)' : conf < 85 ? 'color:var(--amb)' : '';
-      var ct = conf < 85 ? ' <span style="font-size:10px;opacity:0.7">(' + conf + '%)</span>' : '';
-      html += '<div class="crow"><span class="ck">' + (f.key||'') + '</span><span class="cv ' + (f.alert?'w':'') + '" style="' + cs + '">' + (f.value||'—') + ct + '</span></div>';
+    r.fields.forEach(function(f){
+      var conf = f.confidence||100;
+      var cs = conf<70?'color:var(--rose)':conf<85?'color:var(--amb)':'';
+      var ct = conf<85?' <span style="font-size:10px;opacity:0.7">('+conf+'%)</span>':'';
+      html += '<div class="crow"><span class="ck">'+escH(f.key||'')+'</span><span class="cv '+(f.alert?'w':'')+'" style="'+cs+'">'+escH(f.value||'—')+ct+'</span></div>';
     });
     html += '</div>';
   }
 
   // Alerts
   if (r.alerts && r.alerts.length) {
-    r.alerts.forEach(function(a) {
-      var msg = typeof a === 'object' ? a.message : a;
-      var sev = typeof a === 'object' ? a.severity : 'medium';
-      var sc = sev==='high' ? 'var(--rose)' : sev==='low' ? 'var(--teal)' : 'var(--amb)';
-      html += '<div class="alert-strip" style="color:' + sc + ';border-color:' + sc + '40;margin-top:6px"><b>⚠️ గమనించండి</b>' + msg + '</div>';
+    r.alerts.forEach(function(a){
+      var msg = typeof a==='object'?a.message:a;
+      var sev = typeof a==='object'?a.severity:'medium';
+      html += '<div style="margin-top:6px;background:rgba(232,184,74,0.08);border:1px solid rgba(232,184,74,0.3);border-radius:9px;padding:10px 12px;font-size:13px;color:'+(sev==='high'?'var(--rose)':'var(--amb)')+'">'
+        +'<b style="display:block;margin-bottom:3px">⚠️ గమనించండి</b>'+escH(msg)+'</div>';
     });
-  }
-
-  if (r.confidence && r.confidence < 80) {
-    html += '<div class="alert-strip" style="color:var(--rose);border-color:rgba(232,93,122,0.3);margin-top:6px"><b>⚠️ AI Confidence: ' + r.confidence + '%</b> — Some fields may need verification</div>';
   }
 
   return html;
 }
 
-
-function confirmEntry(entry, btn) {
-  addEntry(entry);
-  btn.closest('.ccard').innerHTML = '<div class="ccard-t ok">✓ Google Sheet లో Save అయింది! ☁️</div>';
-}
-
-// ═══════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 // VOICE INPUT
-// ═══════════════════════════════════════════════════
-let recog=null, isRec=false;
+// ════════════════════════════════════════════════════════
+var recog = null;
+var isRec  = false;
 
 function toggleVoice() {
-  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
-    toast('Voice input supported కాదు. Chrome try చేయండి.','err'); return;
+  if (!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)) {
+    toast('Voice not supported. Use Chrome.','err'); return;
   }
-  if(isRec){recog?.stop();return;}
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  recog=new SR();
-  recog.lang='te-IN';
-  recog.continuous=false;
-  recog.interimResults=true;
-  recog.onstart=()=>{isRec=true;document.getElementById('voice-btn').classList.add('rec');document.getElementById('voice-btn').textContent='🔴'};
-  recog.onresult=e=>{const t=Array.from(e.results).map(r=>r[0].transcript).join('');document.getElementById('chat-in').value=t;autoR(document.getElementById('chat-in'))};
-  recog.onend=()=>{isRec=false;document.getElementById('voice-btn').classList.remove('rec');document.getElementById('voice-btn').textContent='🎙️'};
-  recog.onerror=e=>{isRec=false;document.getElementById('voice-btn').classList.remove('rec');document.getElementById('voice-btn').textContent='🎙️'};
+  if (isRec) { recog && recog.stop(); return; }
+  var SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog = new SR();
+  recog.lang = 'te-IN';
+  recog.continuous = false;
+  recog.interimResults = true;
+  recog.onstart = function(){ isRec=true; var b=document.getElementById('voice-btn'); b.classList.add('rec'); b.textContent='🔴'; };
+  recog.onresult = function(e){ var t=Array.from(e.results).map(function(r){ return r[0].transcript; }).join(''); document.getElementById('chat-in').value=t; autoR(document.getElementById('chat-in')); };
+  recog.onend = function(){ isRec=false; var b=document.getElementById('voice-btn'); b.classList.remove('rec'); b.textContent='🎙️'; };
+  recog.onerror = function(){ isRec=false; var b=document.getElementById('voice-btn'); b.classList.remove('rec'); b.textContent='🎙️'; };
   recog.start();
 }
 
-// ═══════════════════════════════════════════════════
-// PHOTO / DOCUMENT UPLOAD
-// ═══════════════════════════════════════════════════
-const DOC_PROMPT = 'You are a specialist in reading Andhra Pradesh government property registration documents, sale agreements, and vendor bills.\n\nSTEP 0 EXTENT RULE: 1 cent=48.4 sqyards. ALWAYS show extent as both: X sq yards (X ch.ga.) = Y.YY cents. NEVER show only one unit.\n\nSTEP 1 DOC TYPE: Look for telugu phrases - vikraya dastavej=Sale deed, gruha vikrayam=House sale, oppandam=Agreement, bill with items=Bill.\n\nSTEP 2 DATE (CRITICAL): documentDate = date in FIRST LINE of document. Look for tedi: DD.MM.YYYY or date written in Telugu words. NEVER use previous owner purchase date. NEVER use today date.\n\nSTEP 3 FINANCIALS: saleAmount=consideration amount in doc. stampDuty=stamp duty tax (small). registrationFee=reg fee (small). totalInvestment=saleAmount+stampDuty+registrationFee (full buyer cost). totalRegistrationCost=stampDuty+regFee only (never=saleAmount).\n\nSTEP 4 PROPERTY TYPE: gruha vikrayam or house/building=House. Plot/site=Plot. Agricultural=Agricultural. Land only=Land. pricePerCent: only for Land/Plot/Agricultural, null for House.\n\nSTEP 5 CONFIDENCE: 100=exact text found, 80+=clear context, 60-79=calculated, under 60=uncertain.\n\nSTEP 6 EXTRACT ALL FIELDS (mandatory for Registration docs):\n1. Document Number\n2. Registration Date (from document header - the date this deed was executed)\n3. Property Type (House/Plot/Land/Agricultural)\n4. Transaction Type (Sale/Gift/Mortgage)\n5. Sub-Registrar Office\n6. District\n7. Mandal\n8. Village or Locality\n9. Ward Number (if present)\n10. Door Number (if present)\n11. Survey Number\n12. Land Extent (MUST show sq yards AND cents both)\n13. Built-up Area in sq feet (if house/building)\n14. Seller Full Name with S/o or W/o\n15. Seller Address\n16. Buyer Full Name with S/o or W/o\n17. Buyer Address\n18. Sale Amount\n19. Market Value\n20. Stamp Duty\n21. Registration Fee\n22. Witness 1 (if present)\n23. Witness 2 (if present)\n24. Boundaries East West North South (if present)\n\nSTEP 7 OWNERSHIP CHAIN (CRITICAL - extract ALL transactions):\nEvery AP Registration document has endorsement pages showing ALL previous transactions.\nExtract EVERY transaction found - not just the current one.\nownershipChain[0]=CURRENT transaction (this document, most recent seller to buyer)\nownershipChain[1]=Previous transaction (who sold to current seller)\nownershipChain[2]=Transaction before that, and so on.\nFor each: order number, seller full name, buyer full name, date of that transaction, reg number of that transaction, amount, survey number, extent.\nExample output should have 2 or 3 entries if document shows 2 or 3 transactions.\nNEVER return only 1 entry if document shows multiple transactions.\n\nReturn ONLY valid JSON no markdown:\n{"docType":"Registration","transactionType":"Sale","propertyType":"House","documentDate":"DD.MM.YYYY","language":"Telugu","summary":"summary text","confidence":90,"fields":[{"key":"field name telugu (English)","value":"extracted value","confidence":95,"alert":false}],"financials":{"saleAmount":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":95},"marketValue":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":85},"stampDuty":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":95},"registrationFee":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":95},"totalRegistrationCost":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":90},"totalInvestment":{"value":"Rs. X/-","telugu":"Ru. X/-","confidence":95},"pricePerCent":{"value":null,"telugu":null,"confidence":0},"pricePerSqyard":{"value":null,"telugu":null,"confidence":0}},"ownershipChain":[{"order":1,"seller":"name","buyer":"name","date":"DD.MM.YYYY","regNumber":"X/YYYY","amount":"Rs. X/-","surveyNumber":"X/X","extent":"X sq yards = Y cents","confidence":95}],"alerts":[{"message":"alert text","severity":"high"}]}'
-
-
-// ── SELECT MODE FOR DOCS ────────────────
-let selectModeOn = false;
-let selectedDocIds = new Set();
-
-function toggleSelectMode() {
-  selectModeOn = !selectModeOn;
-  selectedDocIds.clear();
-  const docList = document.getElementById('doc-list');
-  const bar = document.getElementById('sel-action-bar');
-  const btn = document.getElementById('select-mode-btn');
-  if (selectModeOn) {
-    docList.classList.add('select-mode');
-    bar.classList.add('show');
-    btn.textContent = '✕ Cancel';
-    btn.style.color = 'var(--rose)';
-  } else {
-    docList.classList.remove('select-mode');
-    bar.classList.remove('show');
-    btn.textContent = '☑️ Select';
-    btn.style.color = 'var(--sky)';
-    // Uncheck all
-    document.querySelectorAll('.sel-check').forEach(c => { c.classList.remove('checked'); c.textContent = ''; });
-  }
-  updateSelCount();
+// ════════════════════════════════════════════════════════
+// VENDOR MODAL
+// ════════════════════════════════════════════════════════
+function saveVendor() {
+  var name = document.getElementById('v-name').value.trim();
+  if (!name) { toast('Vendor పేరు ఇవ్వండి','err'); return; }
+  ensureVendor(name, document.getElementById('v-cat').value, document.getElementById('v-phone').value||null);
+  var loc = document.getElementById('v-loc').value.trim();
+  if (loc) state.vendors[name].location = loc;
+  saveData(); renderVendors(); closeModal('add-vendor');
+  pushToSheet('Vendors',['name','category','phone','location'],[name,document.getElementById('v-cat').value,document.getElementById('v-phone').value||'',loc]);
+  document.getElementById('v-name').value='';
+  document.getElementById('v-phone').value='';
+  document.getElementById('v-loc').value='';
+  toast('Vendor saved','ok');
 }
 
-function toggleDocSelect(docId) {
-  if (!selectModeOn) return;
-  const chk = document.getElementById('chk-'+docId);
-  if (selectedDocIds.has(docId)) {
-    selectedDocIds.delete(docId);
-    chk.classList.remove('checked');
-    chk.textContent = '';
-  } else {
-    selectedDocIds.add(docId);
-    chk.classList.add('checked');
-    chk.textContent = '✓';
-  }
-  updateSelCount();
+// ════════════════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════════════════
+function updateSettingsUI() {
+  document.getElementById('cfg-sheet').textContent = cfg.sheetId ? cfg.sheetId.slice(0,22)+'...' : 'Not configured';
+  document.getElementById('cfg-ai').textContent    = cfg.geminiKey ? 'Configured ✓' : 'Not configured';
+  if (state.lastSync) document.getElementById('cfg-sync').textContent = 'Last sync: '+new Date(state.lastSync).toLocaleString('en-IN');
 }
 
-function selectAllDocs() {
-  state.documents.forEach(doc => {
-    selectedDocIds.add(doc.id);
-    const chk = document.getElementById('chk-'+doc.id);
-    if (chk) { chk.classList.add('checked'); chk.textContent = '✓'; }
-  });
-  updateSelCount();
+function openSheetInBrowser() {
+  if (!cfg.sheetId) { toast('Sheet not configured','err'); return; }
+  window.open('https://docs.google.com/spreadsheets/d/'+cfg.sheetId,'_blank');
 }
 
-function updateSelCount() {
-  const lbl = document.getElementById('sel-count-label');
-  if (lbl) lbl.textContent = selectedDocIds.size + ' selected';
+function changeKey() {
+  var k = prompt('New Gemini API Key:');
+  if (k && k.startsWith('AIza')) { cfg.geminiKey=k; saveCfg(); updateSettingsUI(); toast('Key updated','ok'); }
 }
 
-function deleteSelectedDocs() {
-  if (selectedDocIds.size === 0) { toast('Select at least one document','err'); return; }
-  if (!confirm('Delete ' + selectedDocIds.size + ' selected document(s)?')) return;
-  state.documents = state.documents.filter(d => !selectedDocIds.has(d.id));
-  selectedDocIds.clear();
-  saveLocalData();
-  toggleSelectMode();
-  renderDocList();
-  toast('Deleted ' + selectedDocIds.size + ' documents','ok');
+function showGuide() {
+  document.getElementById('guide-sheet').value = cfg.sheetId||'';
+  openModal('guide-modal');
 }
 
-function clearDocs() {
-  if (!confirm('Delete all scanned documents history? (Google Sheet data stays safe)')) return;
-  state.documents = [];
-  saveLocalData();
-  renderDocList();
-  toast('Documents cleared','ok');
+function resetApp() {
+  if (!confirm('Reset all settings? You will need to re-enter Sheet ID and API key.')) return;
+  cfg = {}; saveCfg(); location.reload();
 }
 
-function clearTransactions() {
-  if (!confirm('Delete all transactions locally? Google Sheet data stays safe.')) return;
-  state.entries = [];
-  state.vendors = {};
-  state.priceHistory = {};
-  state.chatHistory = [];
-  saveLocalData();
-  refreshUI();
-  toast('Transactions cleared. Sheet data is safe.','ok');
-}
-
-function clearAllData() {
-  if (!confirm('Delete ALL local data? Transactions + Vendors + Documents + Prices will be cleared. Google Sheet data stays safe - sync to restore.')) return;
-  state.entries = [];
-  state.vendors = {};
-  state.priceHistory = {};
-  state.documents = [];
-  state.chatHistory = [];
-  state.lastSync = null;
-  saveLocalData();
-  refreshUI();
-  renderDocList();
-  toast('All local data cleared. Sheet data is safe.','ok');
-}
-
-// ═══════════════════════════════════════════════════
-// NAVIGATION & UI HELPERS
-// ═══════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════
 function showSc(name) {
-  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('on'));
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.querySelectorAll('.sc').forEach(function(s){ s.classList.remove('on'); });
+  document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
   document.getElementById('sc-'+name).classList.add('on');
-  const names=['home','chat','docs','vendors','prices','settings'];
-  document.querySelectorAll('.ni')[names.indexOf(name)]?.classList.add('on');
-  if(name==='chat'){
-    setTimeout(()=>{const c=document.getElementById('chat-msgs');c.scrollTop=c.scrollHeight;},80);
-    if(!document.getElementById('chat-msgs').children.length) injectWelcomeMsg();
+  var names=['home','chat','docs','vendors','prices','settings'];
+  var idx = names.indexOf(name);
+  var ni = document.querySelectorAll('.ni')[idx];
+  if (ni) ni.classList.add('on');
+  if (name==='chat') {
+    setTimeout(function(){ var c=document.getElementById('chat-msgs'); c.scrollTop=c.scrollHeight; }, 80);
+    if (!document.getElementById('chat-msgs').children.length) injectWelcome();
   }
 }
 
-function openModal(id){document.getElementById(id).classList.add('on')}
-function closeModal(id){document.getElementById(id).classList.remove('on')}
+function openModal(id)  { document.getElementById(id).classList.add('on'); }
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
 
-document.querySelectorAll('.moverlay').forEach(o=>{
-  o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on')});
+document.querySelectorAll('.mover').forEach(function(o){
+  o.addEventListener('click', function(e){ if(e.target===o) o.classList.remove('on'); });
 });
 
-function showProc(t){document.getElementById('proc-text').innerHTML=(t||'').replace(/\n/g,'<br>');document.getElementById('proc').classList.add('on')}
-function hideProc(){document.getElementById('proc').classList.remove('on')}
+function showProc(t) {
+  document.getElementById('proc-text').innerHTML = (t||'').replace(/\n/g,'<br>');
+  document.getElementById('proc').classList.add('on');
+}
+function hideProc() { document.getElementById('proc').classList.remove('on'); }
 
-let toastTimer;
-function toast(msg,type='info'){
-  const el=document.getElementById('toast');
-  el.textContent=msg;
-  el.className='show '+(type||'info');
+var toastTimer;
+function toast(msg, type) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'on '+(type||'info');
   clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.className='',2800);
+  toastTimer = setTimeout(function(){ el.className=''; }, 3000);
 }
 
-function escH(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-
-function fileToB64(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader();
-    r.onload=()=>res(r.result.split(',')[1]);
-    r.onerror=()=>rej(new Error('File read failed'));
-    r.readAsDataURL(file);
-  });
-}
-
-// ═══════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════
-function showSetup() {
-  const setupEl = document.getElementById('setup');
-  setupEl.style.display = 'flex';
-  setupEl.style.opacity = '0';
-  setTimeout(() => { setupEl.style.opacity = '1'; }, 50);
-}
-
-function showApp() {
-  const appEl = document.getElementById('app');
-  appEl.style.opacity = '1';
-  appEl.style.pointerEvents = 'all';
-  appEl.classList.add('visible');
-  try { refreshUI(); } catch(e){}
-  try { renderDocList(); } catch(e){}
-  try { injectWelcomeMsg(); } catch(e){}
-  try { updateSettingsUI(); } catch(e){}
-  try { syncFromSheet(); } catch(e){}
-  try {
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-    if ((isIOS || isAndroid) && !isStandalone) {
-      document.getElementById('install-banner').style.display = 'flex';
-    }
-  } catch(e){}
-  setInterval(() => { try{ syncFromSheet(); }catch(e){} }, 5 * 60 * 1000);
-}
-
+// ════════════════════════════════════════════════════════
 function init() {
-  // Make sure setup is hidden at start
-  const setupEl = document.getElementById('setup');
-  const splashEl = document.getElementById('splash');
-  const appEl = document.getElementById('app');
-  setupEl.style.display = 'none';
-  setupEl.style.opacity = '0';
+  var setup   = document.getElementById('setup');
+  var splash  = document.getElementById('splash');
+  var app     = document.getElementById('app');
 
-  // Splash bar is 2.2s — wait 2.6s then transition
-  setTimeout(() => {
-    splashEl.style.transition = 'opacity 0.6s';
-    splashEl.style.opacity = '0';
-    setTimeout(() => {
-      splashEl.style.display = 'none';
-      // Decide: setup or app?
-      if (cfg && cfg.setupDone && cfg.sheetId && cfg.geminiKey) {
-        showApp();
+  setup.style.display = 'none';
+  setup.style.opacity = '0';
+
+  // Splash shows for 2.5s then reveals setup or app
+  setTimeout(function() {
+    splash.style.opacity = '0';
+    setTimeout(function() {
+      splash.style.display = 'none';
+      if (cfg.setupDone && cfg.sheetId && cfg.geminiKey) {
+        // Already configured
+        launchApp();
       } else {
-        showSetup();
+        // First time — show setup
+        setup.style.display = 'flex';
+        setTimeout(function(){ setup.style.opacity='1'; }, 30);
       }
-    }, 650);
-  }, 2600);
+    }, 600);
+  }, 2500);
 }
 
-// Global error safety net — prevents silent crash on iPhone
-window.onerror = function(msg, src, line) {
-  console.log('Error:', msg, line);
-  // If splash still showing after error, force show setup
-  const splash = document.getElementById('splash');
+// Global error safety — if splash gets stuck, show setup
+window.onerror = function(msg, src, line, col, err) {
+  console.error('Nirmit error:', msg, line);
+  var splash = document.getElementById('splash');
   if (splash && splash.style.display !== 'none' && !splash.classList.contains('out')) {
     splash.style.display = 'none';
-    showSetup();
+    var setup = document.getElementById('setup');
+    setup.style.display = 'flex';
+    setTimeout(function(){ setup.style.opacity='1'; }, 30);
   }
-  return true;
+  return false;
 };
 
 init();
