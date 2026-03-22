@@ -770,7 +770,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
       <div class="seg">
         <div class="seg-t">Configuration</div>
         <div class="si"><div class="si-ico">📊</div><div class="si-body"><div class="si-t">Google Sheet</div><div class="si-s">Data ఇక్కడ save అవుతుంది</div><div class="si-v" id="cfg-sheet">Not configured</div></div><button class="btn ghost sm" onclick="openSheetInBrowser()">Open ↗</button></div>
-        <div class="si"><div class="si-ico">🤖</div><div class="si-body"><div class="si-t">Gemini AI</div><div class="si-s">Free AI — Telugu support</div><div class="si-v" id="cfg-ai">Not configured</div></div><button class="btn ghost sm" onclick="changeKey()">Change</button></div>
+        <div class="si"><div class="si-ico">🤖</div><div class="si-body"><div class="si-t">Gemini AI Keys</div><div class="si-s">Free — 15 req/min per key. Multiple keys = more quota</div><div class="si-v" id="cfg-ai">Not configured</div></div><button class="btn ghost sm" onclick="openModal('manage-keys')">Manage</button></div>
         <div class="si"><div class="si-ico">☁️</div><div class="si-body"><div class="si-t">Sync Status</div><div class="si-s" id="cfg-sync">Last sync: Never</div></div><button class="btn ghost sm" onclick="syncNow()">Sync</button></div>
         <div class="si"><div class="si-ico">📱</div><div class="si-body"><div class="si-t">New Phone Setup</div><div class="si-s">Same Sheet ID + Gemini Key enter చేయండి</div></div><button class="btn ghost sm" onclick="showGuide()">Guide</button></div>
         <div style="height:1px;background:var(--bd);margin:10px 0 14px"></div>
@@ -993,6 +993,33 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
       🌐 Open EC Website
     </a>
     <button class="btn ghost full" onclick="closeModal('ec-modal')">Close</button>
+  </div>
+</div>
+
+<!-- Manage API Keys Modal -->
+<div class="mover" id="manage-keys">
+  <div class="msheet">
+    <div class="mgrip"></div>
+    <div class="mt">🤖 Gemini API Keys</div>
+    <div style="background:rgba(232,184,74,0.07);border:1px solid rgba(232,184,74,0.25);border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;color:var(--tx2);line-height:1.7">
+      <b style="color:var(--amb);display:block;margin-bottom:4px">💡 Multiple Keys = More Quota</b>
+      Free tier: 15 requests/minute per key.<br>
+      3 keys add చేస్తే → 45 requests/minute!<br>
+      Different Gmail accounts కి different keys తీసుకోండి.
+    </div>
+    <div id="keys-list" style="margin-bottom:12px"></div>
+    <label class="fl">New API Key Add చేయండి</label>
+    <input class="fi fi-mono" id="new-key-input" type="password" placeholder="AIzaSy...">
+    <label class="fl" style="margin-top:6px">Label (optional)</label>
+    <input class="fi" id="new-key-label" placeholder="e.g. Gmail1, Gmail2">
+    <div style="display:flex;gap:9px;margin-top:4px">
+      <button class="btn ghost full" onclick="closeModal('manage-keys')">Close</button>
+      <button class="btn amb full" onclick="addApiKey()">+ Add Key</button>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--tx3);line-height:1.6">
+      🔑 Keys మీ phone లో మాత్రమే save అవుతాయి.<br>
+      New key: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--teal)">aistudio.google.com/app/apikey</a>
+    </div>
   </div>
 </div>
 
@@ -1755,9 +1782,10 @@ function confirmEntry(entry, btn) {
 }
 
 async function callGemini(imageData, imageMime, docPromptOverride) {
-  if (!cfg.geminiKey) {
+  var activeKey = getActiveKey();
+  if (!activeKey) {
     hideTyping();
-    addBubble('ai','<span class="bad">⚠️ Gemini key not set. Settings లో configure చేయండి.</span>');
+    addBubble('ai','<span class="bad">⚠️ Gemini key not set. Settings → Manage keys లో add చేయండి.</span>');
     return;
   }
 
@@ -1792,7 +1820,7 @@ async function callGemini(imageData, imageMime, docPromptOverride) {
   }
 
   try {
-    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+cfg.geminiKey, {
+    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key='+activeKey, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({contents:contents, generationConfig:{maxOutputTokens:1000,temperature:0.3}})
@@ -1801,8 +1829,16 @@ async function callGemini(imageData, imageMime, docPromptOverride) {
 
     if (data.error) {
       hideTyping();
-      var isQuota = (data.error.message||'').includes('quota');
-      addBubble('ai','<span class="bad">AI Error: '+data.error.message+'</span>'+(isQuota?'<br><span class="wrn">కొద్దిసేపు wait చేసి retry చేయండి (1-2 min)</span>':''));
+      var isQuota = (data.error.message||'').includes('quota') || (data.error.message||'').includes('429');
+      if (isQuota && cfg.apiKeys && cfg.apiKeys.length > 1) {
+        // Auto-rotate to next key and retry
+        addBubble('ai','<span class="wrn">⚡ Quota limit — switching to next key automatically...</span>');
+        setTimeout(function(){ sendMsg(); }, 1000);
+      } else {
+        addBubble('ai','<span class="bad">AI Error: '+data.error.message+'</span>'
+          +(isQuota?'<br><span class="wrn">Quota exceeded. '+
+            (cfg.apiKeys&&cfg.apiKeys.length>1?'Rotating keys...':'Settings → Add more keys for more quota.')+'</span>':''));
+      }
       return;
     }
 
@@ -1875,8 +1911,9 @@ async function handlePhoto(e, source) {
     toast('Image or PDF only', 'err'); return;
   }
 
-  if (!cfg.geminiKey) {
-    toast('Gemini API key not set. Settings లో configure చేయండి.', 'err'); return;
+  var activePhotoKey = getActiveKey();
+  if (!activePhotoKey) {
+    toast('Gemini API key not set. Settings → Manage keys లో add చేయండి.', 'err'); return;
   }
 
   // Show progress
@@ -1898,7 +1935,7 @@ async function handlePhoto(e, source) {
     ];
 
     var res = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + cfg.geminiKey,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + activePhotoKey,
       { method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ contents: [{ role:'user', parts:parts }] }) }
     );
@@ -2244,7 +2281,10 @@ function saveVendor() {
 // ════════════════════════════════════════════════════════
 function updateSettingsUI() {
   document.getElementById('cfg-sheet').textContent = cfg.sheetId ? cfg.sheetId.slice(0,22)+'...' : 'Not configured';
-  document.getElementById('cfg-ai').textContent    = cfg.geminiKey ? 'Configured ✓' : 'Not configured';
+  var keyCount = (cfg.apiKeys||[]).length || (cfg.geminiKey?1:0);
+  document.getElementById('cfg-ai').textContent = keyCount>0
+    ? keyCount+' key'+(keyCount>1?'s':'')+' configured ✓ ('+keyCount*15+' req/min)'
+    : 'Not configured';
   if (state.lastSync) document.getElementById('cfg-sync').textContent = 'Last sync: '+new Date(state.lastSync).toLocaleString('en-IN');
 }
 
@@ -2254,8 +2294,79 @@ function openSheetInBrowser() {
 }
 
 function changeKey() {
-  var k = prompt('New Gemini API Key:');
-  if (k && k.startsWith('AIza')) { cfg.geminiKey=k; saveCfg(); updateSettingsUI(); toast('Key updated','ok'); }
+  openModal('manage-keys');
+  renderKeysList();
+}
+
+function getActiveKey() {
+  // Rotate through multiple keys to spread quota usage
+  var keys = cfg.apiKeys || [];
+  if (keys.length === 0) return cfg.geminiKey || null;
+  if (keys.length === 1) return keys[0].key;
+  // Round-robin rotation based on request count
+  if (!cfg.keyRotateIdx) cfg.keyRotateIdx = 0;
+  var key = keys[cfg.keyRotateIdx % keys.length].key;
+  cfg.keyRotateIdx = (cfg.keyRotateIdx + 1) % keys.length;
+  saveCfg();
+  return key;
+}
+
+function addApiKey() {
+  var k = document.getElementById('new-key-input').value.trim();
+  var label = document.getElementById('new-key-label').value.trim() || ('Key '+(((cfg.apiKeys||[]).length)+1));
+  if (!k) { toast('Key enter చేయండి','err'); return; }
+  if (!k.startsWith('AIza')) { toast('AIza తో start అయ్యే key enter చేయండి','err'); return; }
+  if (!cfg.apiKeys) cfg.apiKeys = [];
+  // Check duplicate
+  if (cfg.apiKeys.find(function(x){ return x.key===k; })) { toast('Key already added','info'); return; }
+  cfg.apiKeys.push({key:k, label:label, addedDate:today()});
+  // Also set as primary if first key
+  if (!cfg.geminiKey) cfg.geminiKey = k;
+  saveCfg();
+  document.getElementById('new-key-input').value = '';
+  document.getElementById('new-key-label').value = '';
+  renderKeysList();
+  updateSettingsUI();
+  toast('Key added! Total: '+cfg.apiKeys.length+' keys', 'ok');
+}
+
+function removeApiKey(idx) {
+  if (!confirm('Remove this key?')) return;
+  cfg.apiKeys.splice(idx, 1);
+  if (cfg.apiKeys.length > 0) cfg.geminiKey = cfg.apiKeys[0].key;
+  else cfg.geminiKey = null;
+  saveCfg();
+  renderKeysList();
+  updateSettingsUI();
+  toast('Key removed', 'ok');
+}
+
+function renderKeysList() {
+  var el = document.getElementById('keys-list');
+  if (!el) return;
+  var keys = cfg.apiKeys || [];
+  if (!keys.length) {
+    // Show existing single key if present
+    if (cfg.geminiKey) {
+      el.innerHTML = '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<span style="font-size:13px;flex:1;color:var(--teal)">✓ Key 1 (current)</span>'
+        +'<span style="font-size:11px;font-family:JetBrains Mono;color:var(--tx3)">'+cfg.geminiKey.substring(0,12)+'...</span>'
+        +'</div>';
+    } else {
+      el.innerHTML = '<div style="font-size:13px;color:var(--tx3);text-align:center;padding:10px">No keys added yet</div>';
+    }
+    return;
+  }
+  el.innerHTML = keys.map(function(k, i){
+    return '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px 12px;display:flex;align-items:center;gap:9px;margin-bottom:8px">'
+      +'<span style="font-size:18px">'+(i===0?'⭐':'🔑')+'</span>'
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:13px;font-weight:600;color:var(--teal)">'+escH(k.label)+'</div>'
+        +'<div style="font-size:11px;font-family:JetBrains Mono;color:var(--tx3)">'+k.key.substring(0,16)+'...</div>'
+      +'</div>'
+      +'<button onclick="removeApiKey('+i+')" style="background:rgba(232,93,122,0.12);border:1px solid rgba(232,93,122,0.3);border-radius:7px;padding:5px 10px;color:var(--rose);font-size:12px;cursor:pointer">Remove</button>'
+    +'</div>';
+  }).join('');
 }
 
 function showGuide() {
