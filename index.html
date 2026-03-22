@@ -775,6 +775,18 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
 
     <div class="sc" id="sc-settings">
       <div class="seg">
+        <!-- Hardcoded config banner -->
+        <div id="hardcoded-banner" style="display:none;align-items:center;gap:10px;
+          background:rgba(58,232,200,0.07);border:1px solid rgba(58,232,200,0.3);
+          border-radius:11px;padding:12px 14px;margin-bottom:12px">
+          <span style="font-size:22px">🔒</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:var(--teal)">Config locked in GitHub</div>
+            <div style="font-size:12px;color:var(--tx2);margin-top:2px">
+              Keys are hardcoded in private repo — New phone లో automatically loaded అవుతాయి
+            </div>
+          </div>
+        </div>
         <div class="seg-t">Configuration</div>
         <div class="si"><div class="si-ico">📊</div><div class="si-body"><div class="si-t">Google Sheet</div><div class="si-s">Data ఇక్కడ save అవుతుంది</div><div class="si-v" id="cfg-sheet">Not configured</div></div><button class="btn ghost sm" onclick="openSheetInBrowser()">Open ↗</button></div>
         <div class="si"><div class="si-ico">🤖</div><div class="si-body"><div class="si-t">Gemini AI Keys</div><div class="si-s">Free — 15 req/min per key. Multiple keys = more quota</div><div class="si-v" id="cfg-ai">Not configured</div></div><button class="btn ghost sm" onclick="openModal('manage-keys')">Manage</button></div>
@@ -1126,7 +1138,48 @@ function loadData() { return STORE.get(DATA_KEY) || freshData(); }
 function saveData() { STORE.set(DATA_KEY, state); }
 function freshData(){ return {entries:[],vendors:{},priceHistory:{},documents:[],projects:[],contacts:[],nextId:1,chatHistory:[],lastSync:null}; }
 
-var cfg   = loadCfg();
+// ════════════════════════════════════════════════════════
+// HARDCODED CONFIG — Private repo లో safe గా ఉంటుంది
+// New phone లో automatically loaded అవుతుంది
+// ════════════════════════════════════════════════════════
+var HARDCODED_CONFIG = {
+  sheetId:    '13Nk9DKYCcL4PND9wZnBlLB_O2eo2pNa6lG914oU2HAU',        // ← మీ Google Sheet ID ఇక్కడ paste చేయండి
+  scriptUrl:  'https://script.google.com/macros/s/AKfycbwwQ2HN6OI3hbyu4mfKBY_o6QUgEGsQTKfk_CZwK9WCOpgOmF7kg6aV8NgbhUToMMPx/exec',        // ← మీ Apps Script URL ఇక్కడ paste చేయండి
+  setupDone:  true,      // ← true గా ఉంచండి — setup wizard skip అవుతుంది
+
+  // Multiple Gemini API Keys — different Gmail accounts నుండి తీసుకోండి
+  // App automatically rotate చేస్తుంది — quota never ends!
+  // Example:
+  // geminiKeys: [
+  //   { key: 'AIzaSy...key1...', label: 'Gmail1' },
+  //   { key: 'AIzaSy...key2...', label: 'Gmail2' },
+  //   { key: 'AIzaSy...key3...', label: 'Gmail3' }
+  // ]
+  geminiKeys: [
+    // మీ keys ఇక్కడ add చేయండి ↓
+     { key: 'AIzaSyAa8MxcCxmy7qb8bfarhtrbCsHA9S5xEtk', label: 'Indian0506' },
+     { key: 'AIzaSyBIdmkaYSb08sHm18H6hVcXsVaT623daso', label: 'Vasuseen' },
+     { key: 'AIzaSyD9uTBk0aQrCLU8AJ3FFzuSA9DJ0-EP3Is', label: 'Sree0506' }
+  ]
+};
+
+function mergeHardcodedConfig(c) {
+  if (HARDCODED_CONFIG.sheetId)   c.sheetId   = HARDCODED_CONFIG.sheetId;
+  if (HARDCODED_CONFIG.scriptUrl) c.scriptUrl = HARDCODED_CONFIG.scriptUrl;
+  if (HARDCODED_CONFIG.setupDone) c.setupDone = true;
+
+  // Multiple keys — merge into cfg.apiKeys array
+  if (HARDCODED_CONFIG.geminiKeys && HARDCODED_CONFIG.geminiKeys.length > 0) {
+    c.apiKeys = HARDCODED_CONFIG.geminiKeys.map(function(k){
+      return { key: k.key, label: k.label||'Key', addedDate: 'hardcoded' };
+    });
+    c.geminiKey = HARDCODED_CONFIG.geminiKeys[0].key; // primary key
+    c.keyRotateIdx = 0;
+  }
+  return c;
+}
+
+var cfg   = mergeHardcodedConfig(loadCfg());
 var state = loadData();
 
 // ════════════════════════════════════════════════════════
