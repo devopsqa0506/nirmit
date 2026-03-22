@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="నిర్మాణం">
 <meta name="theme-color" content="#08090d">
-<title>నిర్మాణం Manager</title>
+<title>Hi Sreenivas, Your AI Manager here</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -1486,17 +1486,31 @@ Flag if price seems high vs market rates. Warn about large pending dues. Be like
     {role:'user', parts: userParts}
   ];
 
-  try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${cfg.geminiKey}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({contents, generationConfig:{maxOutputTokens:900,temperature:0.3}})
-    });
-    const data = await res.json();
+  // Try models in order until one works (free tier availability varies by region)
+  const MODELS = ['gemini-1.5-flash-latest','gemini-1.5-flash','gemini-1.0-pro'];
+  let data = null;
+  let lastError = '';
+  for (const model of MODELS) {
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cfg.geminiKey}`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({contents, generationConfig:{maxOutputTokens:900,temperature:0.3}})
+      });
+      data = await res.json();
+      if (!data.error) break; // success
+      lastError = data.error.message;
+      if (!lastError.includes('quota') && !lastError.includes('not found')) break; // non-recoverable
+    } catch(e){ lastError = e.message; }
+  }
 
-    if (data.error) {
+  try {
+    if (!data || data.error) {
       hideTyping();
-      addBubble('ai',`<span class="bad">AI Error: ${data.error.message}</span>`);
+      const msg = lastError.includes('quota') 
+        ? '<span class="bad">⚠️ Quota exceeded.</span><br><span class="wrn">Solution: <a href="https://ai.google.dev/gemini-api/docs/rate-limits" target="_blank" style="color:var(--teal)">Free tier limit చేరింది</a><br>కొద్దిసేపు వేచి retry చేయండి (1 min)<br>లేదా <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--teal)">new API key create చేయండి</a></span>'
+        : `<span class="bad">AI Error: ${lastError}</span>`;
+      addBubble('ai', msg);
       return;
     }
 
@@ -1601,12 +1615,21 @@ async function handlePhoto(e, source) {
       parts=[{inlineData:{mimeType:file.type,data:b64}},{text:DOC_PROMPT}];
     }
 
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cfg.geminiKey}`,{
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${cfg.geminiKey}`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user',parts}]})
     });
-    const data = await res.json();
+    let data2 = await res.json();
+    if (data2.error) {
+      const res2 = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro-vision-latest:generateContent?key=${cfg.geminiKey}`,{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{role:'user',parts}]})
+      });
+      data2 = await res2.json();
+    }
+    if (data2.error) throw new Error(data2.error.message);
+    const data = data2;
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
 
     let result;
