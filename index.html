@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Nirmanam">
+<meta name="apple-mobile-web-app-title" content="Nirmit">
 <meta name="theme-color" content="#08090d">
-<title>Nirmanam Manager</title>
+<title>Nirmit</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -629,8 +629,8 @@ body{
 <!-- Splash -->
 <div id="splash">
   <div class="sp-emblem">🏗️</div>
-  <div class="sp-name">Nirmanam Manager</div>
-  <div class="sp-tag">Kadapa Builder · Cloud Sync · Free Forever</div>
+  <div class="sp-name">Nirmit</div>
+  <div class="sp-tag">Kadapa Builder · AI Ledger · Cloud Sync</div>
   <div class="sp-progress"><div class="sp-bar"></div></div>
 </div>
 
@@ -696,7 +696,7 @@ body{
         <ol class="key-steps">
           <li>మీ phone లో <strong>Google Sheets app</strong> open చేయండి (లేదా sheets.google.com)</li>
           <li>"<strong>+</strong>" tap చేసి new spreadsheet create చేయండి</li>
-          <li>Name: <strong>"Nirmanam Ledger"</strong> అని పెట్టండి</li>
+          <li>Name: <strong>"Nirmit Ledger"</strong> అని పెట్టండి</li>
           <li>Top లో URL చూడండి: <code style="color:var(--teal);font-size:11px">docs.google.com/spreadsheets/d/<strong>XXXXXX</strong>/edit</code></li>
           <li>ఆ <strong>XXXXXX</strong> part copy చేసి below paste చేయండి</li>
         </ol>
@@ -780,7 +780,7 @@ body{
   <div class="hdr">
     <div class="hdr-logo">🏗️</div>
     <div class="hdr-text">
-      <div class="hdr-title">Nirmanam Manager</div>
+      <div class="hdr-title">Nirmit</div>
       <div class="hdr-sub">
         <div class="sync-pip" id="sync-pip"></div>
         <span id="sync-label">Synced</span> · Kadapa Builder
@@ -1073,7 +1073,7 @@ function doPost(e) {
 }
 
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({ok:true,msg:'Nirmanam Manager API'})).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({ok:true,msg:'Nirmit API'})).setMimeType(ContentService.MimeType.JSON);
 }
 `.trim();
 
@@ -1478,7 +1478,7 @@ function renderDocList() {
     // Basic fields
     let fields='';
     if(r.fields?.length){
-      const fieldRows = r.fields.slice(0,12).map(f=>{
+      const fieldRows = r.fields.map(f=>{
         const conf = f.confidence||100;
         const confStyle = conf < 70 ? 'color:var(--rose)' : conf < 85 ? 'color:var(--amb)' : '';
         const confTxt = conf < 85 ? ` <span style="font-size:10px;opacity:0.8">(${conf}%)</span>` : '';
@@ -1523,7 +1523,7 @@ function injectWelcomeMsg() {
   w.innerHTML=`<div class="bav">🤖</div>
     <div>
       <div class="bbl">
-        <b>నమస్కారం! నేను మీ Nirmanam Manager 🏗️</b><br><br>
+        <b>నమస్కారం! నేను మీ Nirmit 🏗️</b><br><br>
         Telugu లేదా English లో చెప్పండి:<br>
         • "ఇసుక 3 ట్రాక్టర్ మురళి దగ్గర ₹4500 ఆర్డర్"<br>
         • "రాం Electricals కి ₹10000 advance ఇచ్చాను"<br>
@@ -1595,7 +1595,7 @@ async function callGemini(imageData, imageMime, extraInstruction) {
     totalPaid:    Object.values(state.vendors).reduce((s,v)=>s+(Number(v.totalPaid)||0),0),
   });
 
-  const systemText = `You are "Nirmanam Manager", an AI site manager for a builder from Kadapa, Andhra Pradesh, India.
+  const systemText = `You are "Nirmit", an AI site manager for a builder from Kadapa, Andhra Pradesh, India.
 He builds small houses on 3-cent plots. He buys materials from local vendors and pays in installments.
 He speaks Telugu and English. 
 - If he writes in Telugu → reply in Telugu
@@ -1733,168 +1733,7 @@ function toggleVoice() {
 // ═══════════════════════════════════════════════════
 // PHOTO / DOCUMENT UPLOAD
 // ═══════════════════════════════════════════════════
-const DOC_PROMPT = `You are a specialist in reading Andhra Pradesh government property registration documents, sale agreements, and vendor bills. You read both Telugu and English text in document images.
-
-STEP 0 — EXTENT CONVERSION RULE (always apply):
-1 cent = 48.4 sq yards | 1 sq yard = 0.02066 cents
-ALWAYS show extent as: "X sq yards (X చ.గ.) = Y.YY cents (Y.YY సెంట్లు)"
-Example: 151.74 sq yards → "151.74 sq yards (151.74 చ.గ.) = 3.14 cents (3.14 సెంట్లు)"
-Example: 3 cents → "145.2 sq yards (145.2 చ.గ.) = 3.00 cents (3.00 సెంట్లు)"
-NEVER show only sq yards. NEVER show only cents. ALWAYS show BOTH.
-
-STEP 1 — IDENTIFY DOCUMENT TYPE:
-- "విక్రయ దస్తావేజు" or "Sale Deed" → Registration (Sale)
-- "గృహ విక్రయ దస్తావేజు" → Registration (House Sale)
-- "అమ్మకం ఒప్పందం" or "Agreement of Sale" → Agreement
-- Bill/Invoice with items → Bill
-
-STEP 2 — DOCUMENT DATE (CRITICAL — READ CAREFULLY):
-The document date is in the VERY FIRST paragraph/line of the document.
-Patterns to find:
-- "తేది : DD.MM.YYYY" → use that exact date
-- Telugu date in words like "పంతొమ్మిదవ తేదీ ఆగష్టు నెల రెండువేల ఇరవై అయిదవ సంవత్సరం" → 19.08.2025
-- "This deed executed on DD/MM/YYYY" → use that date
-STRICT RULE: documentDate = date THIS document was signed/registered.
-NEVER use a previous owner purchase date. NEVER use today's date.
-
-STEP 3 — FINANCIAL VALUES (AP Registration patterns):
-- Sale Amount: look for "రూ. XX,XX,XXX/- లకు" or "Rs. XX,XX,XXX/- only" near start of document
-- Market Value: "మార్కెట్ విలువ" or "Guideline value"
-- Stamp Duty: "స్టాంప్ డ్యూటీ" — this is a TAX, always much smaller than sale amount
-- Registration Fee: "రిజిస్ట్రేషన్ రుసుము" — small fee
-- totalRegistrationCost = stampDuty + registrationFee ONLY (small amount, just tax+fee)
-- totalInvestment = saleAmount + stampDuty + registrationFee (FULL amount person paid including property cost)
-  Example: Sale ₹31,50,000 + Stamp ₹2,04,400 + RegFee ₹31,500 = Total Investment ₹33,85,900
-
-STEP 4 — PROPERTY TYPE:
-"గృహ విక్రయం" or house/building mentioned → "House"
-Plot/site/నివేశన స్థలం → "Plot"
-Agricultural/వ్యవసాయ → "Agricultural"
-Only land/cents, no structure → "Land"
-pricePerCent: ONLY calculate for Land/Plot/Agricultural. Set null for House/Apartment.
-
-STEP 5 — CONFIDENCE (0-100):
-100 = exact text found | 80+ = clear context | 60-79 = calculated | <60 = uncertain
-
-Return ONLY this JSON (no markdown):
-{
-  "docType": "Registration|Agreement|Bill|Other",
-  "transactionType": "Sale|Gift|Mortgage|Partition|Other",
-  "propertyType": "House|Land|Plot|Agricultural|Apartment|Commercial",
-  "documentDate": "DD.MM.YYYY from document header only",
-  "language": "Telugu|English|Mixed",
-  "summary": "English summary. తెలుగు సారాంశం.",
-  "confidence": 90,
-  "fields": [
-    {"key": "సర్వే నంబర్ (Survey No)", "value": "exact value", "confidence": 95, "alert": false},
-    {"key": "విస్తీర్ణం (Extent)", "value": "X sq yards (X చ.గ.) = Y.YY cents (Y.YY సెంట్లు)", "confidence": 90, "alert": false},
-    {"key": "గ్రామం (Village)", "value": "value", "confidence": 100, "alert": false},
-    {"key": "మండలం (Mandal)", "value": "value", "confidence": 100, "alert": false},
-    {"key": "జిల్లా (District)", "value": "value", "confidence": 100, "alert": false},
-    {"key": "రిజిస్ట్రేషన్ తేదీ (Reg Date)", "value": "DD.MM.YYYY", "confidence": 95, "alert": false},
-    {"key": "డాక్యుమెంట్ నంబర్ (Doc No)", "value": "XXXXX/YYYY", "confidence": 90, "alert": false}
-  ],
-  "financials": {
-    "saleAmount": {"value": "Rs. XX,XX,XXX/-", "telugu": "రూ. XX,XX,XXX/-", "confidence": 95},
-    "marketValue": {"value": "Rs. XX,XX,XXX/-", "telugu": "రూ. XX,XX,XXX/-", "confidence": 85},
-    "stampDuty": {"value": "Rs. XX,XXX/-", "telugu": "రూ. XX,XXX/-", "confidence": 95},
-    "registrationFee": {"value": "Rs. XX,XXX/-", "telugu": "రూ. XX,XXX/-", "confidence": 95},
-    "totalRegistrationCost": {"value": "Rs. XX,XXX/- (stampDuty+regFee only)", "telugu": "రూ. XX,XXX/-", "confidence": 90},
-    "totalInvestment": {"value": "Rs. XX,XX,XXX/- (saleAmount+stampDuty+regFee)", "telugu": "రూ. XX,XX,XXX/-", "confidence": 95},
-    "pricePerCent": {"value": null, "telugu": null, "confidence": 0},
-    "pricePerSqyard": {"value": null, "telugu": null, "confidence": 0}
-  },
-  "ownershipChain": [
-    {
-      "order": 1,
-      "seller": "Full name S/o Father, Address",
-      "buyer": "Full name W/o Husband, Address",
-      "date": "DD.MM.YYYY",
-      "regNumber": "XXXXX/YYYY",
-      "amount": "Rs. XX,XX,XXX/-",
-      "surveyNumber": "XXX/X",
-      "extent": "XXX sq yards (XXX చ.గ.) = Y.YY cents (Y.YY సెంట్లు)",
-      "confidence": 95
-    }
-  ],
-  "alerts": [
-    {"message": "Alert in Telugu", "severity": "high|medium|low"}
-  ]
-}`
-
-async function handlePhoto(e, source) {
-  const file=e.target.files[0];
-  if(!file) return;
-  e.target.value='';
-
-  showProc(file.type.includes('pdf')?'PDF చదువుతున్నాను...\nTelugu text extract చేస్తున్నాను...':'Image scan చేస్తున్నాను...\nTelugu లో analyze చేస్తున్నాను...');
-
-  try {
-    const b64 = await fileToB64(file);
-    const isPDF = file.type==='application/pdf';
-
-    if(!cfg.geminiKey){hideProc();toast('Gemini key not set','err');return;}
-
-    // For PDF, use document part; for image, use inlineData
-    let parts;
-    if(isPDF){
-      parts=[{inlineData:{mimeType:'application/pdf',data:b64}},{text:DOC_PROMPT}];
-    } else {
-      parts=[{inlineData:{mimeType:file.type,data:b64}},{text:DOC_PROMPT}];
-    }
-
-    const docRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cfg.geminiKey}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{role:'user',parts}]})
-    });
-    const docData = await docRes.json();
-    if (docData.error) throw new Error(docData.error.message);
-    const text = docData.candidates?.[0]?.content?.parts?.[0]?.text||'{}';
-
-    let result;
-    try {
-      const clean = text.replace(/```json|```/g,'').trim();
-      result = JSON.parse(clean.match(/\{[\s\S]*\}/)?.[0]||clean);
-    } catch(e){ result={docType:'Unknown',summary:text,fields:[],alerts:[]}; }
-
-    // Save doc record - ONLY use documentDate from AI, never fall back to chain dates
-    const docActualDate = result.documentDate
-      || result.fields?.find(f=>{
-           const k=(f.key||'').toLowerCase();
-           return k.includes('registration date') || k.includes('రిజిస్ట్రేషన్ తేదీ') 
-               || k.includes('document date') || k.includes('date of execution')
-               || k.includes('తేదీ');
-         })?.value
-      || today();
-    const doc={id:'d'+Date.now(),date:docActualDate,fileName:file.name,type:result.docType||'Document',propertyType:result.propertyType||'',result};
-    state.documents.push(doc);
-    saveLocalData();
-    renderDocList();
-
-    // Push to sheet
-    pushToSheet('Documents',['id','date','type','summary','fileName'],
-      [doc.id,doc.date,doc.type,result.summary||'',file.name]);
-
-    hideProc();
-
-    if(source==='chat'){
-      showSc('chat');
-      addBubble('usr',`📄 Document: ${file.name}`);
-      addBubble('ai', buildDocHtml(result));
-    } else {
-      showSc('docs');
-      toast('✓ Document analyzed!','ok');
-    }
-
-  } catch(err) {
-    hideProc();
-    const errMsg = `<span class="bad">⚠️ Error: ${err.message}</span>`;
-    if(source==='chat') addBubble('ai',errMsg);
-    else toast('Error: '+err.message,'err');
-  }
-}
-
+const DOC_PROMPT = 'You are a specialist in reading Andhra Pradesh government property registration documents, sale agreements, and vendor bills. You read both Telugu and English text in document images.\n\nSTEP 0 — EXTENT CONVERSION RULE (always apply):\n1 cent = 48.4 sq yards | 1 sq yard = 0.02066 cents\nALWAYS show land extent as: "X sq yards (X చ.గ.) = Y.YY cents (Y.YY సెంట్లు)"\nExample: 151.74 sq yards → "151.74 sq yards (151.74 చ.గ.) = 3.14 cents (3.14 సెంట్లు)"\nNEVER show only sq yards. NEVER show only cents. ALWAYS show BOTH.\nBuilt-up area show in sq feet as-is.\n\nSTEP 1 — IDENTIFY DOCUMENT TYPE:\n- "విక్రయ దస్తావేజు" or "Sale Deed" → Registration (Sale)\n- "గృహ విక్రయ దస్తావేజు" → Registration (House Sale)\n- "అమ్మకం ఒప్పందం" or "Agreement of Sale" → Agreement\n- Bill/Invoice with items → Bill\n\nSTEP 2 — DOCUMENT DATE (CRITICAL):\nThe document date is in the VERY FIRST paragraph/line of the document.\n- "తేది : DD.MM.YYYY" → use that exact date\n- Telugu date in words → convert to DD.MM.YYYY\n- "This deed executed on DD/MM/YYYY" → use that date\nSTRICT RULE: documentDate = date THIS document was signed/registered.\nNEVER use a previous owner purchase date. NEVER use today\'s date.\n\nSTEP 3 — FINANCIAL VALUES (AP Registration patterns):\n- Sale Amount: "రూ. XX,XX,XXX/- లకు" or "Rs. XX,XX,XXX/- only"\n- Market Value: "మార్కెట్ విలువ" or "Guideline value"\n- Stamp Duty: "స్టాంప్ డ్యూటీ" — TAX, always much smaller than sale amount\n- Registration Fee: "రిజిస్ట్రేషన్ రుసుము" — small fee\n- totalRegistrationCost = stampDuty + registrationFee ONLY (never equals saleAmount)\n- totalInvestment = saleAmount + stampDuty + registrationFee (FULL amount buyer paid)\n  Example: Sale ₹31,50,000 + Stamp ₹2,04,400 + RegFee ₹31,500 = Total Investment ₹33,85,900\n\nSTEP 4 — PROPERTY TYPE:\n"గృహ విక్రయం" or house/building → "House"\nPlot/site/నివేశన స్థలం → "Plot"\nAgricultural/వ్యవసాయ → "Agricultural"\nOnly land/cents, no structure → "Land"\npricePerCent: ONLY calculate for Land/Plot/Agricultural. Set null for House/Apartment.\n\nSTEP 5 — CONFIDENCE (0-100):\n100 = exact text found | 80+ = clear context | 60-79 = calculated | <60 = uncertain\n\nSTEP 6 — EXTRACT ALL FIELDS BELOW (MANDATORY — extract every field visible in document):\nAlways extract these fields for Registration documents. Show value in English (తెలుగు):\n1.  Document Number (డాక్యుమెంట్ నంబర్)\n2.  Registration Date (రిజిస్ట్రేషన్ తేదీ)\n3.  Property Type (ఆస్తి రకం) — House/Plot/Land/Agricultural\n4.  Transaction Type (లావాదేవీ రకం) — Sale/Gift/Mortgage\n5.  Sub-Registrar Office (సబ్ రిజిస్ట్రార్ కార్యాలయం)\n6.  District (జిల్లా)\n7.  Mandal (మండలం)\n8.  Village/Locality (గ్రామం/స్థలం)\n9.  Ward Number (వార్డు నంబర్) — if mentioned\n10. Property Door Number (ఇంటి నంబర్/ద్వారం నంబర్) — if mentioned\n11. Property Survey Number (సర్వే నంబర్)\n12. Land Extent (భూమి విస్తీర్ణం) — MUST show sq yards + cents both\n13. Built-up Area (నిర్మిత వైశాల్యం) — in sq feet, if house/building\n14. Seller Name (విక్రేత పేరు) — full name with father/husband name\n15. Seller Address (విక్రేత చిరునామా)\n16. Buyer Name (కొనుగోలుదారు పేరు) — full name with father/husband name\n17. Buyer Address (కొనుగోలుదారు చిరునామా)\n18. Sale Amount (విక్రయ మొత్తం)\n19. Market Value (మార్కెట్ విలువ)\n20. Stamp Duty (స్టాంప్ డ్యూటీ)\n21. Registration Fee (రిజిస్ట్రేషన్ రుసుము)\n22. Witness 1 (సాక్షి 1) — if mentioned\n23. Witness 2 (సాక్షి 2) — if mentioned\n24. Boundaries (హద్దులు) — East/West/North/South if mentioned\n\nReturn ONLY this JSON (no markdown):\n{\n  "docType": "Registration|Agreement|Bill|Other",\n  "transactionType": "Sale|Gift|Mortgage|Partition|Other",\n  "propertyType": "House|Land|Plot|Agricultural|Apartment|Commercial",\n  "documentDate": "DD.MM.YYYY from document header only",\n  "language": "Telugu|English|Mixed",\n  "summary": "English summary. తెలుగు సారాంశం.",\n  "confidence": 90,\n  "fields": [\n    {"key": "డాక్యుమెంట్ నంబర్ (Document Number)", "value": "XXXX/YYYY", "confidence": 100, "alert": false},\n    {"key": "రిజిస్ట్రేషన్ తేదీ (Registration Date)", "value": "DD.MM.YYYY", "confidence": 100, "alert": false},\n    {"key": "ఆస్తి రకం (Property Type)", "value": "House", "confidence": 100, "alert": false},\n    {"key": "లావాదేవీ రకం (Transaction Type)", "value": "Sale", "confidence": 100, "alert": false},\n    {"key": "సబ్ రిజిస్ట్రార్ (Sub-Registrar Office)", "value": "Cuddapah (RO)", "confidence": 100, "alert": false},\n    {"key": "జిల్లా (District)", "value": "YS R Kadapa", "confidence": 100, "alert": false},\n    {"key": "మండలం (Mandal)", "value": "value", "confidence": 100, "alert": false},\n    {"key": "గ్రామం/స్థలం (Village/Locality)", "value": "Chinnachowk, Reddypally", "confidence": 100, "alert": false},\n    {"key": "వార్డు నంబర్ (Ward Number)", "value": "Old Ward No. 3, New Ward No. 38", "confidence": 95, "alert": false},\n    {"key": "ఇంటి నంబర్ (Door Number)", "value": "38/168-12", "confidence": 95, "alert": false},\n    {"key": "సర్వే నంబర్ (Survey Number)", "value": "620/1", "confidence": 100, "alert": false},\n    {"key": "భూమి విస్తీర్ణం (Land Extent)", "value": "151.74 sq yards (151.74 చ.గ.) = 3.14 cents (3.14 సెంట్లు)", "confidence": 100, "alert": false},\n    {"key": "నిర్మిత వైశాల్యం (Built-up Area)", "value": "1211.25 sq feet", "confidence": 100, "alert": false},\n    {"key": "విక్రేత పేరు (Seller Name)", "value": "Full name S/o Father name", "confidence": 100, "alert": false},\n    {"key": "విక్రేత చిరునామా (Seller Address)", "value": "Full address", "confidence": 95, "alert": false},\n    {"key": "కొనుగోలుదారు పేరు (Buyer Name)", "value": "Full name W/o Husband name", "confidence": 100, "alert": false},\n    {"key": "కొనుగోలుదారు చిరునామా (Buyer Address)", "value": "Full address", "confidence": 95, "alert": false},\n    {"key": "హద్దులు (Boundaries)", "value": "East: ..., West: ..., North: ..., South: ...", "confidence": 85, "alert": false}\n  ],\n  "financials": {\n    "saleAmount": {"value": "Rs. XX,XX,XXX/-", "telugu": "రూ. XX,XX,XXX/-", "confidence": 95},\n    "marketValue": {"value": "Rs. XX,XX,XXX/-", "telugu": "రూ. XX,XX,XXX/-", "confidence": 85},\n    "stampDuty": {"value": "Rs. XX,XXX/-", "telugu": "రూ. XX,XXX/-", "confidence": 95},\n    "registrationFee": {"value": "Rs. XX,XXX/-", "telugu": "రూ. XX,XXX/-", "confidence": 95},\n    "totalRegistrationCost": {"value": "Rs. XX,XXX/- (stampDuty+regFee only)", "telugu": "రూ. XX,XXX/-", "confidence": 90},\n    "totalInvestment": {"value": "Rs. XX,XX,XXX/- (saleAmount+stampDuty+regFee)", "telugu": "రూ. XX,XX,XXX/-", "confidence": 95},\n    "pricePerCent": {"value": null, "telugu": null, "confidence": 0},\n    "pricePerSqyard": {"value": null, "telugu": null, "confidence": 0}\n  },\n  "ownershipChain": [\n    {\n      "order": 1,\n      "seller": "Full name S/o Father, Address",\n      "buyer": "Full name W/o Husband, Address",\n      "date": "DD.MM.YYYY",\n      "regNumber": "XXXXX/YYYY",\n      "amount": "Rs. XX,XX,XXX/-",\n      "surveyNumber": "XXX/X",\n      "extent": "XXX sq yards (XXX చ.గ.) = Y.YY cents (Y.YY సెంట్లు)",\n      "confidence": 95\n    }\n  ],\n  "alerts": [\n    {"message": "Alert in Telugu", "severity": "high|medium|low"}\n  ]\n}'
 function buildDocHtml(r) {
   const typeColor={Registration:'inf',Agreement:'wrn',Bill:'ok'}[r.docType]||'ok';
   let html=`<b class="${typeColor}">📄 ${r.docType||'Document'}</b><br><span style="color:var(--tx2);font-size:12px">${r.summary||''}</span>`;
