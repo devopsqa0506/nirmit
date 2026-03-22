@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="నిర్మాణం">
+<meta name="apple-mobile-web-app-title" content="Nirmanam">
 <meta name="theme-color" content="#08090d">
-<title>Hi Sreenivas, Your AI Manager Here!!</title>
+<title>Nirmanam Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -112,7 +112,7 @@ body{
 .ipanel{
   background:var(--s2);border:1px solid var(--bd);
   border-radius:12px;padding:14px;margin-bottom:14px;
-  font-size:13px;line-height:1.7;color:var(--tx2);
+  font-size:15px;line-height:1.75;color:var(--tx2);
 }
 .ipanel .ip-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
 .ipanel .ip-ico{font-size:22px}
@@ -182,8 +182,8 @@ body{
   display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;
 }
 .hdr-text{flex:1;min-width:0}
-.hdr-title{font-size:15px;font-weight:700;color:var(--amb);font-family:'Noto Serif Telugu'}
-.hdr-sub{font-size:10px;color:var(--tx2);margin-top:1px;display:flex;align-items:center;gap:5px}
+.hdr-title{font-size:17px;font-weight:700;color:var(--amb);font-family:'Noto Serif Telugu'}
+.hdr-sub{font-size:12px;color:var(--tx2);margin-top:1px;display:flex;align-items:center;gap:5px}
 .sync-pip{
   width:7px;height:7px;border-radius:50%;background:var(--sage);flex-shrink:0;
   transition:background 0.3s;
@@ -213,7 +213,7 @@ body{
   border-bottom:2px solid transparent;transition:all 0.2s;gap:3px;
 }
 .ni .ico{font-size:18px}
-.ni .lbl{font-size:9px;color:var(--tx3);font-weight:600;letter-spacing:0.3px;white-space:nowrap}
+.ni .lbl{font-size:11px;color:var(--tx3);font-weight:600;letter-spacing:0.3px;white-space:nowrap}
 .ni.on{border-bottom-color:var(--amb)}
 .ni.on .lbl{color:var(--amb)}
 
@@ -236,17 +236,17 @@ body{
   background:var(--s2);border:1px solid var(--bd);
   border-radius:13px;padding:13px 12px;
 }
-.scard .sc-l{font-size:9px;color:var(--tx3);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:6px;font-family:'JetBrains Mono'}
-.scard .sc-v{font-size:20px;font-weight:700;font-family:'JetBrains Mono';line-height:1}
+.scard .sc-l{font-size:11px;color:var(--tx3);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:6px;font-family:'JetBrains Mono'}
+.scard .sc-v{font-size:22px;font-weight:700;font-family:'JetBrains Mono';line-height:1}
 .scard .sc-v.amb{color:var(--amb)}
 .scard .sc-v.teal{color:var(--teal)}
 .scard .sc-v.rose{color:var(--rose)}
 .scard .sc-v.sky{color:var(--sky)}
-.scard .sc-s{font-size:10px;color:var(--tx3);margin-top:4px}
+.scard .sc-s{font-size:12px;color:var(--tx3);margin-top:4px}
 
 .seg{padding:14px 15px 0}
 .seg-t{
-  font-size:10px;letter-spacing:0.8px;text-transform:uppercase;
+  font-size:12px;letter-spacing:0.8px;text-transform:uppercase;
   color:var(--tx3);margin-bottom:10px;font-family:'JetBrains Mono';
   display:flex;align-items:center;justify-content:space-between;
 }
@@ -266,11 +266,11 @@ body{
 .txn-ico.pay{background:rgba(58,232,200,0.1)}
 .txn-ico.doc{background:rgba(90,175,232,0.1)}
 .txn-body{flex:1;min-width:0}
-.txn-v{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.txn-d{font-size:11px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-v{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-d{font-size:13px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .txn-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
 .tag{
-  font-size:10px;padding:2px 7px;border-radius:7px;
+  font-size:12px;padding:2px 7px;border-radius:7px;
   border:1px solid var(--bd);color:var(--tx2);font-family:'JetBrains Mono';white-space:nowrap;
 }
 .tag.s{border-color:#5a4010;color:#c49040}
@@ -282,9 +282,9 @@ body{
 .tag.p{border-color:rgba(58,232,200,0.3);color:var(--teal)}
 .tag.due{border-color:rgba(232,93,122,0.3);color:var(--rose)}
 .txn-right{text-align:right;flex-shrink:0}
-.txn-amt{font-size:14px;font-weight:700;font-family:'JetBrains Mono'}
+.txn-amt{font-size:16px;font-weight:700;font-family:'JetBrains Mono'}
 .txn-amt.cr{color:var(--teal)}.txn-amt.dr{color:var(--rose)}
-.txn-date{font-size:10px;color:var(--tx3);margin-top:3px;font-family:'JetBrains Mono'}
+.txn-date{font-size:12px;color:var(--tx3);margin-top:3px;font-family:'JetBrains Mono'}
 
 /* ── CHAT ──────────────────────────────── */
 .chat-wrap{display:flex;flex-direction:column;position:absolute;inset:0}
@@ -305,7 +305,7 @@ body{
 .bbl{
   background:var(--s2);border:1px solid var(--bd);
   border-radius:13px;padding:10px 13px;
-  font-size:13px;line-height:1.65;
+  font-size:15px;line-height:1.7;
 }
 .bw.usr .bbl{background:var(--s3);border-color:var(--bd2)}
 .bbl strong,.bbl b{color:var(--amb)}
@@ -319,9 +319,9 @@ body{
 }
 .ccard-t{color:var(--amb);font-weight:700;font-size:12px;margin-bottom:9px;display:flex;align-items:center;gap:6px}
 .crow{display:flex;justify-content:space-between;align-items:flex-start;
-  padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px}
+  padding:6px 0;border-bottom:1px solid var(--bd);font-size:14px}
 .crow:last-of-type{border-bottom:none}
-.ck{color:var(--tx2)}.cv{font-weight:600;font-family:'JetBrains Mono';font-size:11px;text-align:right;word-break:break-word;max-width:60%}
+.ck{color:var(--tx2)}.cv{font-weight:600;font-family:'JetBrains Mono';font-size:13px;text-align:right;word-break:break-word;max-width:60%}
 .cv.ok{color:var(--teal)}.cv.w{color:var(--amb)}.cv.bad{color:var(--rose)}
 .cacts{display:flex;gap:7px;margin-top:10px}
 
@@ -333,9 +333,9 @@ body{
 }
 .chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:9px;padding-bottom:1px}
 .chip{
-  flex-shrink:0;padding:6px 12px;border-radius:20px;
+  flex-shrink:0;padding:7px 14px;border-radius:20px;
   border:1px solid var(--bd);background:var(--s2);
-  color:var(--tx2);font-size:11px;font-weight:500;cursor:pointer;
+  color:var(--tx2);font-size:13px;font-weight:500;cursor:pointer;
   white-space:nowrap;font-family:'Noto Sans Telugu',sans-serif;
   transition:all 0.15s;
 }
@@ -354,9 +354,9 @@ body{
 @keyframes rp{0%,100%{opacity:1}50%{opacity:0.5}}
 .cin{
   flex:1;background:var(--s2);border:1px solid var(--bd);
-  border-radius:10px;padding:10px 13px;
+  border-radius:10px;padding:11px 14px;
   color:var(--tx);font-family:'Noto Sans Telugu',sans-serif;
-  font-size:14px;resize:none;outline:none;
+  font-size:16px;resize:none;outline:none;
   min-height:42px;max-height:100px;
   transition:border-color 0.2s;line-height:1.5;
 }
@@ -408,9 +408,9 @@ body{
 .dr-badge.agr{background:rgba(232,184,74,0.12);color:var(--amb)}
 .dr-badge.bil{background:rgba(58,232,200,0.12);color:var(--teal)}
 .dr-fields{padding:10px 14px}
-.drf{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12px}
+.drf{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--bd);font-size:14px}
 .drf:last-child{border-bottom:none}
-.drf-k{color:var(--tx2);min-width:105px;flex-shrink:0;padding-top:1px}
+.drf-k{color:var(--tx2);min-width:110px;flex-shrink:0;padding-top:1px;font-size:13px}
 .drf-v{font-weight:600;word-break:break-word}
 .drf-v.alrt{color:var(--amb)}
 .drf-v.good{color:var(--teal)}
@@ -432,12 +432,12 @@ body{
   background:var(--s3);border:1px solid var(--bd2);
   display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
 }
-.vc-n{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vc-c{font-size:10px;color:var(--tx2);margin-top:2px}
-.vc-bal{font-size:14px;font-weight:700;font-family:'JetBrains Mono'}
+.vc-n{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vc-c{font-size:12px;color:var(--tx2);margin-top:2px}
+.vc-bal{font-size:16px;font-weight:700;font-family:'JetBrains Mono'}
 .vc-bar{height:2px;background:var(--s4);border-radius:1px;margin-top:9px;overflow:hidden}
 .vc-bf{height:100%;border-radius:1px;transition:width 0.5s ease}
-.vc-nums{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--tx3);font-family:'JetBrains Mono'}
+.vc-nums{display:flex;justify-content:space-between;margin-top:5px;font-size:12px;color:var(--tx3);font-family:'JetBrains Mono'}
 
 /* ── PRICES ─────────────────────────────── */
 .price-group{
@@ -455,7 +455,7 @@ body{
   padding:8px 13px;border-bottom:1px solid var(--bd);font-size:12px;
 }
 .pr:last-child{border-bottom:none}
-.pr-d{color:var(--tx3);font-family:'JetBrains Mono';font-size:10px;min-width:72px}
+.pr-d{color:var(--tx3);font-family:'JetBrains Mono';font-size:12px;min-width:72px}
 .pr-v{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tx2)}
 .pr-p{font-family:'JetBrains Mono';font-weight:600;color:var(--tx)}
 .pr-c{font-size:10px;font-family:'JetBrains Mono';min-width:38px;text-align:right}
@@ -469,9 +469,9 @@ body{
 }
 .si-ico{font-size:22px;flex-shrink:0}
 .si-body{flex:1;min-width:0}
-.si-t{font-size:13px;font-weight:600}
-.si-s{font-size:11px;color:var(--tx2);margin-top:3px;word-break:break-all}
-.si-val{font-size:11px;color:var(--teal);font-family:'JetBrains Mono';margin-top:3px}
+.si-t{font-size:15px;font-weight:600}
+.si-s{font-size:13px;color:var(--tx2);margin-top:3px;word-break:break-all}
+.si-val{font-size:13px;color:var(--teal);font-family:'JetBrains Mono';margin-top:3px}
 
 /* ── BUTTONS ────────────────────────────── */
 .btn{
@@ -538,6 +538,45 @@ body{
 .mgrip{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 16px}
 .mt{font-size:17px;font-weight:700;color:var(--amb);margin-bottom:14px}
 
+/* ownership chain */
+.own-chain{padding:11px 14px}
+.own-step{
+  display:flex;gap:11px;padding:10px 0;
+  border-bottom:1px solid var(--bd);position:relative;
+}
+.own-step:last-child{border-bottom:none}
+.own-num{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--s3),var(--s4));
+  border:1px solid var(--bd2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--amb);font-family:'JetBrains Mono';
+  margin-top:1px;
+}
+.own-body{flex:1;min-width:0}
+.own-date{font-size:10px;color:var(--teal);font-family:'JetBrains Mono';margin-bottom:4px}
+.own-row{display:flex;gap:6px;font-size:12px;margin-bottom:3px;align-items:flex-start}
+.own-label{color:var(--tx2);min-width:50px;flex-shrink:0}
+.own-val{font-weight:600;word-break:break-word}
+.own-amount{font-size:12px;font-family:'JetBrains Mono';color:var(--amb);font-weight:700;margin-top:4px}
+.own-arrow{
+  text-align:center;font-size:16px;color:var(--tx3);
+  padding:4px 0;
+}
+
+/* financials grid */
+.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:11px 14px}
+.fin-card{
+  background:var(--s3);border:1px solid var(--bd2);
+  border-radius:10px;padding:10px 11px;
+}
+.fin-card.highlight{border-color:rgba(232,184,74,0.4);background:rgba(232,184,74,0.06)}
+.fin-card.full{grid-column:1/-1}
+.fin-label{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-family:'JetBrains Mono'}
+.fin-value{font-size:15px;font-weight:700;font-family:'JetBrains Mono';color:var(--amb)}
+.fin-value.teal{color:var(--teal)}
+.fin-value.sm{font-size:12px}
+
 /* empty state */
 .empty{text-align:center;padding:42px 20px;color:var(--tx3)}
 .empty .ei{font-size:42px;margin-bottom:12px}
@@ -566,7 +605,7 @@ body{
 <!-- Splash -->
 <div id="splash">
   <div class="sp-emblem">🏗️</div>
-  <div class="sp-name">నిర్మాణం Manager</div>
+  <div class="sp-name">Nirmanam Manager</div>
   <div class="sp-tag">Kadapa Builder · Cloud Sync · Free Forever</div>
   <div class="sp-progress"><div class="sp-bar"></div></div>
 </div>
@@ -717,10 +756,10 @@ body{
   <div class="hdr">
     <div class="hdr-logo">🏗️</div>
     <div class="hdr-text">
-      <div class="hdr-title">నిర్మాణం Manager</div>
+      <div class="hdr-title">Nirmanam Manager</div>
       <div class="hdr-sub">
         <div class="sync-pip" id="sync-pip"></div>
-        <span id="sync-label">Synced</span>
+        <span id="sync-label">Synced</span> · Kadapa Builder
       </div>
     </div>
     <div class="hdr-pills">
@@ -1351,16 +1390,50 @@ function renderDocList() {
     const r=doc.result||{};
     const badge={Registration:'reg',Agreement:'agr',Bill:'bil'}[r.docType]||'reg';
     const emoji={Registration:'🏛️',Agreement:'📝',Bill:'🧾',Other:'📄'}[r.docType]||'📄';
+    // Financials
+    let finHtml='';
+    const fin=r.financials;
+    if(fin && Object.values(fin).some(v=>v&&v!=='N/A'&&v!=='Not mentioned')){
+      finHtml=`<div class="fin-grid">
+        ${fin.saleAmount?`<div class="fin-card highlight"><div class="fin-label">Sale Amount</div><div class="fin-value">${fin.saleAmount}</div></div>`:''}
+        ${fin.marketValue?`<div class="fin-card"><div class="fin-label">Market Value</div><div class="fin-value teal">${fin.marketValue}</div></div>`:''}
+        ${fin.stampDuty?`<div class="fin-card"><div class="fin-label">Stamp Duty</div><div class="fin-value sm">${fin.stampDuty}</div></div>`:''}
+        ${fin.registrationFee?`<div class="fin-card"><div class="fin-label">Reg Fee</div><div class="fin-value sm">${fin.registrationFee}</div></div>`:''}
+        ${fin.pricePerCent?`<div class="fin-card highlight full"><div class="fin-label">Rate per Cent</div><div class="fin-value">${fin.pricePerCent}</div></div>`:''}
+      </div>`;
+    }
+
+    // Ownership chain
+    let chainHtml='';
+    if(r.ownershipChain?.length){
+      chainHtml=`<div style="padding:0 14px 10px">
+        <div style="font-size:10px;color:var(--tx3);letter-spacing:0.6px;text-transform:uppercase;font-family:JetBrains Mono;margin-bottom:9px">🔗 Ownership Chain</div>
+        ${r.ownershipChain.map((step,i)=>`
+          <div style="background:var(--s3);border:1px solid var(--bd2);border-radius:9px;padding:10px 12px;margin-bottom:7px">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+              <div style="width:20px;height:20px;border-radius:5px;background:var(--s4);border:1px solid var(--bd2);display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--amb);font-family:JetBrains Mono">${step.order||i+1}</div>
+              <span style="font-size:11px;color:var(--teal);font-family:JetBrains Mono">${step.date||''}</span>
+              ${step.regNumber?`<span style="font-size:10px;color:var(--tx3)">· Reg# ${step.regNumber}</span>`:''}
+            </div>
+            <div style="font-size:12px;margin-bottom:2px"><span style="color:var(--tx2)">Seller: </span><b>${step.seller||'—'}</b></div>
+            <div style="font-size:12px;margin-bottom:2px"><span style="color:var(--tx2)">Buyer: </span><b>${step.buyer||'—'}</b></div>
+            ${step.amount?`<div style="font-size:12px;color:var(--amb);font-family:JetBrains Mono;font-weight:700;margin-top:4px">${step.amount}</div>`:''}
+          </div>`).join('')}
+      </div>`;
+    }
+
+    // Basic fields
     let fields='';
-    if(r.fields?.length) fields=`<div class="dr-fields">${r.fields.slice(0,8).map(f=>`<div class="drf"><span class="drf-k">${f.key}</span><span class="drf-v ${f.alert?'alrt':''}">${f.value}</span></div>`).join('')}</div>`;
+    if(r.fields?.length) fields=`<div class="dr-fields">${r.fields.slice(0,10).map(f=>`<div class="drf"><span class="drf-k">${f.key}</span><span class="drf-v ${f.alert?'alrt':''}">${f.value}</span></div>`).join('')}</div>`;
     let alerts='';
     if(r.alerts?.length) alerts=r.alerts.map(a=>`<div class="alert-strip"><b>⚠️ గమనించండి</b>${a}</div>`).join('');
+
     return`<div class="doc-result fi-anim">
       <div class="dr-top"><div class="dr-ico">${emoji}</div>
         <div><div class="dr-name">${r.docType||'Document'}</div><div class="dr-date">${doc.date}</div></div>
         <span class="dr-badge ${badge}">${r.docType||'Doc'}</span>
       </div>
-      ${fields}${alerts}
+      ${finHtml}${chainHtml}${fields}${alerts}
     </div>`;
   }).join('');
 }
@@ -1376,7 +1449,7 @@ function injectWelcomeMsg() {
   w.innerHTML=`<div class="bav">🤖</div>
     <div>
       <div class="bbl">
-        <b>నమస్కారం! నేను మీ నిర్మాణం Manager 🏗️</b><br><br>
+        <b>నమస్కారం! నేను మీ Nirmanam Manager 🏗️</b><br><br>
         Telugu లేదా English లో చెప్పండి:<br>
         • "ఇసుక 3 ట్రాక్టర్ మురళి దగ్గర ₹4500 ఆర్డర్"<br>
         • "రాం Electricals కి ₹10000 advance ఇచ్చాను"<br>
@@ -1448,9 +1521,14 @@ async function callGemini(imageData, imageMime, extraInstruction) {
     totalPaid:    Object.values(state.vendors).reduce((s,v)=>s+(Number(v.totalPaid)||0),0),
   });
 
-  const systemText = `You are "నిర్మాణం Manager", an AI site manager for a builder from Kadapa, Andhra Pradesh, India.
+  const systemText = `You are "Nirmanam Manager", an AI site manager for a builder from Kadapa, Andhra Pradesh, India.
 He builds small houses on 3-cent plots. He buys materials from local vendors and pays in installments.
-He speaks Telugu and English. Reply in the same language he uses.
+He speaks Telugu and English. 
+- If he writes in Telugu → reply in Telugu
+- If he writes in English → reply in English  
+- For all amounts, vendor names, item names — always show BOTH Telugu and English
+- Field labels in responses: use format "English (తెలుగు)"
+- Keep replies clear and easy to read at larger font sizes
 
 LEDGER STATE: ${ledgerCtx}
 
@@ -1581,15 +1659,52 @@ function toggleVoice() {
 // ═══════════════════════════════════════════════════
 // PHOTO / DOCUMENT UPLOAD
 // ═══════════════════════════════════════════════════
-const DOC_PROMPT = `You are an expert reading Telugu and English property documents from Andhra Pradesh.
-Analyze this document. Could be: Registration (నమోదు), Agreement (ఒప్పందం), Bill (బిల్లు), or Other.
-Return ONLY valid JSON (no markdown):
-{"docType":"Registration|Agreement|Bill|Other","language":"Telugu|English|Mixed","summary":"2-3 sentences","fields":[{"key":"field name","value":"extracted value","alert":false}],"alerts":["important warnings"],"keyDates":[{"label":"type","date":"value"}],"amounts":[{"label":"type","amount":"value"}]}
+const DOC_PROMPT = `You are an expert reading Telugu and English property/legal documents from Andhra Pradesh, India.
+Analyze this document carefully. Return ONLY valid JSON (no markdown, no explanation):
 
-For Registration: extract Survey Number (సర్వే నంబర్), Extent in cents/acres, Village, Mandal, District, Seller, Buyer, Date, Reg Number, Value.
-For Agreement: extract Total amount, Advance paid, Balance, Payment dates, Possession date, Penalty clauses.
-For Bill: extract Vendor, Items, Quantities, Unit prices, Total, Date, Bill number.
-Mark alert:true for fields needing action. Add warnings for deadlines, large amounts, unusual clauses.`;
+{
+  "docType": "Registration|Agreement|Bill|Other",
+  "language": "Telugu|English|Mixed",
+  "summary": "2-3 sentence summary",
+  "fields": [{"key": "field label", "value": "extracted value", "alert": false}],
+  "alerts": ["important warning strings"],
+  "ownershipChain": [
+    {
+      "order": 1,
+      "seller": "full name + details",
+      "buyer": "full name + details", 
+      "date": "transaction date",
+      "regNumber": "registration/doc number",
+      "amount": "sale amount if mentioned",
+      "surveyNumber": "survey no",
+      "extent": "area in cents/sqyards/acres"
+    }
+  ],
+  "financials": {
+    "saleAmount": "actual sale/consideration amount",
+    "marketValue": "market value / guideline value",
+    "stampDuty": "stamp duty paid",
+    "registrationFee": "registration fee",
+    "totalTransactionValue": "total amount",
+    "pricePerCent": "calculated price per cent if possible",
+    "pricePerSqyard": "calculated price per sq yard if possible"
+  }
+}
+
+EXTRACTION RULES:
+1. BILINGUAL OUTPUT: For every field, provide value in BOTH Telugu and English. Format: "English value (తెలుగు విలువ)"
+   Example: "Kadapa Urban (కడప అర్బన్)", "153.04 sq yards / 3.16 cents (153.04 చదరపు గజాలు / 3.16 సెంట్లు)"
+2. For Registration docs: Look for "Consideration Amount", "Sale Amount", "విక్రయ మొత్తం", "మార్కెట్ విలువ", "స్టాంప్ డ్యూటీ"
+3. Field keys also bilingual: "Survey Number (సర్వే నంబర్)", "Seller (విక్రేత)", "Buyer (కొనుగోలుదారు)", "Extent (విస్తీర్ణం)", "Village (గ్రామం)", "District (జిల్లా)", "Sale Amount (విక్రయ మొత్తం)", "Stamp Duty (స్టాంప్ డ్యూటీ)", "Market Value (మార్కెట్ విలువ)"
+4. Ownership chain: list ALL previous owners with dates. For each person include name in both scripts if available.
+5. For seller/buyer names: if Telugu script present in doc, include it. Format: "English Name (తెలుగు పేరు)"
+6. Extent: always show as "X sq yards (X చదరపు గజాలు) = Y cents (Y సెంట్లు)"
+7. Summary: write in BOTH languages — English first, then Telugu translation
+8. Alerts: write in Telugu — e.g. "చెల్లింపు గడువు దగ్గర పడింది", "పెద్ద మొత్తం పెండింగ్ లో ఉంది"
+9. Mark alert:true for: pending payments, short deadlines, penalty clauses, encumbrances, price anomalies
+10. pricePerCent: calculate as saleAmount ÷ cents and show in ₹
+
+Return ONLY the JSON object. No markdown fences.`;
 
 async function handlePhoto(e, source) {
   const file=e.target.files[0];
@@ -1658,12 +1773,49 @@ async function handlePhoto(e, source) {
 
 function buildDocHtml(r) {
   const typeColor={Registration:'inf',Agreement:'wrn',Bill:'ok'}[r.docType]||'ok';
-  let html=`<b class="${typeColor}">📄 ${r.docType||'Document'}</b><br>${r.summary||''}<br>`;
+  let html=`<b class="${typeColor}">📄 ${r.docType||'Document'}</b><br><span style="color:var(--tx2);font-size:12px">${r.summary||''}</span>`;
+
+  // Financials section
+  const fin = r.financials;
+  if(fin && Object.values(fin).some(v=>v && v!=='N/A' && v!=='Not mentioned')){
+    html += `<div class="ccard" style="margin-top:10px">
+      <div class="ccard-t">💰 Financial Details</div>`;
+    if(fin.saleAmount) html+=`<div class="crow"><span class="ck">Sale Amount</span><span class="cv ok">${fin.saleAmount}</span></div>`;
+    if(fin.marketValue) html+=`<div class="crow"><span class="ck">Market Value</span><span class="cv">${fin.marketValue}</span></div>`;
+    if(fin.stampDuty) html+=`<div class="crow"><span class="ck">Stamp Duty</span><span class="cv w">${fin.stampDuty}</span></div>`;
+    if(fin.registrationFee) html+=`<div class="crow"><span class="ck">Reg Fee</span><span class="cv">${fin.registrationFee}</span></div>`;
+    if(fin.pricePerCent) html+=`<div class="crow"><span class="ck">Rate/Cent</span><span class="cv ok">${fin.pricePerCent}</span></div>`;
+    if(fin.pricePerSqyard) html+=`<div class="crow"><span class="ck">Rate/SqYard</span><span class="cv">${fin.pricePerSqyard}</span></div>`;
+    html+=`</div>`;
+  }
+
+  // Ownership chain
+  if(r.ownershipChain?.length){
+    html+=`<div class="ccard" style="margin-top:10px"><div class="ccard-t">🔗 Ownership Chain (${r.ownershipChain.length} transaction${r.ownershipChain.length>1?'s':''})</div>`;
+    r.ownershipChain.forEach((step,i)=>{
+      html+=`<div style="padding:9px 0;border-bottom:1px solid var(--bd)">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
+          <div style="width:22px;height:22px;border-radius:6px;background:var(--s4);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--amb);font-family:JetBrains Mono">${step.order||i+1}</div>
+          <span style="font-size:11px;color:var(--teal);font-family:JetBrains Mono">${step.date||'Date unknown'}</span>
+          ${step.regNumber?`<span style="font-size:10px;color:var(--tx3)">Reg# ${step.regNumber}</span>`:''}
+        </div>
+        <div style="font-size:12px;margin-bottom:3px"><span style="color:var(--tx2)">Seller: </span><b>${step.seller||'—'}</b></div>
+        <div style="font-size:12px;margin-bottom:3px"><span style="color:var(--tx2)">Buyer: </span><b>${step.buyer||'—'}</b></div>
+        ${step.extent?`<div style="font-size:12px;margin-bottom:3px"><span style="color:var(--tx2)">Extent: </span><b>${step.extent}</b></div>`:''}
+        ${step.amount?`<div style="font-size:12px;color:var(--amb);font-family:JetBrains Mono;font-weight:700">₹ ${step.amount}</div>`:''}
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  // Basic fields
   if(r.fields?.length){
-    html+=`<div class="ccard" style="margin-top:9px"><div class="ccard-t">🔍 Extracted Details</div>`;
+    html+=`<div class="ccard" style="margin-top:10px"><div class="ccard-t">📋 All Details</div>`;
     r.fields.forEach(f=>{html+=`<div class="crow"><span class="ck">${f.key}</span><span class="cv ${f.alert?'w':''}">${f.value}</span></div>`;});
     html+=`</div>`;
   }
+
+  // Alerts
   if(r.alerts?.length) r.alerts.forEach(a=>{html+=`<div class="alert-strip" style="margin-top:6px"><b>⚠️ గమనించండి</b>${a}</div>`;});
   return html;
 }
