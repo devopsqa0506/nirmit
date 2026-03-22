@@ -3121,7 +3121,7 @@ async function compressAndUpload(file, docType, result) {
 async function chunkUpload(b64, mimeType, fileName, docType, result) {
   if (!cfg.scriptUrl || !cfg.sheetId) return;
 
-  var CHUNK_SIZE = 700000; // ~700KB per chunk (safe for no-cors)
+  var CHUNK_SIZE = 90000; // ~90KB per chunk (CacheService 100KB limit)
   var totalChunks = Math.ceil(b64.length / CHUNK_SIZE);
   var uploadId = 'u_' + Date.now();
 
