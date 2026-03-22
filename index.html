@@ -246,7 +246,7 @@ body{
 
 .seg{padding:14px 15px 0}
 .seg-t{
-  font-size:12px;letter-spacing:0.8px;text-transform:uppercase;
+  font-size:13px;letter-spacing:0.8px;text-transform:uppercase;
   color:var(--tx3);margin-bottom:10px;font-family:'JetBrains Mono';
   display:flex;align-items:center;justify-content:space-between;
 }
@@ -398,8 +398,8 @@ body{
 }
 .dr-top{padding:13px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
 .dr-ico{font-size:22px}
-.dr-name{font-size:13px;font-weight:600}
-.dr-date{font-size:10px;color:var(--tx2);margin-top:2px}
+.dr-name{font-size:16px;font-weight:700;color:var(--amb)}
+.dr-date{font-size:13px;color:var(--tx2);margin-top:3px}
 .dr-badge{
   margin-left:auto;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:700;
   font-family:'JetBrains Mono';
@@ -416,10 +416,10 @@ body{
 .drf-v.good{color:var(--teal)}
 .alert-strip{
   margin:0 14px 10px;
-  background:rgba(232,184,74,0.07);border:1px solid rgba(232,184,74,0.25);
-  border-radius:9px;padding:10px 12px;font-size:12px;color:var(--amb);line-height:1.65;
+  background:rgba(232,184,74,0.1);border:1px solid rgba(232,184,74,0.4);
+  border-radius:9px;padding:12px 14px;font-size:14px;color:var(--amb);line-height:1.7;
 }
-.alert-strip b{display:block;margin-bottom:3px}
+.alert-strip b{display:block;margin-bottom:4px;font-size:15px}
 
 /* ── VENDORS ────────────────────────────── */
 .vc{
@@ -567,15 +567,15 @@ body{
 /* financials grid */
 .fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:11px 14px}
 .fin-card{
-  background:var(--s3);border:1px solid var(--bd2);
-  border-radius:10px;padding:10px 11px;
+  background:var(--s2);border:1px solid var(--bd2);
+  border-radius:10px;padding:13px 13px;
 }
-.fin-card.highlight{border-color:rgba(232,184,74,0.4);background:rgba(232,184,74,0.06)}
+.fin-card.highlight{border-color:rgba(232,184,74,0.5);background:rgba(232,184,74,0.1)}
 .fin-card.full{grid-column:1/-1}
-.fin-label{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;font-family:'JetBrains Mono'}
-.fin-value{font-size:15px;font-weight:700;font-family:'JetBrains Mono';color:var(--amb)}
+.fin-label{font-size:13px;color:var(--sky);font-weight:700;margin-bottom:6px;font-family:'Noto Sans Telugu',sans-serif;letter-spacing:0}
+.fin-value{font-size:17px;font-weight:700;font-family:'JetBrains Mono';color:var(--amb)}
 .fin-value.teal{color:var(--teal)}
-.fin-value.sm{font-size:12px}
+.fin-value.sm{font-size:15px}
 
 /* empty state */
 .empty{text-align:center;padding:42px 20px;color:var(--tx3)}
@@ -1395,11 +1395,13 @@ function renderDocList() {
     const fin=r.financials;
     if(fin && Object.values(fin).some(v=>v&&v!=='N/A'&&v!=='Not mentioned')){
       finHtml=`<div class="fin-grid">
-        ${fin.saleAmount?`<div class="fin-card highlight"><div class="fin-label">Sale Amount</div><div class="fin-value">${fin.saleAmount}</div></div>`:''}
-        ${fin.marketValue?`<div class="fin-card"><div class="fin-label">Market Value</div><div class="fin-value teal">${fin.marketValue}</div></div>`:''}
-        ${fin.stampDuty?`<div class="fin-card"><div class="fin-label">Stamp Duty</div><div class="fin-value sm">${fin.stampDuty}</div></div>`:''}
-        ${fin.registrationFee?`<div class="fin-card"><div class="fin-label">Reg Fee</div><div class="fin-value sm">${fin.registrationFee}</div></div>`:''}
-        ${fin.pricePerCent?`<div class="fin-card highlight full"><div class="fin-label">Rate per Cent</div><div class="fin-value">${fin.pricePerCent}</div></div>`:''}
+        ${fin.saleAmount?`<div class="fin-card highlight"><div class="fin-label">💰 విక్రయ మొత్తం (Sale Amount)</div><div class="fin-value">${fin.saleAmount}</div></div>`:''}
+        ${fin.marketValue?`<div class="fin-card"><div class="fin-label">🏠 మార్కెట్ విలువ (Market Value)</div><div class="fin-value teal">${fin.marketValue}</div></div>`:''}
+        ${fin.stampDuty?`<div class="fin-card"><div class="fin-label">📋 స్టాంప్ డ్యూటీ (Stamp Duty)</div><div class="fin-value sm">${fin.stampDuty}</div></div>`:''}
+        ${fin.registrationFee?`<div class="fin-card"><div class="fin-label">🏛️ రిజిస్ట్రేషన్ రుసుము (Reg Fee)</div><div class="fin-value sm">${fin.registrationFee}</div></div>`:''}
+        ${fin.totalTransactionValue?`<div class="fin-card"><div class="fin-label">🧾 మొత్తం విలువ (Total Value)</div><div class="fin-value sm">${fin.totalTransactionValue}</div></div>`:''}
+        ${fin.pricePerCent?`<div class="fin-card highlight full"><div class="fin-label">📐 సెంట్ కి ధర (Rate per Cent)</div><div class="fin-value">${fin.pricePerCent}</div></div>`:''}
+        ${fin.pricePerSqyard?`<div class="fin-card full"><div class="fin-label">📏 చదరపు గజానికి ధర (Rate per Sq Yard)</div><div class="fin-value sm">${fin.pricePerSqyard}</div></div>`:''}
       </div>`;
     }
 
@@ -1407,17 +1409,18 @@ function renderDocList() {
     let chainHtml='';
     if(r.ownershipChain?.length){
       chainHtml=`<div style="padding:0 14px 10px">
-        <div style="font-size:10px;color:var(--tx3);letter-spacing:0.6px;text-transform:uppercase;font-family:JetBrains Mono;margin-bottom:9px">🔗 Ownership Chain</div>
+        <div style="font-size:14px;color:var(--sky);font-weight:700;margin-bottom:11px">🔗 Ownership Chain (యాజమాన్య చరిత్ర)</div>
         ${r.ownershipChain.map((step,i)=>`
           <div style="background:var(--s3);border:1px solid var(--bd2);border-radius:9px;padding:10px 12px;margin-bottom:7px">
             <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
               <div style="width:20px;height:20px;border-radius:5px;background:var(--s4);border:1px solid var(--bd2);display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--amb);font-family:JetBrains Mono">${step.order||i+1}</div>
-              <span style="font-size:11px;color:var(--teal);font-family:JetBrains Mono">${step.date||''}</span>
-              ${step.regNumber?`<span style="font-size:10px;color:var(--tx3)">· Reg# ${step.regNumber}</span>`:''}
+              <span style="font-size:14px;color:var(--teal);font-weight:700;font-family:JetBrains Mono">${step.date||''}</span>
+              ${step.regNumber?`<span style="font-size:13px;color:var(--amb);font-weight:600;font-family:JetBrains Mono"> · Reg# ${step.regNumber}</span>`:''}
             </div>
-            <div style="font-size:12px;margin-bottom:2px"><span style="color:var(--tx2)">Seller: </span><b>${step.seller||'—'}</b></div>
-            <div style="font-size:12px;margin-bottom:2px"><span style="color:var(--tx2)">Buyer: </span><b>${step.buyer||'—'}</b></div>
-            ${step.amount?`<div style="font-size:12px;color:var(--amb);font-family:JetBrains Mono;font-weight:700;margin-top:4px">${step.amount}</div>`:''}
+            <div style="font-size:14px;margin-bottom:4px"><span style="color:var(--sky);font-weight:700">విక్రేత (Seller): </span><b style="color:var(--tx)">${step.seller||'—'}</b></div>
+            <div style="font-size:14px;margin-bottom:4px"><span style="color:var(--teal);font-weight:700">కొనుగోలుదారు (Buyer): </span><b style="color:var(--tx)">${step.buyer||'—'}</b></div>
+            ${step.extent?`<div style="font-size:13px;margin-bottom:3px"><span style="color:var(--tx2)">విస్తీర్ణం: </span><b>${step.extent}</b></div>`:''}
+            ${step.amount?`<div style="font-size:15px;color:var(--amb);font-family:JetBrains Mono;font-weight:700;margin-top:5px;padding:5px 0;border-top:1px solid var(--bd)">₹ ${step.amount}</div>`:''}
           </div>`).join('')}
       </div>`;
     }
@@ -1779,19 +1782,20 @@ function buildDocHtml(r) {
   const fin = r.financials;
   if(fin && Object.values(fin).some(v=>v && v!=='N/A' && v!=='Not mentioned')){
     html += `<div class="ccard" style="margin-top:10px">
-      <div class="ccard-t">💰 Financial Details</div>`;
-    if(fin.saleAmount) html+=`<div class="crow"><span class="ck">Sale Amount</span><span class="cv ok">${fin.saleAmount}</span></div>`;
-    if(fin.marketValue) html+=`<div class="crow"><span class="ck">Market Value</span><span class="cv">${fin.marketValue}</span></div>`;
-    if(fin.stampDuty) html+=`<div class="crow"><span class="ck">Stamp Duty</span><span class="cv w">${fin.stampDuty}</span></div>`;
-    if(fin.registrationFee) html+=`<div class="crow"><span class="ck">Reg Fee</span><span class="cv">${fin.registrationFee}</span></div>`;
-    if(fin.pricePerCent) html+=`<div class="crow"><span class="ck">Rate/Cent</span><span class="cv ok">${fin.pricePerCent}</span></div>`;
-    if(fin.pricePerSqyard) html+=`<div class="crow"><span class="ck">Rate/SqYard</span><span class="cv">${fin.pricePerSqyard}</span></div>`;
+      <div class="ccard-t">💰 Financial Details (ఆర్థిక వివరాలు)</div>`;
+    if(fin.saleAmount) html+=`<div class="crow"><span class="ck">💰 విక్రయ మొత్తం</span><span class="cv ok">${fin.saleAmount}</span></div>`;
+    if(fin.marketValue) html+=`<div class="crow"><span class="ck">🏠 మార్కెట్ విలువ</span><span class="cv">${fin.marketValue}</span></div>`;
+    if(fin.stampDuty) html+=`<div class="crow"><span class="ck">📋 స్టాంప్ డ్యూటీ</span><span class="cv w">${fin.stampDuty}</span></div>`;
+    if(fin.registrationFee) html+=`<div class="crow"><span class="ck">🏛️ రిజి. రుసుము</span><span class="cv">${fin.registrationFee}</span></div>`;
+    if(fin.totalTransactionValue) html+=`<div class="crow"><span class="ck">🧾 మొత్తం విలువ</span><span class="cv">${fin.totalTransactionValue}</span></div>`;
+    if(fin.pricePerCent) html+=`<div class="crow"><span class="ck">📐 సెంట్ కి ధర</span><span class="cv ok">${fin.pricePerCent}</span></div>`;
+    if(fin.pricePerSqyard) html+=`<div class="crow"><span class="ck">📏 చ.గ. కి ధర</span><span class="cv">${fin.pricePerSqyard}</span></div>`;
     html+=`</div>`;
   }
 
   // Ownership chain
   if(r.ownershipChain?.length){
-    html+=`<div class="ccard" style="margin-top:10px"><div class="ccard-t">🔗 Ownership Chain (${r.ownershipChain.length} transaction${r.ownershipChain.length>1?'s':''})</div>`;
+    html+=`<div class="ccard" style="margin-top:10px"><div class="ccard-t">🔗 Ownership Chain · యాజమాన్య చరిత్ర (${r.ownershipChain.length} transaction${r.ownershipChain.length>1?'s':''})</div>`;
     r.ownershipChain.forEach((step,i)=>{
       html+=`<div style="padding:9px 0;border-bottom:1px solid var(--bd)">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">
@@ -1799,10 +1803,10 @@ function buildDocHtml(r) {
           <span style="font-size:11px;color:var(--teal);font-family:JetBrains Mono">${step.date||'Date unknown'}</span>
           ${step.regNumber?`<span style="font-size:10px;color:var(--tx3)">Reg# ${step.regNumber}</span>`:''}
         </div>
-        <div style="font-size:12px;margin-bottom:3px"><span style="color:var(--tx2)">Seller: </span><b>${step.seller||'—'}</b></div>
-        <div style="font-size:12px;margin-bottom:3px"><span style="color:var(--tx2)">Buyer: </span><b>${step.buyer||'—'}</b></div>
-        ${step.extent?`<div style="font-size:12px;margin-bottom:3px"><span style="color:var(--tx2)">Extent: </span><b>${step.extent}</b></div>`:''}
-        ${step.amount?`<div style="font-size:12px;color:var(--amb);font-family:JetBrains Mono;font-weight:700">₹ ${step.amount}</div>`:''}
+        <div style="font-size:14px;margin-bottom:4px"><span style="color:var(--sky);font-weight:700">విక్రేత (Seller): </span><b>${step.seller||'—'}</b></div>
+        <div style="font-size:14px;margin-bottom:4px"><span style="color:var(--teal);font-weight:700">కొనుగోలుదారు (Buyer): </span><b>${step.buyer||'—'}</b></div>
+        ${step.extent?`<div style="font-size:13px;margin-bottom:3px"><span style="color:var(--tx2)">విస్తీర్ణం: </span><b>${step.extent}</b></div>`:''}
+        ${step.amount?`<div style="font-size:15px;color:var(--amb);font-family:JetBrains Mono;font-weight:700;margin-top:5px">₹ ${step.amount}</div>`:''}
       </div>`;
     });
     html+=`</div>`;
