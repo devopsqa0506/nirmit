@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="నిర్మాణం">
 <meta name="theme-color" content="#08090d">
-<title>నిర్మాణం Manager</title>
+<title>Hi Sreenivas, Your AI Manager Here!!</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;500;600;700&family=Noto+Serif+Telugu:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
@@ -1486,8 +1486,8 @@ Flag if price seems high vs market rates. Warn about large pending dues. Be like
     {role:'user', parts: userParts}
   ];
 
-  // Call Gemini API - gemini-1.5-flash is free in India
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cfg.geminiKey}`;
+  // Call Gemini API - gemini-2.5-flash is free in India
+  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cfg.geminiKey}`;
   let data = null;
   let lastError = '';
   try {
@@ -1612,7 +1612,7 @@ async function handlePhoto(e, source) {
       parts=[{inlineData:{mimeType:file.type,data:b64}},{text:DOC_PROMPT}];
     }
 
-    const docRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${cfg.geminiKey}`,{
+    const docRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${cfg.geminiKey}`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user',parts}]})
