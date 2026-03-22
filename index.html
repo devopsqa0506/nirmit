@@ -577,7 +577,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
       <div class="chat-wrap">
         <div class="chat-msgs" id="chat-msgs"></div>
         <div class="cin-area">
-          <div class="chips">
+          <div class="chips" id="chat-chips">
             <div class="chip" onclick="qt('ఇసుక ఆర్డర్: ')">🪨 ఇసుక</div>
             <div class="chip" onclick="qt('electrical items ')">⚡ Electrical</div>
             <div class="chip" onclick="qt('steel TMT bars ')">🔩 Steel</div>
@@ -586,6 +586,9 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
             <div class="chip" onclick="qt('కూలి చెల్లించాను ')">👷 Labour</div>
             <div class="chip" onclick="qt('చెల్లించాను ₹')">💰 Payment</div>
             <div class="chip" onclick="doSend('అందరికీ ఎంత బకాయి చెప్పు')">📊 Summary</div>
+            <div class="chip" style="border-color:rgba(90,175,232,0.4);color:var(--sky)" onclick="doSend('uploaded document లో survey number correct గా ఉందా? recheck చేయి')">🔍 Recheck Doc</div>
+            <div class="chip" style="border-color:rgba(90,175,232,0.4);color:var(--sky)" onclick="doSend('document లో financial amounts అన్నీ correct గా ఉన్నాయా? verify చేయి')">💰 Verify Amounts</div>
+            <div class="chip" style="border-color:rgba(90,175,232,0.4);color:var(--sky)" onclick="doSend('ownership chain లో అన్ని transactions కనిపిస్తున్నాయా? check చేయి')">🔗 Check Chain</div>
           </div>
           <div class="cin-row">
             <div class="cin-acts">
@@ -1172,6 +1175,9 @@ function renderDocList() {
           +'<span class="dc-badge '+badge+'">'+(r.docType||'Doc')+'</span>'
         +'</div>'
         +finHtml+chainHtml+fieldsHtml+alertsHtml+confWarn
+        +'<div style="padding:9px 13px;border-top:1px solid var(--bd)">'
+        +'<button onclick="askAboutDoc()" style="width:100%;background:rgba(90,175,232,0.08);border:1px solid rgba(90,175,232,0.3);border-radius:9px;padding:10px;color:var(--sky);font-size:13px;cursor:pointer">💬 AI తో discuss చేయండి</button>'
+        +'</div>'
       +'</div>'
     +'</div>';
   }).join('');
@@ -1515,12 +1521,45 @@ async function handlePhoto(e, source) {
 
     if (source==='chat') {
       showSc('chat');
-      addBubble('usr','📄 Document: '+file.name);
+      addBubble('usr','📄 Document uploaded: '+file.name);
       addBubble('ai', buildDocResultHtml(result));
+
+      // Store result in chat history so user can ask follow-up questions
+      var resultSummary = 'I analyzed the document "'+file.name+'" and extracted: '
+        + 'DocType='+( result.docType||'Unknown')+', '
+        + 'Date='+(result.documentDate||'unknown')+', '
+        + 'PropertyType='+(result.propertyType||'unknown')+'. '
+        + 'Fields: '+( result.fields ? result.fields.map(function(f){ return f.key+': '+f.value; }).join('; ') : 'none') + '. '
+        + 'Financials: saleAmount='+(result.financials&&result.financials.saleAmount ? (typeof result.financials.saleAmount==='object'?result.financials.saleAmount.value:result.financials.saleAmount) : 'N/A')
+        + ', totalInvestment='+(result.financials&&result.financials.totalInvestment ? (typeof result.financials.totalInvestment==='object'?result.financials.totalInvestment.value:result.financials.totalInvestment) : 'N/A') + '. '
+        + 'OwnershipChain: '+(result.ownershipChain ? result.ownershipChain.map(function(s){ return '#'+s.order+' '+s.date+' '+s.seller+' → '+s.buyer+' '+s.amount; }).join(' | ') : 'none');
+
+      // Add to chat history so follow-up questions work
+      state.chatHistory.push({role:'user', parts:[{text:'[I uploaded document: '+file.name+']'}]});
+      state.chatHistory.push({role:'model', parts:[{text: resultSummary}]});
+      if (state.chatHistory.length>16) state.chatHistory = state.chatHistory.slice(-16);
+
+      // Show follow-up hint
+      var hint = document.createElement('div');
+      hint.style.cssText = 'margin:4px 0 4px 38px;font-size:12px;color:var(--tx3);font-style:italic';
+      hint.textContent = '💬 ఏదైనా wrong అనిపిస్తే type చేయండి — "survey number wrong recheck" or "amount confirm చేయి"';
+      document.getElementById('chat-msgs').appendChild(hint);
+      document.getElementById('chat-msgs').scrollTop = document.getElementById('chat-msgs').scrollHeight;
+
+      saveData();
     } else {
+      // From docs screen — also add to chat history and show "Ask AI" button
       showSc('docs');
       var fc2 = result.fields ? result.fields.length : 0;
-      toast('Document analyzed! '+fc2+' fields extracted.', 'ok');
+      toast('Document analyzed! '+fc2+' fields extracted. AI Chat లో questions అడగవచ్చు.', 'ok');
+
+      // Store in chat history for follow-up
+      var resultSummary2 = 'Document "'+file.name+'" analyzed. DocType='+(result.docType||'Unknown')+'. '
+        + (result.fields ? result.fields.map(function(f){ return f.key+': '+f.value; }).join('; ') : '');
+      state.chatHistory.push({role:'user', parts:[{text:'[Document analyzed: '+file.name+']'}]});
+      state.chatHistory.push({role:'model', parts:[{text: resultSummary2}]});
+      if (state.chatHistory.length>16) state.chatHistory = state.chatHistory.slice(-16);
+      saveData();
     }
 
   } catch(err) {
@@ -1603,6 +1642,31 @@ function buildDocResultHtml(r) {
   }
 
   return html;
+}
+
+// ════════════════════════════════════════════════════════
+// ASK AI ABOUT DOCUMENT
+// ════════════════════════════════════════════════════════
+function askAboutDoc(fileName, docType, summary) {
+  // Switch to chat
+  showSc('chat');
+  // Pre-fill input with context
+  var inp = document.getElementById('chat-in');
+  inp.value = '';
+  inp.focus();
+
+  // Add a message showing context is loaded
+  setTimeout(function() {
+    var hint = '<b>📄 ' + escH(docType) + ' document context loaded.</b><br>'
+      + 'File: ' + escH(fileName) + '<br><br>'
+      + 'ఇప్పుడు మీరు directly అడగవచ్చు:<br>'
+      + '• "survey number wrong, recheck చేయి"<br>'
+      + '• "ownership chain లో 2nd transaction missing"<br>'
+      + '• "total investment amount correct గా ఉందా?"<br>'
+      + '• "stamp duty percentage check చేయి"<br>'
+      + '• "document date wrong, actual date 19.08.2025"';
+    addBubble('ai', hint);
+  }, 300);
 }
 
 // ════════════════════════════════════════════════════════
