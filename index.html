@@ -2218,14 +2218,11 @@ async function handlePhoto(e, source) {
     );
     // Auto-add buyer/seller to contacts
     autoAddContactFromDoc(result);
-    // Save original file to Google Drive (max 8MB due to no-cors browser limit)
+    // Save to Drive — chunked upload handles any size
     var fileSizeMB = (b64.length * 0.75) / (1024 * 1024);
     console.log('File size for Drive upload:', fileSizeMB.toFixed(2), 'MB');
-    if (fileSizeMB <= 8) {
-      compressAndUpload(file, result.docType||'Other', result);
-    } else {
-      toast('📄 AI scan complete! Drive upload skip — file ' + fileSizeMB.toFixed(0) + 'MB (max 8MB). ilovepdf.com లో compress చేసి re-upload చేయండి.', 'info');
-    }
+    // await so hideProc waits for upload to complete
+    await compressAndUpload(file, result.docType||'Other', result);
 
     hideProc();
 
