@@ -2194,12 +2194,13 @@ async function handlePhoto(e, source) {
     );
     // Auto-add buyer/seller to contacts
     autoAddContactFromDoc(result);
-    // Save original file to Google Drive (max 5MB)
+    // Save original file to Google Drive
     var fileSizeMB = (b64.length * 0.75) / (1024 * 1024);
-    if (fileSizeMB <= 5) {
+    console.log('File size for Drive upload:', fileSizeMB.toFixed(2), 'MB');
+    if (fileSizeMB <= 10) {
       saveToDrive(b64, file.type, file.name, result.docType||'Other', result);
     } else {
-      toast('File size ' + fileSizeMB.toFixed(1) + 'MB — Drive upload skip (max 5MB)', 'info');
+      toast('File ' + fileSizeMB.toFixed(1) + 'MB — too large for Drive upload (max 10MB)', 'info');
     }
 
     hideProc();
@@ -3092,13 +3093,15 @@ function saveToDrive(b64, mimeType, fileName, docType, result) {
   });
 
   // Always use no-cors — Apps Script blocks CORS from browser
-  // File gets saved to Drive even without response
+  console.log('Sending to Drive, payload size:', Math.round(payload.length/1024), 'KB');
   fetch(cfg.scriptUrl, { method: 'POST', mode: 'no-cors', body: payload })
   .then(function(){
+    console.log('Drive upload request sent successfully');
     toast('📁 Drive కి upload అవుతోంది...', 'info');
   })
   .catch(function(err){
     console.log('Drive upload failed:', err.message);
+    toast('Drive upload failed: ' + err.message, 'err');
   });
 }
 
