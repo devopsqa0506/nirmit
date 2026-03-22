@@ -800,7 +800,7 @@ body{
       <div class="seg">
         <div class="seg-t">
           <span>Recent Transactions</span>
-          <span id="last-sync" style="color:var(--tx3);font-size:9px"></span>
+          <span id="last-sync" style="color:var(--tx3);font-size:11px"></span>
         </div>
         <div id="recent-list">
           <div class="empty"><div class="ei">📋</div><div class="et">ఇంకా ఏమీ లేదు</div><div class="es">AI Chat లో మీ ఆర్డర్లు చెప్పండి</div></div>
@@ -857,7 +857,10 @@ body{
       </div>
       <input type="file" id="doc-file" accept="image/*,application/pdf" style="display:none" onchange="handlePhoto(event,'docs')">
       <div class="seg" style="margin-top:12px">
-        <div class="seg-t">Scanned Documents</div>
+        <div class="seg-t">
+          <span>Scanned Documents</span>
+          <button class="btn btn-ghost btn-sm" onclick="clearDocs()" style="font-size:12px;color:var(--rose);border-color:rgba(232,93,122,0.3)">🗑️ Clear All</button>
+        </div>
         <div id="doc-list">
           <div class="empty"><div class="ei">🏛️</div><div class="et">Documents లేవు</div><div class="es">Registration, Agreement docs scan చేయండి</div></div>
         </div>
@@ -925,6 +928,12 @@ body{
           </div>
           <button class="btn btn-ghost btn-sm" onclick="showReconfigGuide()">Guide</button>
         </div>
+        <div style="height:1px;background:var(--bd);margin:8px 0 14px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px">
+          <button class="btn btn-ghost btn-full btn-sm" style="color:var(--rose);border-color:rgba(232,93,122,0.3);font-size:12px" onclick="clearDocs()">🗑️ Clear Documents</button>
+          <button class="btn btn-ghost btn-full btn-sm" style="color:var(--rose);border-color:rgba(232,93,122,0.3);font-size:12px" onclick="clearTransactions()">🗑️ Clear Transactions</button>
+        </div>
+        <button class="btn btn-ghost btn-full btn-sm" style="color:var(--rose);border-color:rgba(232,93,122,0.3);font-size:12px;margin-bottom:9px" onclick="clearAllData()">🗑️ Clear ALL Data (Transactions + Documents + Vendors)</button>
         <div style="height:1px;background:var(--bd);margin:8px 0 14px"></div>
         <button class="btn btn-ghost btn-full" style="color:var(--tx3);font-size:12px" onclick="if(confirm('Are you sure? All local settings will be cleared.'))clearConfig()">
           🔄 Reconfigure from scratch
@@ -1703,7 +1712,13 @@ Analyze this document carefully. Return ONLY valid JSON (no markdown, no explana
 EXTRACTION RULES:
 1. BILINGUAL: Every field value in both Telugu+English. Format: "English (తెలుగు)"
 2. Field keys bilingual: "Survey Number (సర్వే నంబర్)", "Seller (విక్రేత)", "Buyer (కొనుగోలుదారు)", "Extent (విస్తీర్ణం)", "Village (గ్రామం)", "Registration Date (రిజిస్ట్రేషన్ తేదీ)", "Sale Amount (విక్రయ మొత్తం)", "Stamp Duty (స్టాంప్ డ్యూటీ)", "Market Value (మార్కెట్ విలువ)"
-3. DATES: Extract the ACTUAL date written in the document (look for తేది:, Date:, రిజిస్ట్రేషన్ తేదీ). Do NOT use today's date. Format as DD.MM.YYYY
+3. DATES — VERY IMPORTANT: 
+   - "documentDate" = the date THIS specific document was executed/registered (look at document header, first line, తేది:, Date of execution, రిజిస్ట్రేషన్ తేదీ)
+   - This is NOT the date of any previous transaction or previous owner's purchase
+   - Example: if doc says "తేది: 19.08.2025" at top → documentDate = "19.08.2025"
+   - ownershipChain[0].date = date of THIS current transaction (same as documentDate usually)
+   - ownershipChain[1], [2] etc = dates of PREVIOUS transactions found in the document history
+   - Do NOT use today's date. Extract exactly from document text. Format: DD.MM.YYYY
 4. PROPERTY TYPE: Determine and set "propertyType" field as one of: "Land" | "Plot" | "House" | "Apartment" | "Agricultural" | "Commercial". Look for keywords: గృహ విక్రయం=House, నివేశన స్థలం=Plot, వ్యవసాయ భూమి=Agricultural
 5. PRICE PER CENT: Only calculate if propertyType is "Land", "Plot", or "Agricultural". For House/Apartment do NOT calculate pricePerCent or pricePerSqyard — set them to null
 6. Ownership chain: ALL transactions in order, extract exact dates from document
@@ -1756,13 +1771,13 @@ async function handlePhoto(e, source) {
       result = JSON.parse(clean.match(/\{[\s\S]*\}/)?.[0]||clean);
     } catch(e){ result={docType:'Unknown',summary:text,fields:[],alerts:[]}; }
 
-    // Save doc record - use actual document date from AI result
+    // Save doc record - ONLY use documentDate from AI, never fall back to chain dates
     const docActualDate = result.documentDate
-      || result.ownershipChain?.[0]?.date 
-      || result.keyDates?.[0]?.date 
       || result.fields?.find(f=>{
            const k=(f.key||'').toLowerCase();
-           return k.includes('registration date') || k.includes('రిజిస్ట్రేషన్ తేదీ') || k.includes('document date');
+           return k.includes('registration date') || k.includes('రిజిస్ట్రేషన్ తేదీ') 
+               || k.includes('document date') || k.includes('date of execution')
+               || k.includes('తేదీ');
          })?.value
       || today();
     const doc={id:'d'+Date.now(),date:docActualDate,fileName:file.name,type:result.docType||'Document',propertyType:result.propertyType||'',result};
@@ -1894,6 +1909,44 @@ function showReconfigGuide() {
 function clearConfig() {
   localStorage.removeItem(CFG_KEY);
   location.reload();
+}
+
+function clearDocs() {
+  if (!confirm('Documents history అన్నీ delete చేయాలా?
+(Google Sheet లో data ఉంటుంది, local మాత్రమే clear అవుతుంది)')) return;
+  state.documents = [];
+  saveLocalData();
+  renderDocList();
+  toast('✓ Documents cleared','ok');
+}
+
+function clearTransactions() {
+  if (!confirm('అన్ని transactions delete చేయాలా?
+
+JUST local data clear అవుతుంది. Google Sheet లో data safe గా ఉంటుంది.')) return;
+  state.entries = [];
+  state.vendors = {};
+  state.priceHistory = {};
+  state.chatHistory = [];
+  saveLocalData();
+  refreshUI();
+  toast('✓ Transactions cleared. Google Sheet లో data ఉంది.','ok');
+}
+
+function clearAllData() {
+  if (!confirm('⚠️ అన్నీ delete చేయాలా? Transactions, Vendors, Documents, Prices అన్నీ!
+
+Google Sheet లో data safe గా ఉంటుంది — sync చేస్తే వెనక్కి వస్తుంది.')) return;
+  state.entries = [];
+  state.vendors = {};
+  state.priceHistory = {};
+  state.documents = [];
+  state.chatHistory = [];
+  state.lastSync = null;
+  saveLocalData();
+  refreshUI();
+  renderDocList();
+  toast('✓ All local data cleared. Google Sheet లో data safe గా ఉంది.','ok');
 }
 
 // ═══════════════════════════════════════════════════
