@@ -2518,12 +2518,38 @@ function saveVendor() {
 // SETTINGS
 // ════════════════════════════════════════════════════════
 function updateSettingsUI() {
-  document.getElementById('cfg-sheet').textContent = cfg.sheetId ? cfg.sheetId.slice(0,22)+'...' : 'Not configured';
+  // Sheet ID
+  var sheetEl = document.getElementById('cfg-sheet');
+  if (sheetEl) sheetEl.textContent = cfg.sheetId ? cfg.sheetId.slice(0,22)+'...' : 'Not configured';
+
+  // Script URL
+  var scriptEl = document.getElementById('cfg-script');
+  if (scriptEl) {
+    if (cfg.scriptUrl) {
+      scriptEl.textContent = cfg.scriptUrl.slice(0,38)+'...';
+      scriptEl.style.color = 'var(--teal)';
+    } else {
+      scriptEl.textContent = 'Not configured';
+      scriptEl.style.color = 'var(--rose)';
+    }
+  }
+
+  // AI Keys
   var keyCount = (cfg.apiKeys||[]).length || (cfg.geminiKey?1:0);
-  document.getElementById('cfg-ai').textContent = keyCount>0
+  var aiEl = document.getElementById('cfg-ai');
+  if (aiEl) aiEl.textContent = keyCount>0
     ? keyCount+' key'+(keyCount>1?'s':'')+' configured ✓ ('+keyCount*15+' req/min)'
     : 'Not configured';
-  if (state.lastSync) document.getElementById('cfg-sync').textContent = 'Last sync: '+new Date(state.lastSync).toLocaleString('en-IN');
+
+  // Sync status
+  if (state.lastSync) {
+    var syncEl = document.getElementById('cfg-sync');
+    if (syncEl) syncEl.textContent = 'Last sync: '+new Date(state.lastSync).toLocaleString('en-IN');
+  }
+
+  // Hardcoded banner
+  var banner = document.getElementById('hardcoded-banner');
+  if (banner) banner.style.display = (typeof HARDCODED_CONFIG!=='undefined' && HARDCODED_CONFIG.sheetId) ? 'flex' : 'none';
 }
 
 function openSheetInBrowser() {
