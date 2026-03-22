@@ -793,6 +793,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
         </div>
         <div class="seg-t">Configuration</div>
         <div class="si"><div class="si-ico">📊</div><div class="si-body"><div class="si-t">Google Sheet</div><div class="si-s">Data ఇక్కడ save అవుతుంది</div><div class="si-v" id="cfg-sheet">Not configured</div></div><button class="btn ghost sm" onclick="openSheetInBrowser()">Open ↗</button></div>
+        <div class="si"><div class="si-ico">🔗</div><div class="si-body"><div class="si-t">Apps Script URL</div><div class="si-s">Script URL update చేయండి</div><div class="si-v" id="cfg-script" style="font-size:11px">Not configured</div></div><button class="btn ghost sm" onclick="changeScriptUrl()">Change</button></div>
         <div class="si"><div class="si-ico">🤖</div><div class="si-body"><div class="si-t">Gemini AI Keys</div><div class="si-s">Free — 15 req/min per key. Multiple keys = more quota</div><div class="si-v" id="cfg-ai">Not configured</div></div><button class="btn ghost sm" onclick="openModal('manage-keys')">Manage</button></div>
         <div class="si"><div class="si-ico">☁️</div><div class="si-body"><div class="si-t">Sync Status</div><div class="si-s" id="cfg-sync">Last sync: Never</div></div><button class="btn ghost sm" onclick="syncNow()">Sync</button></div>
         <div class="si" style="border-color:rgba(58,232,200,0.3)">
@@ -2489,6 +2490,18 @@ function openSheetInBrowser() {
 function changeKey() {
   openModal('manage-keys');
   renderKeysList();
+}
+
+function changeScriptUrl() {
+  var url = prompt('New Apps Script URL paste చేయండి:');
+  if (url && url.startsWith('https://script.google.com')) {
+    cfg.scriptUrl = url;
+    saveCfg();
+    updateSettingsUI();
+    toast('Script URL updated!', 'ok');
+  } else if (url) {
+    toast('Invalid URL — script.google.com తో start అవాలి', 'err');
+  }
 }
 
 function getActiveKey() {
