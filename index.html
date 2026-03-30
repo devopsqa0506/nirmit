@@ -694,9 +694,24 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
     </div>
     <div class="hdr-right" style="display:flex;align-items:center;gap:8px">
       <div class="pill">బకాయి: <b id="hdr-due">₹0</b></div>
-      <div id="user-pill" style="display:none" class="user-pill">
+      <div id="user-pill" style="display:none;position:relative" class="user-pill" onclick="toggleUserMenu()" title="Click to sign out">
         <img id="user-av" class="user-av" src="" alt="">
         <span id="user-name" class="user-name"></span>
+        <span style="font-size:10px;color:var(--tx3)">▾</span>
+        <!-- Dropdown -->
+        <div id="user-menu" style="display:none;position:absolute;top:110%;right:0;
+          background:var(--s1);border:1px solid var(--bd);border-radius:10px;
+          min-width:160px;padding:6px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.3)">
+          <div style="padding:8px 10px;font-size:12px;color:var(--tx3);border-bottom:1px solid var(--bd);margin-bottom:4px" id="user-email-menu"></div>
+          <button onclick="event.stopPropagation();signOut()" style="width:100%;background:none;border:none;
+            padding:8px 10px;text-align:left;color:var(--rose);font-size:13px;cursor:pointer;border-radius:7px">
+            🚪 Sign Out
+          </button>
+          <button onclick="event.stopPropagation();showSc('settings');closeUserMenu()" style="width:100%;background:none;border:none;
+            padding:8px 10px;text-align:left;color:var(--tx2);font-size:13px;cursor:pointer;border-radius:7px">
+            ⚙️ Settings
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2430,7 +2445,14 @@ async function handlePhoto(e, source) {
     hideProc(); toast('File read failed: ' + err.message, 'err'); return;
   }
 
-  showProc('AI analyzing document...\nReading Telugu text...\nPlease wait 15-30 seconds');
+  // Dynamic wait message based on file size
+  var fileSizeMB = (b64.length * 0.75) / (1024 * 1024);
+  var waitMsg = fileSizeMB < 1   ? '30-45 seconds'
+              : fileSizeMB < 3   ? '45-60 seconds'
+              : fileSizeMB < 7   ? '1-2 minutes'
+              :                    '2-3 minutes';
+  var pageEstimate = file.type === 'application/pdf' ? Math.round(fileSizeMB * 3) + ' page PDF · ' : '';
+  showProc('AI analyzing document...\nReading Telugu text...\n' + pageEstimate + 'Please wait ' + waitMsg);
 
   try {
     var parts = [
@@ -3896,7 +3918,7 @@ function toast(msg, type) {
   el.textContent = msg;
   el.className = 'on '+(type||'info');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ el.className=''; }, 3000);
+  toastTimer = setTimeout(function(){ el.className=''; }, 10000);
 }
 
 // ════════════════════════════════════════════════════════
@@ -4337,11 +4359,31 @@ function updateUserUI() {
   var pill = document.getElementById('user-pill');
   var av   = document.getElementById('user-av');
   var name = document.getElementById('user-name');
+  var emailMenu = document.getElementById('user-email-menu');
   if (cfg.userEmail) {
     if (pill) pill.style.display = 'flex';
-    if (av && cfg.userPicture) av.src = cfg.userPicture;
-    if (name) name.textContent = (cfg.userName||'').split(' ')[0];
+    if (av && cfg.userPicture) { av.src = cfg.userPicture; av.onerror = function(){ av.style.display='none'; }; }
+    if (name) name.textContent = (cfg.userName||'User').split(' ')[0];
+    if (emailMenu) emailMenu.textContent = cfg.userEmail;
   }
+}
+
+function toggleUserMenu() {
+  var menu = document.getElementById('user-menu');
+  if (!menu) return;
+  var isOpen = menu.style.display === 'block';
+  menu.style.display = isOpen ? 'none' : 'block';
+  // Close on outside click
+  if (!isOpen) {
+    setTimeout(function(){
+      document.addEventListener('click', closeUserMenu, {once: true});
+    }, 10);
+  }
+}
+
+function closeUserMenu() {
+  var menu = document.getElementById('user-menu');
+  if (menu) menu.style.display = 'none';
 }
 
 function changeClientId() {
