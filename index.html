@@ -413,6 +413,35 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
 @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fu{animation:fadeup 0.24s ease both}
 
+/* AI BRAIN MODULE */
+.ai-brain-btn{display:flex;align-items:center;gap:10px;width:100%;
+  background:linear-gradient(135deg,rgba(232,184,74,0.15),rgba(58,232,200,0.1));
+  border:1px solid rgba(232,184,74,0.4);border-radius:14px;padding:14px 16px;
+  cursor:pointer;margin-bottom:12px;text-align:left}
+.ai-brain-btn:active{opacity:0.8}
+.aib-ico{font-size:28px;flex-shrink:0}
+.aib-body{flex:1}
+.aib-title{font-size:15px;font-weight:700;color:var(--amb)}
+.aib-sub{font-size:12px;color:var(--tx2);margin-top:2px}
+
+.insight-card{background:var(--s2);border:1px solid var(--bd);border-radius:12px;
+  padding:14px;margin-bottom:10px;animation:fadeup 0.3s ease both}
+.insight-card.alert{border-color:rgba(232,93,122,0.4);background:rgba(232,93,122,0.06)}
+.insight-card.good{border-color:rgba(58,232,200,0.4);background:rgba(58,232,200,0.06)}
+.insight-card.warn{border-color:rgba(232,184,74,0.4);background:rgba(232,184,74,0.06)}
+.insight-title{font-size:13px;font-weight:700;color:var(--tx1);margin-bottom:6px;
+  display:flex;align-items:center;gap:6px}
+.insight-body{font-size:13px;color:var(--tx2);line-height:1.7}
+
+.auto-entry-bar{display:flex;gap:8px;padding:10px 14px;background:var(--s2);
+  border-top:1px solid var(--bd);align-items:flex-end}
+.auto-entry-in{flex:1;background:var(--s3);border:1px solid var(--bd);border-radius:10px;
+  padding:10px 12px;color:var(--tx1);font-size:14px;font-family:var(--ff);
+  resize:none;min-height:40px;max-height:100px}
+.auto-entry-in::placeholder{color:var(--tx3)}
+.ae-send{background:var(--amb);border:none;border-radius:10px;width:38px;height:38px;
+  cursor:pointer;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+
 /* GMAIL LOGIN */
 .login-screen{position:fixed;inset:0;z-index:6000;background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -676,6 +705,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
     <div class="ni on" onclick="showSc('home')"><div class="ico">🏠</div><div class="lbl">Home</div></div>
     <div class="ni" onclick="showSc('chat')"><div class="ico">💬</div><div class="lbl">AI Chat</div></div>
     <div class="ni" onclick="showSc('projects')"><div class="ico">🏗️</div><div class="lbl">Projects</div></div>
+    <div class="ni" onclick="showSc('brain')"><div class="ico">🧠</div><div class="lbl">AI Brain</div></div>
     <div class="ni" onclick="showSc('contacts')"><div class="ico">👥</div><div class="lbl">Contacts</div></div>
     <div class="ni" onclick="showSc('docs')"><div class="ico">📄</div><div class="lbl">Docs</div></div>
     <div class="ni" onclick="showSc('settings')"><div class="ico">⚙️</div><div class="lbl">Settings</div></div>
@@ -825,6 +855,65 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
       <div class="seg">
         <div class="seg-t">Price History — ధరల చరిత్ర</div>
         <div id="price-list"></div>
+      </div>
+    </div>
+
+    <!-- AI BRAIN SCREEN -->
+    <div class="sc" id="sc-brain">
+      <div class="seg">
+        <div class="seg-t">🧠 AI Brain — Construction Manager</div>
+
+        <!-- Layer 1: AI Insights -->
+        <button class="ai-brain-btn" onclick="runAIInsights()">
+          <div class="aib-ico">📊</div>
+          <div class="aib-body">
+            <div class="aib-title">AI Insights</div>
+            <div class="aib-sub">Cost trends · Vendor analysis · Cash flow · Suggestions</div>
+          </div>
+          <span style="color:var(--amb);font-size:20px">›</span>
+        </button>
+
+        <!-- Layer 5: Alerts -->
+        <button class="ai-brain-btn" onclick="runAIAlerts()" style="background:linear-gradient(135deg,rgba(232,93,122,0.1),rgba(232,184,74,0.08));border-color:rgba(232,93,122,0.3)">
+          <div class="aib-ico">🚨</div>
+          <div class="aib-body">
+            <div class="aib-title" style="color:var(--rose)">Smart Alerts</div>
+            <div class="aib-sub">Price hikes · Overdue payments · Budget risks</div>
+          </div>
+          <span style="color:var(--rose);font-size:20px">›</span>
+        </button>
+
+        <!-- Insights output area -->
+        <div id="brain-output" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:700;color:var(--tx1)" id="brain-output-title">Insights</div>
+            <button onclick="document.getElementById('brain-output').style.display='none'"
+              style="background:none;border:none;color:var(--tx3);font-size:18px;cursor:pointer">✕</button>
+          </div>
+          <div id="brain-cards"></div>
+        </div>
+
+        <!-- Processing state -->
+        <div id="brain-loading" style="display:none;text-align:center;padding:30px 0">
+          <div class="proc-ring" style="width:36px;height:36px;border-width:3px;margin:0 auto 12px"></div>
+          <div style="font-size:13px;color:var(--tx2)" id="brain-loading-text">AI analyzing your data...</div>
+        </div>
+      </div>
+
+      <!-- Layer 3: Auto Entry from Text -->
+      <div class="seg" style="margin-top:0">
+        <div class="seg-t">⚡ Auto Entry — Natural Language</div>
+        <div style="font-size:13px;color:var(--tx2);margin-bottom:12px;line-height:1.6">
+          Type in Telugu or English — AI automatically creates expense entry
+        </div>
+        <div style="background:var(--s3);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:var(--tx3)">
+          Examples: "Paid 20k to Ramesh for sand" · "Raju కి 5000 steel కి ఇచ్చాను" · "Bought 10 cement bags 4200"
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <textarea id="auto-entry-input" class="auto-entry-in" placeholder="Type expense in your words..." rows="2"></textarea>
+          <button class="ae-send" onclick="processAutoEntry()">⚡</button>
+        </div>
+        <div id="auto-entry-result" style="margin-top:10px"></div>
       </div>
     </div>
 
@@ -2176,17 +2265,14 @@ async function callGemini(imageData, imageMime, docPromptOverride) {
     return;
   }
 
-  var ledgerCtx = JSON.stringify({
-    vendors: state.vendors,
-    recentEntries: state.entries.slice(-12).map(function(e){ return {date:e.date,type:e.type,vendor:e.vendor,category:e.category,amount:e.amount,description:e.description}; }),
-    priceHistory: state.priceHistory,
-    totalOrdered: Object.values(state.vendors).reduce(function(s,v){ return s+(Number(v.totalOrdered)||0); },0),
-    totalPaid:    Object.values(state.vendors).reduce(function(s,v){ return s+(Number(v.totalPaid)||0); },0)
-  });
+  // Send full data summary to AI for better answers
+  var dataSummary = buildDataSummary();
+  var ledgerCtx = JSON.stringify(dataSummary);
 
-  var systemText = 'You are SiteBook AI, site manager for a builder from Kadapa, Andhra Pradesh. '
-    +'He builds small houses on 3-cent plots. He speaks Telugu and English. Reply in the same language he uses.\n\n'
-    +'LEDGER STATE: '+ledgerCtx+'\n\n'
+  var systemText = 'You are SiteBook AI, an expert construction site manager and cost controller for a builder from Kadapa, Andhra Pradesh. '
+    +'He builds small houses on 3-cent plots. He speaks Telugu and English. Reply in the same language he uses.\n'
+    +'Answer questions based ONLY on the provided project data. Show numbers when possible. Be short and practical.\n\n'
+    +'FULL PROJECT DATA: '+ledgerCtx+'\n\n'
     +'ANDHRA MARKET RATES (Kadapa):\n'
     +'- Sand: Rs.1800-3500/tractor\n- TMT Steel: Rs.58-75/kg\n- Cement: Rs.340-430/bag\n- Electrical rough: Rs.85-140/sqft\n- Labour: Rs.450-700/day\n\n'
     +'When user mentions an order or payment, parse it and output ONE <ENTRY> block:\n'
@@ -3641,7 +3727,7 @@ function showSc(name) {
   document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('on'); });
   var scEl = document.getElementById('sc-'+name);
   if (scEl) scEl.classList.add('on');
-  var names=['home','chat','projects','contacts','docs','settings'];
+  var names=['home','chat','projects','brain','contacts','docs','settings'];
   var idx = names.indexOf(name);
   var ni = document.querySelectorAll('.ni')[idx];
   if (ni) ni.classList.add('on');
@@ -3695,6 +3781,334 @@ function toast(msg, type) {
   el.className = 'on '+(type||'info');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function(){ el.className=''; }, 3000);
+}
+
+// ════════════════════════════════════════════════════════
+// AI BRAIN MODULE — 5 Layers
+// ════════════════════════════════════════════════════════
+
+// Build clean data summary for AI
+function buildDataSummary() {
+  var vendors = Object.values(state.vendors || {});
+  var entries = state.entries || [];
+
+  // Clean expenses list
+  var expenses = entries.filter(function(e){ return e.type === 'order' || e.type === 'advance'; })
+    .map(function(e){ return {date:e.date, vendor:e.vendor, category:e.category, amount:Number(e.amount)||0, qty:e.qty, unit:e.unit}; });
+
+  // Clean payments list
+  var payments = entries.filter(function(e){ return e.type === 'payment'; })
+    .map(function(e){ return {date:e.date, vendor:e.vendor, amount:Number(e.amount)||0}; });
+
+  // Vendor summary with balance
+  var vendorSummary = vendors.map(function(v){
+    return {
+      name: v.name,
+      category: v.category,
+      phone: v.phone,
+      totalOrdered: Number(v.totalOrdered)||0,
+      totalPaid: Number(v.totalPaid)||0,
+      balance: (Number(v.totalOrdered)||0) - (Number(v.totalPaid)||0),
+      lastDate: v.lastDate
+    };
+  });
+
+  // Price history per material
+  var priceInsights = {};
+  Object.keys(state.priceHistory || {}).forEach(function(key){
+    var history = state.priceHistory[key];
+    if (history && history.length > 0) {
+      priceInsights[key] = history.slice(-5); // last 5 prices
+    }
+  });
+
+  // Totals
+  var totalOrdered = vendors.reduce(function(s,v){ return s+(Number(v.totalOrdered)||0); }, 0);
+  var totalPaid    = vendors.reduce(function(s,v){ return s+(Number(v.totalPaid)||0); }, 0);
+
+  return {
+    summary: {
+      totalEntries: entries.length,
+      totalOrdered: totalOrdered,
+      totalPaid: totalPaid,
+      totalPending: totalOrdered - totalPaid,
+      vendorCount: vendors.length
+    },
+    expenses: expenses.slice(-50), // last 50 expenses
+    payments: payments.slice(-30), // last 30 payments
+    vendors: vendorSummary,
+    priceHistory: priceInsights
+  };
+}
+
+// LAYER 1: AI Insights
+async function runAIInsights() {
+  var activeKey = getActiveKey();
+  if (!activeKey) { toast('Gemini API key set చేయండి', 'err'); return; }
+
+  var data = buildDataSummary();
+  if (data.summary.totalEntries === 0) {
+    toast('ముందు entries add చేయండి', 'info'); return;
+  }
+
+  showBrainLoading('AI analyzing your project data...');
+
+  var INSIGHTS_PROMPT = 'You are an experienced construction site manager and cost controller in India.'
+    + ' You are given full project data for a builder from Kadapa, Andhra Pradesh who builds small houses.'
+    + '\n\nAnalyze the data and give output in these sections:'
+    + '\n\n1. COST INSIGHTS - Price increases/decreases, unusual spending, material-wise breakdown'
+    + '\n2. PENDING PAYMENTS - Vendors with pending balances, how long pending'
+    + '\n3. MISTAKES / ANOMALIES - Duplicate entries, suspicious high prices, wrong totals'
+    + '\n4. VENDOR ANALYSIS - Cheapest vendor, inconsistent vendors, recommendations'
+    + '\n5. CASH FLOW SUMMARY - Total spent, total paid, total pending'
+    + '\n6. ACTIONABLE SUGGESTIONS - What to do immediately, where to save money, risks'
+    + '\n\nIMPORTANT: Be practical. Use simple language like talking to a builder.'
+    + ' Use Telugu words where natural. Do not hallucinate numbers.'
+    + ' If data is insufficient say "Not enough data".'
+    + '\n\nDATA:\n' + JSON.stringify(data);
+
+  try {
+    var res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + activeKey,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          contents: [{parts: [{text: INSIGHTS_PROMPT}]}],
+          generationConfig: {temperature: 0.3, maxOutputTokens: 2000}
+        })
+      }
+    );
+    var json = await res.json();
+    if (json.error) { hideBrainLoading(); toast('AI Error: ' + json.error.message, 'err'); return; }
+    var text = json.candidates[0].content.parts[0].text;
+    hideBrainLoading();
+    renderInsights(text, '📊 AI Insights');
+  } catch(e) {
+    hideBrainLoading();
+    toast('Error: ' + e.message, 'err');
+  }
+}
+
+// LAYER 5: Smart Alerts
+async function runAIAlerts() {
+  var activeKey = getActiveKey();
+  if (!activeKey) { toast('Gemini API key set చేయండి', 'err'); return; }
+
+  var data = buildDataSummary();
+  if (data.summary.totalEntries === 0) { toast('ముందు entries add చేయండి', 'info'); return; }
+
+  showBrainLoading('Checking for alerts...');
+
+  var ALERTS_PROMPT = 'You are a construction project monitor.'
+    + ' Analyze the data and generate ONLY important alerts.'
+    + '\nFocus on:'
+    + '\n- Price increases >10% vs previous entries for same material'
+    + '\n- Pending payments overdue >7 days'
+    + '\n- Unusual high expenses (3x normal)'
+    + '\n- Budget risks'
+    + '\n- Vendors not paid for long time'
+    + '\n\nFormat each alert as: ⚠️ [SHORT ALERT TEXT]'
+    + '\nKeep each alert under 15 words. Maximum 8 alerts.'
+    + '\nIf no issues found say: ✅ No major alerts. All looks good!'
+    + '\n\nData:\n' + JSON.stringify(data);
+
+  try {
+    var res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + activeKey,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          contents: [{parts: [{text: ALERTS_PROMPT}]}],
+          generationConfig: {temperature: 0.2, maxOutputTokens: 500}
+        })
+      }
+    );
+    var json = await res.json();
+    if (json.error) { hideBrainLoading(); toast('AI Error: ' + json.error.message, 'err'); return; }
+    var text = json.candidates[0].content.parts[0].text;
+    hideBrainLoading();
+    renderInsights(text, '🚨 Smart Alerts');
+  } catch(e) {
+    hideBrainLoading();
+    toast('Error: ' + e.message, 'err');
+  }
+}
+
+// LAYER 3: Auto Entry from Natural Language
+async function processAutoEntry() {
+  var input = document.getElementById('auto-entry-input');
+  var text = input ? input.value.trim() : '';
+  if (!text) { toast('Text enter చేయండి', 'err'); return; }
+
+  var activeKey = getActiveKey();
+  if (!activeKey) { toast('Gemini API key set చేయండి', 'err'); return; }
+
+  var resultEl = document.getElementById('auto-entry-result');
+  if (resultEl) resultEl.innerHTML = '<div style="font-size:13px;color:var(--tx2)">⏳ Processing...</div>';
+
+  var AUTO_ENTRY_PROMPT = 'Convert the following sentence into structured JSON for a construction ledger.'
+    + '\nExtract: type (order=expense/payment), vendor name, category (sand/steel/cement/electrical/labour/other), amount (number only), date (today if not given: ' + today() + '), qty (if mentioned), unit (if mentioned), notes'
+    + '\n\nReturn ONLY valid JSON. No explanation. No markdown.'
+    + '\nExample input: "Paid 20000 to Ramesh for sand"'
+    + '\nExample output: {"type":"payment","vendor":"Ramesh","category":"Sand","amount":20000,"date":"' + today() + '","qty":"","unit":"","notes":""}'
+    + '\n\nNow convert: ' + text;
+
+  try {
+    var res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + activeKey,
+      {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          contents: [{parts: [{text: AUTO_ENTRY_PROMPT}]}],
+          generationConfig: {temperature: 0.1, maxOutputTokens: 300}
+        })
+      }
+    );
+    var json = await res.json();
+    if (json.error) {
+      if (resultEl) resultEl.innerHTML = '<div style="color:var(--rose);font-size:13px">Error: ' + json.error.message + '</div>';
+      return;
+    }
+    var rawText = json.candidates[0].content.parts[0].text;
+    // Clean JSON from response
+    var cleaned = rawText.replace(/```json/g,'').replace(/```/g,'').trim();
+    var entry = JSON.parse(cleaned);
+
+    // Show preview card for confirmation
+    if (resultEl) {
+      resultEl.innerHTML = '<div class="insight-card good">'
+        + '<div class="insight-title">✅ Entry Detected — Confirm?</div>'
+        + '<table style="width:100%;font-size:13px;border-collapse:collapse">'
+        + '<tr><td style="color:var(--tx3);padding:3px 0;width:40%">Type</td><td style="color:var(--tx1)">' + (entry.type||'order') + '</td></tr>'
+        + '<tr><td style="color:var(--tx3);padding:3px 0">Vendor</td><td style="color:var(--teal);font-weight:700">' + escH(entry.vendor||'') + '</td></tr>'
+        + '<tr><td style="color:var(--tx3);padding:3px 0">Category</td><td>' + escH(entry.category||'') + '</td></tr>'
+        + '<tr><td style="color:var(--tx3);padding:3px 0">Amount</td><td style="color:var(--amb);font-weight:700">₹' + Number(entry.amount||0).toLocaleString('en-IN') + '</td></tr>'
+        + (entry.qty ? '<tr><td style="color:var(--tx3);padding:3px 0">Qty</td><td>' + entry.qty + ' ' + (entry.unit||'') + '</td></tr>' : '')
+        + '<tr><td style="color:var(--tx3);padding:3px 0">Date</td><td>' + escH(entry.date||today()) + '</td></tr>'
+        + '</table>'
+        + '<div style="display:flex;gap:8px;margin-top:12px">'
+        + '<button class="btn ghost full" style="color:var(--rose)" onclick="clearAutoEntry()">✕ Cancel</button>'
+        + '<button class="btn amb full" onclick="confirmAutoEntry(' + escH(JSON.stringify(entry)) + ')">✓ Save Entry</button>'
+        + '</div>'
+        + '</div>';
+    }
+  } catch(err) {
+    if (resultEl) resultEl.innerHTML = '<div style="color:var(--rose);font-size:13px">❌ Could not parse. Please try again with clearer text.</div>';
+  }
+}
+
+function clearAutoEntry() {
+  var r = document.getElementById('auto-entry-result');
+  var i = document.getElementById('auto-entry-input');
+  if (r) r.innerHTML = '';
+  if (i) i.value = '';
+}
+
+function confirmAutoEntry(entryJson) {
+  try {
+    var entry = typeof entryJson === 'string' ? JSON.parse(entryJson) : entryJson;
+    addEntry({
+      type: entry.type || 'order',
+      vendor: entry.vendor || '',
+      category: entry.category || 'Other',
+      amount: Number(entry.amount) || 0,
+      date: entry.date || today(),
+      qty: entry.qty || '',
+      unit: entry.unit || '',
+      notes: entry.notes || '',
+      phone: ''
+    });
+    document.getElementById('auto-entry-result').innerHTML = '<div class="insight-card good"><div class="insight-title">✅ Entry saved!</div></div>';
+    document.getElementById('auto-entry-input').value = '';
+    setTimeout(function(){
+      document.getElementById('auto-entry-result').innerHTML = '';
+    }, 2000);
+    toast('Entry saved! ✓', 'ok');
+  } catch(e) {
+    toast('Save failed: ' + e.message, 'err');
+  }
+}
+
+// Render insights as cards
+function renderInsights(text, title) {
+  var outputEl = document.getElementById('brain-output');
+  var cardsEl  = document.getElementById('brain-cards');
+  var titleEl  = document.getElementById('brain-output-title');
+
+  if (!outputEl || !cardsEl) return;
+
+  if (titleEl) titleEl.textContent = title;
+  outputEl.style.display = 'block';
+
+  // Split by numbered sections or ⚠️ alerts
+  var lines = text.split('\n').filter(function(l){ return l.trim(); });
+  var html = '';
+  var currentSection = '';
+  var currentContent = [];
+
+  lines.forEach(function(line) {
+    var trimmed = line.trim();
+    // Section headers (1. COST INSIGHTS etc)
+    if (/^[1-6]\.\s+[A-Z\s\/]+$/.test(trimmed) || /^#+\s/.test(trimmed)) {
+      if (currentSection && currentContent.length) {
+        html += buildInsightCard(currentSection, currentContent.join('\n'), 'normal');
+      }
+      currentSection = trimmed.replace(/^#+\s*/, '').replace(/^\d+\.\s*/, '');
+      currentContent = [];
+    } else if (trimmed.startsWith('⚠️') || trimmed.startsWith('⚠')) {
+      // Alert line
+      html += '<div class="insight-card alert"><div class="insight-body">' + escH(trimmed) + '</div></div>';
+    } else if (trimmed.startsWith('✅')) {
+      html += '<div class="insight-card good"><div class="insight-body">' + escH(trimmed) + '</div></div>';
+    } else {
+      currentContent.push(trimmed);
+    }
+  });
+
+  // Last section
+  if (currentSection && currentContent.length) {
+    html += buildInsightCard(currentSection, currentContent.join('\n'), 'normal');
+  } else if (!currentSection && currentContent.length) {
+    // No sections — show as single card
+    html += buildInsightCard(title, currentContent.join('\n'), 'normal');
+  }
+
+  cardsEl.innerHTML = html || '<div class="insight-card"><div class="insight-body">' + escH(text) + '</div></div>';
+
+  // Scroll to output
+  outputEl.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+function buildInsightCard(title, content, type) {
+  var icons = {
+    'COST INSIGHTS': '📊', 'PENDING PAYMENTS': '💸', 'MISTAKES': '🚨',
+    'ANOMALIES': '🚨', 'VENDOR ANALYSIS': '🤝', 'CASH FLOW': '💰',
+    'SUGGESTIONS': '💡', 'ACTIONABLE': '💡'
+  };
+  var icon = '📋';
+  Object.keys(icons).forEach(function(k){ if (title.toUpperCase().includes(k)) icon = icons[k]; });
+  var cardClass = 'insight-card' + (title.includes('MISTAKE') || title.includes('ANOMAL') ? ' alert' : title.includes('SUGGEST') ? ' good' : '');
+  return '<div class="' + cardClass + '">'
+    + '<div class="insight-title">' + icon + ' ' + escH(title) + '</div>'
+    + '<div class="insight-body">' + escH(content).replace(/\n/g,'<br>') + '</div>'
+    + '</div>';
+}
+
+function showBrainLoading(msg) {
+  var el = document.getElementById('brain-loading');
+  var txt = document.getElementById('brain-loading-text');
+  var out = document.getElementById('brain-output');
+  if (el) el.style.display = 'block';
+  if (txt) txt.textContent = msg || 'AI analyzing...';
+  if (out) out.style.display = 'none';
+}
+
+function hideBrainLoading() {
+  var el = document.getElementById('brain-loading');
+  if (el) el.style.display = 'none';
 }
 
 // ════════════════════════════════════════════════════════
