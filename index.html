@@ -1746,8 +1746,12 @@ function finishSetup() {
 function launchApp() {
   var setup = document.getElementById('setup');
   var app   = document.getElementById('app');
+  var loginScreen = document.getElementById('login-screen');
+  // Hide login screen
+  if (loginScreen) loginScreen.classList.remove('on');
   setup.style.opacity = '0';
   setTimeout(function(){ setup.style.display = 'none'; }, 400);
+  app.style.display = '';
   app.classList.add('on');
   refreshUI();
   renderDocList();
@@ -4405,18 +4409,37 @@ function saveClientId() {
 }
 
 function signOut() {
+  closeUserMenu();
+  // Disable Google auto-select
   if (typeof google !== 'undefined' && GOOGLE_CLIENT_ID) {
     google.accounts.id.disableAutoSelect();
   }
+  // Clear login info
   cfg.loggedIn = false;
   cfg.userEmail = '';
   cfg.userName = '';
   cfg.userPicture = '';
   saveCfg();
+
+  // Hide app, show login screen
+  var app = document.getElementById('app');
+  var loginScreen = document.getElementById('login-screen');
+  if (app) app.style.display = 'none';
+  if (loginScreen) {
+    loginScreen.classList.add('on');
+    var sub = loginScreen.querySelector('.login-sub');
+    if (sub) sub.innerHTML = 'Daily Transactions · Vendors · Documents · All in One Place';
+  }
+  // Hide user pill
   var pill = document.getElementById('user-pill');
   if (pill) pill.style.display = 'none';
-  toast('Signed out', 'info');
-  setTimeout(function(){ location.reload(); }, 1000);
+
+  toast('Signed out successfully', 'ok');
+
+  // Re-init Google login for fresh sign in
+  setTimeout(function(){
+    initGoogleLogin();
+  }, 500);
 }
 
 function showSetupScreen() {
