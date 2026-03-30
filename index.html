@@ -3210,71 +3210,87 @@ function extractPhones(text) {
 }
 
 function autoAddContactFromDoc(result) {
-  if (!result || !result.ownershipChain || !result.ownershipChain.length) return;
+  if (!result) return;
   if (!state.contacts) state.contacts = [];
 
-  // Also extract phones from all fields text
-  var allFieldsText = (result.fields||[]).map(function(f){ return f.value||''; }).join(' ');
+  var contacts = [];
 
-  result.ownershipChain.forEach(function(step, i) {
-    // Add buyer
-    if (step.buyer && step.buyer.length > 2) {
-      var bname = step.buyer.replace(/\(.*?\)/g,'').trim().substring(0,60);
-      if (bname && bname !== '—') {
-        // Get phone — from step.buyerPhone or extract from buyer text
-        var bphones = step.buyerPhone ? [step.buyerPhone] : extractPhones(step.buyer);
-        var bphone = bphones.length ? bphones[0] : '';
-        var exists = state.contacts.find(function(c){ return c.name.toLowerCase()===bname.toLowerCase(); });
-        if (!exists) {
-          state.contacts.push({
-            id: 'con_'+Date.now()+'_b'+i,
-            name: bname,
-            phone: bphone,
-            role: 'buyer',
-            address: '',
-            notes: (result.documentDate||today())+' · '+(step.amount||'')+(step.surveyNumber?' · Survey '+step.surveyNumber:''),
-            addedDate: today(),
-            autoAdded: true
-          });
-        } else if (bphone && !exists.phone) {
-          exists.phone = bphone;
+  // Method 1: Extract from ownershipChain
+  if (result.ownershipChain && result.ownershipChain.length) {
+    result.ownershipChain.forEach(function(step) {
+      if (step.buyer && step.buyer.length > 2) {
+        var bname = step.buyer.replace(/\(.*?\)/g,'').trim().substring(0,60);
+        if (bname && bname !== '—') {
+          var bphone = step.buyerPhone ? String(step.buyerPhone) : (extractPhones(step.buyer)[0]||'');
+          contacts.push({name:bname, phone:bphone, role:'Buyer', aadhaar:step.buyerAadhaar||''});
         }
       }
-    }
-    // Add seller
-    if (step.seller && step.seller.length > 2) {
-      var sname = step.seller.replace(/\(.*?\)/g,'').trim().substring(0,60);
-      if (sname && sname !== '—') {
-        var sphones = step.sellerPhone ? [step.sellerPhone] : extractPhones(step.seller);
-        var sphone = sphones.length ? sphones[0] : '';
-        var exists2 = state.contacts.find(function(c){ return c.name.toLowerCase()===sname.toLowerCase(); });
-        if (!exists2) {
-          state.contacts.push({
-            id: 'con_'+Date.now()+'_s'+i,
-            name: sname,
-            phone: sphone,
-            role: 'seller',
-            address: '',
-            notes: (result.documentDate||today())+' · '+(step.amount||'')+(step.surveyNumber?' · Survey '+step.surveyNumber:''),
-            addedDate: today(),
-            autoAdded: true
-          });
-        } else if (sphone && !exists2.phone) {
-          exists2.phone = sphone;
+      if (step.seller && step.seller.length > 2) {
+        var sname = step.seller.replace(/\(.*?\)/g,'').trim().substring(0,60);
+        if (sname && sname !== '—') {
+          var sphone = step.sellerPhone ? String(step.sellerPhone) : (extractPhones(step.seller)[0]||'');
+          contacts.push({name:sname, phone:sphone, role:'Seller', aadhaar:step.sellerAadhaar||''});
         }
       }
+    });
+  }
+
+  // Method 2: Extract from direct fields (sellerName, buyerName etc)
+  var fields = {};
+  (result.fields||[]).forEach(function(f){
+    var k = (f.key||'').toLowerCase().replace(/\s+/g,'');
+    var v = typeof f.value==='object' ? (f.value&&f.value.value||'') : String(f.value||'');
+    fields[k] = v.trim();
+  });
+
+  // Add buyer from direct fields if not already in ownershipChain
+  if (fields['buyerfullname'] || fields['buyername']) {
+    var bn = fields['buyerfullname'] || fields['buyername'];
+    var bp = fields['buyerphone'] ? String(fields['buyerphone']) : '';
+    if (bn && bn.length > 2 && !contacts.find(function(c){ return c.name === bn; })) {
+      contacts.push({name:bn, phone:bp, role:'Buyer', aadhaar:fields['buyeraadhaar']||''});
+    }
+  }
+  if (fields['sellerfullname'] || fields['sellername']) {
+    var sn = fields['sellerfullname'] || fields['sellername'];
+    var sp = fields['sellerphone'] ? String(fields['sellerphone']) : '';
+    if (sn && sn.length > 2 && !contacts.find(function(c){ return c.name === sn; })) {
+      contacts.push({name:sn, phone:sp, role:'Seller', aadhaar:fields['selleraadhaar']||''});
+    }
+  }
+
+  // Save each contact
+  contacts.forEach(function(c) {
+    if (!c.name || c.name.length < 2) return;
+    var exists = state.contacts.find(function(x){
+      return x.name.toLowerCase() === c.name.toLowerCase();
+    });
+    if (!exists) {
+      var newContact = {
+        id: 'c' + Date.now() + Math.random().toString(36).slice(2,6),
+        name: c.name,
+        phone: c.phone || '',
+        role: c.role || 'Other',
+        aadhaar: c.aadhaar || '',
+        address: '',
+        notes: '',
+        addedDate: today(),
+        source: 'document'
+      };
+      state.contacts.push(newContact);
+      pushToSheet('Contacts',
+        ['id','name','phone','role','address','notes','addedDate'],
+        [newContact.id, newContact.name, newContact.phone, newContact.role, newContact.aadhaar, '', newContact.addedDate]
+      );
     }
   });
-  saveData();
-  renderContacts();
-  // Push all newly added contacts to Sheet
-  (state.contacts||[]).filter(function(c){ return c.autoAdded; }).forEach(function(c){
-    pushToSheet('Contacts',
-      ['id','name','phone','role','address','notes','addedDate'],
-      [c.id, c.name, c.phone||'', c.role, c.address||'', c.notes||'', c.addedDate||today()]
-    );
-  });
+
+  if (contacts.length > 0) {
+    saveData();
+    renderContacts();
+  }
 }
+
 
 function filterContacts(f) {
   contactFilter = f;
@@ -3312,7 +3328,7 @@ function renderContacts() {
           +'</div>':'')
         +'<div class="cc-actions">'
           +(c.phone?'<a href="tel:'+c.phone+'" class="btn ghost sm" style="font-size:12px;text-decoration:none;color:var(--teal);border-color:rgba(58,232,200,0.3)">📞 Call</a>':'')
-          +(c.phone?'<a href="https://wa.me/91'+c.phone.replace(/[^0-9]/g,'')+'" target="_blank" class="btn ghost sm" style="font-size:12px;text-decoration:none;color:#25D366;border-color:rgba(37,211,102,0.4)">💬 WhatsApp</a>':'')
+          +(c.phone?'<a href="https://wa.me/91'+String(c.phone).replace(/[^0-9]/g,'')+'" target="_blank" class="btn ghost sm" style="font-size:12px;text-decoration:none;color:#25D366;border-color:rgba(37,211,102,0.4)">💬 WhatsApp</a>':'')
           +'<button class="btn ghost sm" style="font-size:12px;color:var(--rose)" onclick="deleteContact(this)" data-cid="'+c.id+'">🗑️</button>'
         +'</div>'
       +'</div>'
