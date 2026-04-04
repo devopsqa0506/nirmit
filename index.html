@@ -2611,34 +2611,46 @@ function autoAddBillVendorContact(result) {
   if (!name || name.length < 2) return;
   if (!state.contacts) state.contacts = [];
 
-  var exists = state.contacts.find(function(c) {
-    return c.name.toLowerCase() === name.toLowerCase();
-  });
-
+  // Validate phone: 10 digits starting 6-9 only
   var phone = '';
   if (result.vendorPhone) {
-    // Validate: 10 digits starting 6-9
     var ph = String(result.vendorPhone).replace(/[^0-9]/g, '');
     if (/^[6-9][0-9]{9}$/.test(ph)) phone = ph;
   }
 
+  // Trim address to avoid garbage long strings from OCR
+  var address = (result.vendorAddress || '').trim().substring(0, 100);
+
+  var exists = state.contacts.find(function(c) {
+    return c.name.toLowerCase() === name.toLowerCase();
+  });
+
   if (exists) {
-    // Update phone if we now have it and didn't before
-    if (phone && !exists.phone) {
-      exists.phone = phone;
+    // Update phone and/or address if we now have them and didn't before
+    var updated = false;
+    if (phone && !exists.phone) { exists.phone = phone; updated = true; }
+    if (address && !exists.address) { exists.address = address; updated = true; }
+    if (updated) {
       saveData();
       renderContacts();
+      // BUG FIX: push updated contact back to Sheet so phone/address persists
+      pushToSheet('Contacts',
+        ['id','name','phone','role','address','notes','addedDate'],
+        [exists.id, exists.name, exists.phone, exists.role, exists.address||'', exists.notes||'', exists.addedDate||today()]
+      );
+      toast(name + ' contact updated (phone/address added) ✓', 'ok');
     }
     return;
   }
 
+  // New contact
   var newContact = {
     id: 'con_' + Date.now() + Math.random().toString(36).slice(2,5),
     name: name,
     phone: phone,
     role: 'vendor',
-    address: result.vendorAddress || '',
-    notes: 'Bill vendor — ' + (result.summary || result.documentDate || ''),
+    address: address,
+    notes: 'Bill vendor — ' + (result.summary || result.documentDate || '').substring(0, 80),
     addedDate: today(),
     source: 'bill'
   };
@@ -2649,6 +2661,7 @@ function autoAddBillVendorContact(result) {
     ['id','name','phone','role','address','notes','addedDate'],
     [newContact.id, newContact.name, newContact.phone, newContact.role, newContact.address, newContact.notes, newContact.addedDate]
   );
+  toast(name + ' Contacts లో add అయ్యారు' + (phone ? ' 📞' : '') + ' ✓', 'ok');
 }
 
 // Build HTML alert cards for bill price changes and mismatches
