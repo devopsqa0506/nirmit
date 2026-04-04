@@ -898,6 +898,38 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
           <span style="color:var(--rose);font-size:20px">›</span>
         </button>
 
+        <!-- Layer 6: Price History Viewer -->
+        <button class="ai-brain-btn" onclick="showPriceHistoryPanel()" style="background:linear-gradient(135deg,rgba(90,175,232,0.1),rgba(58,232,200,0.06));border-color:rgba(90,175,232,0.3)">
+          <div class="aib-ico">📊</div>
+          <div class="aib-body">
+            <div class="aib-title" style="color:var(--sky)">Price History Viewer</div>
+            <div class="aib-sub">Item-wise rates · Cross-vendor comparison · Trend ↑↓</div>
+          </div>
+          <span style="color:var(--sky);font-size:20px">›</span>
+        </button>
+
+        <!-- Price History Panel (inline, hidden by default) -->
+        <div id="price-history-panel" style="display:none;margin-top:4px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="font-size:14px;font-weight:700;color:var(--sky)">📊 Price History — ధరల చరిత్ర</div>
+            <button onclick="document.getElementById('price-history-panel').style.display='none'"
+              style="background:none;border:none;color:var(--tx3);font-size:18px;cursor:pointer;padding:2px 6px">✕</button>
+          </div>
+          <!-- Item selector -->
+          <div style="margin-bottom:10px">
+            <select id="ph-item-select" onchange="renderPriceHistoryTable()"
+              style="width:100%;background:var(--s3);border:1px solid var(--bd);border-radius:9px;
+                     padding:10px 12px;color:var(--tx);font-size:13px;outline:none;
+                     -webkit-appearance:none;appearance:none">
+              <option value="">-- Item select చేయండి --</option>
+            </select>
+          </div>
+          <!-- Summary stat pills -->
+          <div id="ph-stats" style="display:none;margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap"></div>
+          <!-- Table -->
+          <div id="ph-table"></div>
+        </div>
+
         <!-- Insights output area -->
         <div id="brain-output" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -3090,6 +3122,46 @@ function buildDocResultHtml(r) {
 // BILL CONFIRM ENTRY CARD + LINE ITEMS DISPLAY
 // ════════════════════════════════════════════════════════
 
+// Infer SiteBook category from bill line item keys (Gemini-normalized)
+function inferCategoryFromLineItems(lineItems) {
+  if (!lineItems || !lineItems.length) return 'Other';
+
+  // Score each category based on line item keys
+  var scores = { Steel:0, Cement:0, Sand:0, Electrical:0, Labour:0, Hardware:0, Other:0 };
+
+  var rules = [
+    { cat:'Steel',       keys:['steel','tmt','tor','ms_rod','ms_flat','iron_rod','binding_wire','ms_angle','ms_channel','ms_pipe'] },
+    { cat:'Cement',      keys:['cement','opc','ppc','psc','acc','ultratech','ambuja','ramco','white_cement','putty'] },
+    { cat:'Sand',        keys:['sand','m_sand','river_sand','manufactured_sand','fine_aggregate','coarse_aggregate','jelly','gravel','crush','metal_20mm','metal_40mm','blue_metal'] },
+    { cat:'Electrical',  keys:['electrical','wiring','cable','wire','mcb','db','conduit','socket','switch','fan','light','led','tube','bulb','panel','inverter','earthing','pvc_pipe','cpvc'] },
+    { cat:'Labour',      keys:['labour','labor','mason','mazdoor','wages','coolie','carpenter','plumber','painter','welder','tile_fixer','waterproof'] },
+    { cat:'Hardware',    keys:['hardware','bolt','screw','nut','nail','hinge','lock','door','window','grill','railing','anchor','rawl','clamp','m_seal','adhesive','fevicol','tile','grout','mosaic'] }
+  ];
+
+  lineItems.forEach(function(li) {
+    var key = (li.itemKey || '').toLowerCase();
+    var name = (li.itemName || '').toLowerCase();
+    var combined = key + ' ' + name;
+    rules.forEach(function(rule) {
+      rule.keys.forEach(function(k) {
+        if (combined.indexOf(k) !== -1) {
+          scores[rule.cat] += (li.lineTotal || li.unitRate || 1);
+        }
+      });
+    });
+  });
+
+  // Pick category with highest score
+  var best = 'Other', bestScore = 0;
+  Object.keys(scores).forEach(function(cat) {
+    if (cat !== 'Other' && scores[cat] > bestScore) {
+      bestScore = scores[cat];
+      best = cat;
+    }
+  });
+  return best;
+}
+
 // Build the "Add to Ledger?" confirm card shown after bill scan
 function buildBillConfirmCard(result, docId) {
   if (!result || (result.docType !== 'Bill' && result.docType !== 'Receipt')) return '';
@@ -3115,10 +3187,15 @@ function buildBillConfirmCard(result, docId) {
     liHtml += '</div>';
   }
 
+  // Infer category from line items
+  var inferredCategory = inferCategoryFromLineItems(result.lineItems);
+  var catEmoji = {Steel:'🔩',Cement:'🏗️',Sand:'🪨',Electrical:'⚡',Labour:'👷',Hardware:'🔧',Other:'📦'};
+  var catIcon = catEmoji[inferredCategory] || '📦';
+
   var entryJson = JSON.stringify({
     type: 'order',
     vendor: vendor,
-    category: 'Other',
+    category: inferredCategory,
     amount: amt,
     date: result.documentDate || today(),
     description: result.summary || ('Bill from ' + vendor),
@@ -3130,6 +3207,7 @@ function buildBillConfirmCard(result, docId) {
     +'<div class="crow"><span class="ck">🏪 Vendor</span><span class="cv ok">'+escH(vendor)+'</span></div>'
     +'<div class="crow"><span class="ck">💰 Amount</span><span class="cv" style="color:var(--amb);font-weight:700">₹'+fmtIN(amt)+'</span></div>'
     +'<div class="crow"><span class="ck">📅 Date</span><span class="cv">'+escH(result.documentDate||today())+'</span></div>'
+    +'<div class="crow"><span class="ck">🏷️ Category</span><span class="cv" style="color:var(--sky)">'+catIcon+' '+escH(inferredCategory)+'<span style="font-size:10px;color:var(--tx3);margin-left:5px">(AI inferred)</span></span></div>'
     + liHtml
     +'<div class="cacts" style="margin-top:10px">'
       +'<button class="btn amb sm" style="flex:1" onclick="confirmBillEntry(\''+entryJson+'\',this)">✓ Add to Ledger</button>'
@@ -3146,6 +3224,147 @@ function confirmBillEntry(entryJsonStr, btn) {
   } catch(e) {
     toast('Save failed: ' + e.message, 'err');
   }
+}
+
+// ════════════════════════════════════════════════════════
+// PRICE HISTORY VIEWER — billPriceHistory panel
+// ════════════════════════════════════════════════════════
+
+function showPriceHistoryPanel() {
+  var panel = document.getElementById('price-history-panel');
+  if (!panel) return;
+
+  // Show/hide toggle
+  if (panel.style.display !== 'none') {
+    panel.style.display = 'none';
+    return;
+  }
+
+  var bph = state.billPriceHistory || {};
+  var keys = Object.keys(bph).filter(function(k) { return bph[k] && bph[k].length > 0; });
+
+  var sel = document.getElementById('ph-item-select');
+  sel.innerHTML = '<option value="">-- Item select చేయండి --</option>';
+
+  if (!keys.length) {
+    panel.style.display = 'block';
+    document.getElementById('ph-table').innerHTML =
+      '<div class="empty" style="padding:20px 0"><div class="ei">📊</div>'
+      +'<div class="et">Price history లేదు</div>'
+      +'<div class="es">Bills scan చేసిన తర్వాత ఇక్కడ కనిపిస్తుంది</div></div>';
+    return;
+  }
+
+  // Sort keys alphabetically, label nicely
+  keys.sort().forEach(function(k) {
+    var count = bph[k].length;
+    var label = k.replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+    var opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = label + ' (' + count + ' record' + (count!==1?'s':'') + ')';
+    sel.appendChild(opt);
+  });
+
+  // Auto-select first item
+  if (keys.length > 0) {
+    sel.value = keys[0];
+  }
+
+  panel.style.display = 'block';
+  renderPriceHistoryTable();
+}
+
+function renderPriceHistoryTable() {
+  var sel = document.getElementById('ph-item-select');
+  var key = sel ? sel.value : '';
+  var statsEl  = document.getElementById('ph-stats');
+  var tableEl  = document.getElementById('ph-table');
+  if (!tableEl) return;
+
+  if (!key) {
+    tableEl.innerHTML = '';
+    if (statsEl) statsEl.style.display = 'none';
+    return;
+  }
+
+  var bph = state.billPriceHistory || {};
+  var records = (bph[key] || []).slice(); // copy
+  if (!records.length) {
+    tableEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--tx3);font-size:13px">No records for this item</div>';
+    if (statsEl) statsEl.style.display = 'none';
+    return;
+  }
+
+  // Sort newest first
+  records.sort(function(a, b) {
+    var da = a.date ? a.date.split('.').reverse().join('') : '0';
+    var db = b.date ? b.date.split('.').reverse().join('') : '0';
+    return db.localeCompare(da);
+  });
+
+  // --- Stats pills ---
+  var ratesWithValue = records.filter(function(r){ return r.unitRate > 0; });
+  if (statsEl && ratesWithValue.length) {
+    var rates = ratesWithValue.map(function(r){ return r.unitRate; });
+    var minRate = Math.min.apply(null, rates);
+    var maxRate = Math.max.apply(null, rates);
+    var avgRate = rates.reduce(function(s,v){ return s+v; }, 0) / rates.length;
+    var latestRate  = ratesWithValue[0].unitRate;   // sorted newest first
+    var previousRate = ratesWithValue.length > 1 ? ratesWithValue[1].unitRate : null;
+    var trendHtml = '';
+    if (previousRate !== null) {
+      var pct = ((latestRate - previousRate) / previousRate * 100).toFixed(1);
+      var up  = latestRate >= previousRate;
+      trendHtml = '<div style="background:'+(up?'rgba(232,93,122,0.1)':'rgba(58,232,200,0.1)')
+        +';border:1px solid '+(up?'rgba(232,93,122,0.3)':'rgba(58,232,200,0.3)')
+        +';border-radius:8px;padding:5px 10px;font-size:12px;color:'+(up?'var(--rose)':'var(--teal)')
+        +';font-weight:700">'+(up?'📈 ':'📉 ')+(up?'+':'')+pct+'% vs prev</div>';
+    }
+    statsEl.innerHTML =
+      '<div style="background:var(--s3);border:1px solid var(--bd);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--tx2)">Min ₹'+fmtIN(minRate)+'</div>'
+      +'<div style="background:var(--s3);border:1px solid var(--bd);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--tx2)">Max ₹'+fmtIN(maxRate)+'</div>'
+      +'<div style="background:var(--s3);border:1px solid var(--bd);border-radius:8px;padding:5px 10px;font-size:12px;color:var(--tx2)">Avg ₹'+fmtIN(Math.round(avgRate))+'</div>'
+      +trendHtml;
+    statsEl.style.display = 'flex';
+  } else if (statsEl) {
+    statsEl.style.display = 'none';
+  }
+
+  // --- Table ---
+  var unit = records[0].unit || '';
+  var html = '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;overflow:hidden">';
+  // Header
+  html += '<div style="display:grid;grid-template-columns:80px 1fr auto auto auto;font-size:11px;'
+    +'color:var(--tx3);padding:7px 10px;border-bottom:1px solid var(--bd);background:var(--s3)">'
+    +'<span>Date</span><span>Vendor</span>'
+    +'<span style="text-align:right;padding-right:8px">Qty</span>'
+    +'<span style="text-align:right;padding-right:8px">Rate'+(unit?' /'+unit:'')+'</span>'
+    +'<span style="text-align:right">Total</span></div>';
+
+  records.forEach(function(rec, idx) {
+    // Trend arrow vs previous (idx+1 is older since sorted newest-first)
+    var trendArrow = '';
+    if (rec.unitRate > 0 && idx < records.length - 1) {
+      var nextRec = records[idx + 1];
+      if (nextRec && nextRec.unitRate > 0) {
+        if (rec.unitRate > nextRec.unitRate)      trendArrow = '<span style="color:var(--rose);font-size:11px"> ▲</span>';
+        else if (rec.unitRate < nextRec.unitRate) trendArrow = '<span style="color:var(--teal);font-size:11px"> ▼</span>';
+        else                                      trendArrow = '<span style="color:var(--tx3);font-size:11px"> —</span>';
+      }
+    }
+    var rowBg = idx % 2 === 0 ? '' : 'background:rgba(255,255,255,0.02);';
+    html += '<div style="display:grid;grid-template-columns:80px 1fr auto auto auto;font-size:12px;'
+      +'padding:8px 10px;border-bottom:1px solid var(--bd);'+rowBg+'">'
+      +'<span style="color:var(--tx3);font-family:JetBrains Mono;font-size:11px">'+escH(rec.date||'—')+'</span>'
+      +'<span style="color:var(--tx);padding-right:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+escH(rec.vendor||'—')+'</span>'
+      +'<span style="text-align:right;padding-right:8px;color:var(--tx2);font-family:JetBrains Mono;font-size:11px">'+(rec.quantity?(rec.quantity+(rec.unit?' '+rec.unit:'')):'—')+'</span>'
+      +'<span style="text-align:right;padding-right:8px;color:var(--amb);font-family:JetBrains Mono;font-weight:700">'+(rec.unitRate?'₹'+fmtIN(rec.unitRate):'—')+trendArrow+'</span>'
+      +'<span style="text-align:right;color:var(--tx2);font-family:JetBrains Mono;font-size:11px">'+(rec.lineTotal?'₹'+fmtIN(rec.lineTotal):'—')+'</span>'
+      +'</div>';
+  });
+
+  html += '</div>';
+  tableEl.innerHTML = html;
 }
 
 // ════════════════════════════════════════════════════════
