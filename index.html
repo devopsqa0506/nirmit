@@ -1864,55 +1864,9 @@ function mergeSheetData(sheetData) {
     });
   }
 
-  // ── Rebuild documents list from BillHeaders + Documents sheet ──
-  // Documents are session-only in localStorage but restored from sheet on sync
-  state.documents = [];
-
-  if (sheetData.BillHeaders && sheetData.BillHeaders.length > 1) {
-    var bhHdrs = sheetData.BillHeaders[0];
-    var bhRows = sheetData.BillHeaders.slice(1);
-    bhRows.forEach(function(r){
-      var obj = {};
-      bhHdrs.forEach(function(h,i){ obj[h]=r[i]; });
-      if (!obj.docId) return;
-      state.documents.push({
-        id: obj.docId,
-        date: obj.date||'',
-        fileName: obj.fileName||'',
-        type: 'Bill',
-        propertyType: '',
-        result: {
-          docType: 'Bill',
-          vendorName: obj.vendorName||'',
-          vendorPhone: obj.vendorPhone||'',
-          invoiceNumber: obj.invoiceNumber||'',
-          amount: obj.billTotal||'',
-          gstAmount: obj.gstAmount||'',
-          summary: obj.summary||'',
-          lineItems: [] // line items available in billPriceHistory by docId if needed
-        }
-      });
-    });
-  }
-
-  if (sheetData.Documents && sheetData.Documents.length > 1) {
-    var dHdrs = sheetData.Documents[0];
-    var dRows = sheetData.Documents.slice(1);
-    dRows.forEach(function(r){
-      var obj = {};
-      dHdrs.forEach(function(h,i){ obj[h]=r[i]; });
-      if (!obj.id) return;
-      state.documents.push({
-        id: obj.id,
-        date: obj.date||'',
-        fileName: obj.fileName||'',
-        type: obj.type||'Document',
-        propertyType: obj.propertyType||'',
-        result: { docType: obj.type||'Document', summary: obj.summary||'' }
-      });
-    });
-  }
-
+  // Documents are session-only — NOT restored from sheet on sync
+  // They only exist while user scans in current session
+  // (price history and bill data still flow through billPriceHistory)
   renderDocList();
   refreshUI();
 }
