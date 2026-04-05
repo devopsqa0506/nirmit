@@ -1097,39 +1097,88 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
 <div class="mover" id="add-project">
   <div class="msheet">
     <div class="mgrip"></div>
-    <div class="mt">🏗️ New Project</div>
+    <div class="mt" id="p-modal-title">🏗️ New Project</div>
+    <!-- Project Type Toggle -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <button id="ptype-house" class="btn amb sm" onclick="setProjType('house')" style="font-size:13px">🏗️ House Construction</button>
+      <button id="ptype-land" class="btn ghost sm" onclick="setProjType('land')" style="font-size:13px">🌾 Land Sale</button>
+    </div>
+    <input type="hidden" id="p-type" value="house">
     <label class="fl">Project Name *</label>
     <input class="fi" id="p-name" placeholder="ఉదా: Chinnachowk Plot, Muddanur Land">
+    <!-- Common: Cents + Price per Cent + Total (auto) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div>
-        <label class="fl">Land Cost (₹)</label>
-        <input class="fi fi-mono" id="p-landcost" type="number" placeholder="1263000">
+        <label class="fl">Total Cents Bought</label>
+        <input class="fi fi-mono" id="p-cents" type="number" placeholder="30" oninput="calcLandTotal()">
       </div>
       <div>
-        <label class="fl">Total Cents</label>
-        <input class="fi fi-mono" id="p-cents" type="number" placeholder="3.16">
+        <label class="fl">Price per Cent (₹)</label>
+        <input class="fi fi-mono" id="p-price-per-cent" type="number" placeholder="45000" oninput="calcLandTotal()">
+      </div>
+    </div>
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--tx2)">Total Land Cost</span>
+      <span id="p-landtotal-display" style="font-family:JetBrains Mono;font-weight:700;color:var(--amb);font-size:15px">₹0</span>
+    </div>
+    <input type="hidden" id="p-landcost">
+    <!-- House Construction fields -->
+    <div id="p-house-fields">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="fl">Houses Planned</label>
+          <input class="fi fi-mono" id="p-houses" type="number" placeholder="2" value="1">
+        </div>
+        <div>
+          <label class="fl">Sale Price per House (₹)</label>
+          <input class="fi fi-mono" id="p-saleprice" type="number" placeholder="4500000">
+        </div>
+      </div>
+    </div>
+    <!-- Land Sale fields -->
+    <div id="p-land-fields" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="fl">Selling Price per Cent (₹)</label>
+          <input class="fi fi-mono" id="p-sell-per-cent" type="number" placeholder="65000" oninput="calcLandSellTotal()">
+        </div>
+        <div>
+          <label class="fl">Cents to Sell</label>
+          <input class="fi fi-mono" id="p-cents-to-sell" type="number" placeholder="30" oninput="calcLandSellTotal()">
+        </div>
+      </div>
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--tx2)">Expected Sale Amount</span>
+        <span id="p-selltotal-display" style="font-family:JetBrains Mono;font-weight:700;color:var(--sage);font-size:15px">₹0</span>
+      </div>
+      <input type="hidden" id="p-selltotal">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label class="fl">Cents Sold So Far</label>
+          <input class="fi fi-mono" id="p-cents-sold" type="number" placeholder="0" value="0">
+        </div>
+        <div>
+          <label class="fl">Amount Received (₹)</label>
+          <input class="fi fi-mono" id="p-amount-received" type="number" placeholder="0" value="0">
+        </div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div>
-        <label class="fl">Houses Planned</label>
-        <input class="fi fi-mono" id="p-houses" type="number" placeholder="2" value="1">
-      </div>
       <div>
         <label class="fl">Status</label>
         <select class="fi" id="p-status">
           <option value="planned">📋 Planned</option>
-          <option value="active">🏗️ Under Construction</option>
+          <option value="active">🏗️ Active</option>
           <option value="done">✅ Completed</option>
         </select>
       </div>
+      <div>
+        <label class="fl">Purchase Date</label>
+        <input class="fi" id="p-date" type="date">
+      </div>
     </div>
-    <label class="fl">Purchase Date</label>
-    <input class="fi" id="p-date" type="date">
     <label class="fl">Location / Survey No</label>
     <input class="fi" id="p-location" placeholder="ఉదా: Chinnachowk, Survey 620/1">
-    <label class="fl">Expected Sale Price per House (₹)</label>
-    <input class="fi fi-mono" id="p-saleprice" type="number" placeholder="4500000">
     <div style="display:flex;gap:9px;margin-top:4px">
       <button class="btn ghost full" onclick="closeModal('add-project')">Cancel</button>
       <button class="btn amb full" onclick="saveProject()">✓ Save Project</button>
@@ -3792,45 +3841,85 @@ function resetApp() {
 // ════════════════════════════════════════════════════════
 // PROJECTS — Per-House Cost Tracker + Profitability
 // ════════════════════════════════════════════════════════
+function setProjType(type) {
+  document.getElementById('p-type').value = type;
+  document.getElementById('p-house-fields').style.display = type === 'house' ? 'block' : 'none';
+  document.getElementById('p-land-fields').style.display  = type === 'land'  ? 'block' : 'none';
+  document.getElementById('ptype-house').className = type === 'house' ? 'btn amb sm' : 'btn ghost sm';
+  document.getElementById('ptype-land').className  = type === 'land'  ? 'btn amb sm' : 'btn ghost sm';
+  document.getElementById('p-modal-title').textContent = type === 'house' ? '🏗️ New House Project' : '🌾 New Land Sale Project';
+}
+
+function calcLandTotal() {
+  var cents = Number(document.getElementById('p-cents').value) || 0;
+  var ppc   = Number(document.getElementById('p-price-per-cent').value) || 0;
+  var total = cents * ppc;
+  document.getElementById('p-landtotal-display').textContent = '₹' + fmtIN(total);
+  document.getElementById('p-landcost').value = total;
+}
+
+function calcLandSellTotal() {
+  var cents = Number(document.getElementById('p-cents-to-sell').value) || 0;
+  var ppc   = Number(document.getElementById('p-sell-per-cent').value) || 0;
+  var total = cents * ppc;
+  document.getElementById('p-selltotal-display').textContent = '₹' + fmtIN(total);
+  document.getElementById('p-selltotal').value = total;
+}
+
 function saveProject() {
   var name = document.getElementById('p-name').value.trim();
   if (!name) { toast('Project name enter చేయండి', 'err'); return; }
+  var ptype = document.getElementById('p-type').value || 'house';
   var proj = {
     id: 'proj_' + Date.now(),
     name: name,
+    projType: ptype,
     landCost: Number(document.getElementById('p-landcost').value) || 0,
     totalCents: Number(document.getElementById('p-cents').value) || 0,
-    housesPlanned: Number(document.getElementById('p-houses').value) || 1,
+    pricePerCent: Number(document.getElementById('p-price-per-cent').value) || 0,
     status: document.getElementById('p-status').value,
     date: document.getElementById('p-date').value || today(),
     location: document.getElementById('p-location').value.trim(),
-    expectedSalePerHouse: Number(document.getElementById('p-saleprice').value) || 0,
     houses: [],
     agreements: []
   };
-  // Auto-create house slots
-  for (var i = 1; i <= proj.housesPlanned; i++) {
-    proj.houses.push({
-      id: 'h_' + Date.now() + '_' + i,
-      name: 'House ' + i,
-      status: 'planned',
-      constructionCost: 0,
-      salePrice: 0,
-      buyer: '',
-      phases: { foundation:0, structure:0, roof:0, electrical:0, plumbing:0, finishing:0 }
-    });
+  if (ptype === 'house') {
+    proj.housesPlanned = Number(document.getElementById('p-houses').value) || 1;
+    proj.expectedSalePerHouse = Number(document.getElementById('p-saleprice').value) || 0;
+    for (var i = 1; i <= proj.housesPlanned; i++) {
+      proj.houses.push({
+        id: 'h_' + Date.now() + '_' + i,
+        name: 'House ' + i,
+        status: 'planned',
+        constructionCost: 0,
+        salePrice: 0,
+        buyer: '',
+        phases: { foundation:0, structure:0, roof:0, electrical:0, plumbing:0, finishing:0 }
+      });
+    }
+  } else {
+    proj.sellPerCent     = Number(document.getElementById('p-sell-per-cent').value) || 0;
+    proj.centsToSell     = Number(document.getElementById('p-cents-to-sell').value) || 0;
+    proj.expectedSaleTotal = Number(document.getElementById('p-selltotal').value) || 0;
+    proj.centsSold       = Number(document.getElementById('p-cents-sold').value) || 0;
+    proj.amountReceived  = Number(document.getElementById('p-amount-received').value) || 0;
+    proj.housesPlanned   = 0;
   }
   if (!state.projects) state.projects = [];
   state.projects.push(proj);
-  saveData();
-  renderProjects();
+  saveData(); renderProjects();
   closeModal('add-project');
-  // Clear form
-  ['p-name','p-landcost','p-cents','p-houses','p-location','p-saleprice'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['p-name','p-landcost','p-cents','p-price-per-cent','p-houses','p-location','p-saleprice',
+   'p-sell-per-cent','p-cents-to-sell','p-cents-sold','p-amount-received'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('p-landtotal-display').textContent = '₹0';
+  document.getElementById('p-selltotal-display') && (document.getElementById('p-selltotal-display').textContent = '₹0');
+  setProjType('house');
   toast('Project saved!', 'ok');
   pushToSheet('Projects',
-    ['id','name','landCost','totalCents','housesPlanned','status','location','date','expectedSalePerHouse'],
-    [proj.id,proj.name,proj.landCost,proj.totalCents,proj.housesPlanned,proj.status,proj.location,proj.date,proj.expectedSalePerHouse||0]
+    ['id','name','projType','landCost','totalCents','pricePerCent','housesPlanned','status','location','date','expectedSalePerHouse','sellPerCent','centsToSell','expectedSaleTotal','centsSold','amountReceived'],
+    [proj.id,proj.name,proj.projType,proj.landCost,proj.totalCents,proj.pricePerCent,proj.housesPlanned||0,proj.status,proj.location,proj.date,proj.expectedSalePerHouse||0,proj.sellPerCent||0,proj.centsToSell||0,proj.expectedSaleTotal||0,proj.centsSold||0,proj.amountReceived||0]
   );
 }
 
@@ -3845,55 +3934,102 @@ function renderProjects() {
 
   var html = '';
   state.projects.forEach(function(proj, pidx) {
-    var totalConstruction = proj.houses.reduce(function(s,h){ return s+h.constructionCost; }, 0);
-    var totalInvest = proj.landCost + totalConstruction;
-    var totalSaleExpected = proj.expectedSalePerHouse * proj.housesPlanned;
-    var profit = totalSaleExpected - totalInvest;
-    var profitPct = totalInvest > 0 ? ((profit/totalInvest)*100).toFixed(1) : 0;
-    var profitColor = profit>0?'var(--sage)':profit<0?'var(--rose)':'var(--amb)';
-    var soldHouses = proj.houses.filter(function(h){ return h.status==='sold'; }).length;
-    var statusMap = {planned:'Planned',active:'Building',done:'Done'};
+    var statusMap = {planned:'Planned',active:'Active',done:'Done'};
+    var isLand = proj.projType === 'land';
 
-    var houseTiles = '';
-    proj.houses.forEach(function(h, hi) {
-      var sc2 = h.status==='sold'?'sold':h.status==='building'?'building':'';
-      var si2 = h.status==='sold'?'🏠':h.status==='building'?'🏗️':'📋';
-      var st2 = h.status==='sold'?'Sold':h.status==='building'?'Building':'Planned';
-      houseTiles += '<div class="house-tile '+sc2+'" data-proj="'+pidx+'" data-house="'+hi+'" onclick="openHouseByIndex(this)">'
-        +'<div class="ht-ico">'+si2+'</div>'
-        +'<div class="ht-name">'+escH(h.name)+'</div>'
-        +'<div class="ht-cost">'+rup(h.constructionCost)+'</div>'
-        +'<div class="ht-status '+h.status+'">'+st2+'</div>'
-        +'</div>';
-    });
+    if (isLand) {
+      // ── Land Sale Card ──
+      var landCost     = Number(proj.landCost) || 0;
+      var expectedSale = Number(proj.expectedSaleTotal) || (Number(proj.sellPerCent||0) * Number(proj.centsToSell||0));
+      var received     = Number(proj.amountReceived) || 0;
+      var profit       = expectedSale - landCost;
+      var realizedProfit = received - landCost;
+      var profitColor  = profit>0?'var(--sage)':profit<0?'var(--rose)':'var(--amb)';
+      var centsSold    = Number(proj.centsSold) || 0;
+      var centsLeft    = Number(proj.totalCents||0) - centsSold;
 
-    html += '<div class="proj-card fu">'
-      +'<div class="proj-hdr" data-proj="'+pidx+'" onclick="toggleProjDetail(this)">'
-        +'<div class="proj-ico">🏗️</div>'
-        +'<div style="flex:1;min-width:0">'
-          +'<div class="proj-name">'+escH(proj.name)+'</div>'
-          +'<div style="font-size:11px;color:var(--tx2);margin-top:2px">'+escH(proj.location||'')+(proj.totalCents?' · '+proj.totalCents+' cents':'')+'</div>'
+      html += '<div class="proj-card fu">'
+        +'<div class="proj-hdr" data-proj="'+pidx+'" onclick="toggleProjDetail(this)">'
+          +'<div class="proj-ico">🌾</div>'
+          +'<div style="flex:1;min-width:0">'
+            +'<div class="proj-name">'+escH(proj.name)+'</div>'
+            +'<div style="font-size:11px;color:var(--tx2);margin-top:2px">'+escH(proj.location||'')+(proj.totalCents?' · '+proj.totalCents+' cents':'')+'</div>'
+          +'</div>'
+          +'<span class="proj-status '+proj.status+'">'+(statusMap[proj.status]||proj.status)+'</span>'
         +'</div>'
-        +'<span class="proj-status '+proj.status+'">'+(statusMap[proj.status]||proj.status)+'</span>'
-      +'</div>'
-      +'<div class="proj-body" id="pd'+pidx+'" style="display:none">'
-        +'<div class="profit-summary">'
-          +'<div class="ps-box"><div class="pl">Land Cost</div><div class="pv" style="color:var(--amb)">'+rup(proj.landCost)+'</div></div>'
-          +'<div class="ps-box"><div class="pl">Construction</div><div class="pv" style="color:var(--sky)">'+rup(totalConstruction)+'</div></div>'
-          +'<div class="ps-box"><div class="pl">Total Invest</div><div class="pv" style="color:var(--rose)">'+rup(totalInvest)+'</div></div>'
+        +'<div class="proj-body" id="pd'+pidx+'" style="display:none">'
+          +'<div class="profit-summary">'
+            +'<div class="ps-box"><div class="pl">Bought</div><div class="pv" style="color:var(--amb)">'+proj.totalCents+' cents</div></div>'
+            +'<div class="ps-box"><div class="pl">Buy Price/cent</div><div class="pv" style="color:var(--sky)">'+rup(proj.pricePerCent||0)+'</div></div>'
+            +'<div class="ps-box"><div class="pl">Total Cost</div><div class="pv" style="color:var(--rose)">'+rup(landCost)+'</div></div>'
+          +'</div>'
+          +'<div class="profit-summary" style="padding-top:0">'
+            +'<div class="ps-box"><div class="pl">Sell Price/cent</div><div class="pv" style="color:var(--teal)">'+rup(proj.sellPerCent||0)+'</div></div>'
+            +'<div class="ps-box"><div class="pl">Cents Sold</div><div class="pv" style="color:var(--sky)">'+centsSold+' / '+proj.totalCents+'</div></div>'
+            +'<div class="ps-box"><div class="pl">Remaining</div><div class="pv" style="color:var(--amb)">'+centsLeft+' cents</div></div>'
+          +'</div>'
+          +'<div class="profit-summary" style="padding-top:0">'
+            +'<div class="ps-box"><div class="pl">Exp. Sale</div><div class="pv" style="color:var(--teal)">'+rup(expectedSale)+'</div></div>'
+            +'<div class="ps-box"><div class="pl">Received</div><div class="pv" style="color:var(--sage)">'+rup(received)+'</div></div>'
+            +'<div class="ps-box"><div class="pl">Exp. Profit</div><div class="pv" style="color:'+profitColor+'">'+rup(profit)+'</div></div>'
+          +'</div>'
+          +'<div style="display:flex;gap:8px;padding:0 14px 12px">'
+            +'<button class="btn ghost sm" style="flex:1;font-size:12px;color:var(--rose)" data-proj="'+pidx+'" onclick="deleteProjByIndex(this)">🗑️ Delete</button>'
+          +'</div>'
         +'</div>'
-        +'<div class="profit-summary" style="padding-top:0">'
-          +'<div class="ps-box"><div class="pl">Exp. Sale</div><div class="pv" style="color:var(--teal)">'+rup(totalSaleExpected)+'</div></div>'
-          +'<div class="ps-box"><div class="pl">Profit</div><div class="pv" style="color:'+profitColor+'">'+rup(profit)+'</div></div>'
-          +'<div class="ps-box"><div class="pl">ROI</div><div class="pv" style="color:'+profitColor+'">'+profitPct+'%</div></div>'
+      +'</div>';
+
+    } else {
+      // ── House Construction Card ──
+      var totalConstruction = (proj.houses||[]).reduce(function(s,h){ return s+h.constructionCost; }, 0);
+      var totalInvest = Number(proj.landCost||0) + totalConstruction;
+      var totalSaleExpected = Number(proj.expectedSalePerHouse||0) * Number(proj.housesPlanned||0);
+      var profit = totalSaleExpected - totalInvest;
+      var profitPct = totalInvest > 0 ? ((profit/totalInvest)*100).toFixed(1) : 0;
+      var profitColor = profit>0?'var(--sage)':profit<0?'var(--rose)':'var(--amb)';
+      var soldHouses = (proj.houses||[]).filter(function(h){ return h.status==='sold'; }).length;
+
+      var houseTiles = '';
+      (proj.houses||[]).forEach(function(h, hi) {
+        var sc2 = h.status==='sold'?'sold':h.status==='building'?'building':'';
+        var si2 = h.status==='sold'?'🏠':h.status==='building'?'🏗️':'📋';
+        var st2 = h.status==='sold'?'Sold':h.status==='building'?'Building':'Planned';
+        houseTiles += '<div class="house-tile '+sc2+'" data-proj="'+pidx+'" data-house="'+hi+'" onclick="openHouseByIndex(this)">'
+          +'<div class="ht-ico">'+si2+'</div>'
+          +'<div class="ht-name">'+escH(h.name)+'</div>'
+          +'<div class="ht-cost">'+rup(h.constructionCost)+'</div>'
+          +'<div class="ht-status '+h.status+'">'+st2+'</div>'
+          +'</div>';
+      });
+
+      html += '<div class="proj-card fu">'
+        +'<div class="proj-hdr" data-proj="'+pidx+'" onclick="toggleProjDetail(this)">'
+          +'<div class="proj-ico">🏗️</div>'
+          +'<div style="flex:1;min-width:0">'
+            +'<div class="proj-name">'+escH(proj.name)+'</div>'
+            +'<div style="font-size:11px;color:var(--tx2);margin-top:2px">'+escH(proj.location||'')+(proj.totalCents?' · '+proj.totalCents+' cents':'')+'</div>'
+          +'</div>'
+          +'<span class="proj-status '+proj.status+'">'+(statusMap[proj.status]||proj.status)+'</span>'
         +'</div>'
-        +'<div style="padding:0 14px 6px;font-size:12px;color:var(--tx2)">Houses: '+soldHouses+'/'+proj.housesPlanned+' sold</div>'
-        +'<div class="house-grid">'+houseTiles+'</div>'
-        +'<div style="display:flex;gap:8px;padding:0 14px 12px">'
-          +'<button class="btn ghost sm" style="flex:1;font-size:12px;color:var(--rose)" data-proj="'+pidx+'" onclick="deleteProjByIndex(this)">🗑️ Delete</button>'
+        +'<div class="proj-body" id="pd'+pidx+'" style="display:none">'
+          +'<div class="profit-summary">'
+            +'<div class="ps-box"><div class="pl">Land Cost</div><div class="pv" style="color:var(--amb)">'+rup(proj.landCost||0)+'</div></div>'
+            +'<div class="ps-box"><div class="pl">Construction</div><div class="pv" style="color:var(--sky)">'+rup(totalConstruction)+'</div></div>'
+            +'<div class="ps-box"><div class="pl">Total Invest</div><div class="pv" style="color:var(--rose)">'+rup(totalInvest)+'</div></div>'
+          +'</div>'
+          +'<div class="profit-summary" style="padding-top:0">'
+            +'<div class="ps-box"><div class="pl">Exp. Sale</div><div class="pv" style="color:var(--teal)">'+rup(totalSaleExpected)+'</div></div>'
+            +'<div class="ps-box"><div class="pl">Profit</div><div class="pv" style="color:'+profitColor+'">'+rup(profit)+'</div></div>'
+            +'<div class="ps-box"><div class="pl">ROI</div><div class="pv" style="color:'+profitColor+'">'+profitPct+'%</div></div>'
+          +'</div>'
+          +'<div style="padding:0 14px 6px;font-size:12px;color:var(--tx2)">Houses: '+soldHouses+'/'+proj.housesPlanned+' sold</div>'
+          +'<div class="house-grid">'+houseTiles+'</div>'
+          +'<div style="display:flex;gap:8px;padding:0 14px 12px">'
+            +'<button class="btn ghost sm" style="flex:1;font-size:12px;color:var(--rose)" data-proj="'+pidx+'" onclick="deleteProjByIndex(this)">🗑️ Delete</button>'
+          +'</div>'
         +'</div>'
-      +'</div>'
-    +'</div>';
+      +'</div>';
+    }
   });
 
   el.innerHTML = html;
@@ -4656,7 +4792,9 @@ function openModal(id)  { document.getElementById(id).classList.add('on'); }
 function closeModal(id) { document.getElementById(id).classList.remove('on'); }
 
 document.querySelectorAll('.mover').forEach(function(o){
-  o.addEventListener('click', function(e){ if(e.target===o) o.classList.remove('on'); });
+  o.addEventListener('click', function(e){
+    if(e.target===o && o.id !== 'add-project') o.classList.remove('on');
+  });
 });
 
 var _procTimer = null;
