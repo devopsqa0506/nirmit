@@ -2547,8 +2547,8 @@ function confirmEntry(eid, btn) {
         +(dup.description?' ('+escH(dup.description)+')':'')+'. మళ్ళీ same order వచ్చిందా?'
       +'</div>'
       +'<div style="display:flex;gap:8px">'
-        +'<button class="btn amb sm" style="flex:1;font-size:12px" onclick="confirmEntryForce(''+eid+'',this)">✓ అవును, Save చేయి</button>'
-        +'<button class="btn ghost sm" style="flex:1;font-size:12px" onclick="this.closest('.ccard').remove()">✗ Cancel</button>'
+        +'<button class="btn amb sm" style="flex:1;font-size:12px" onclick="confirmEntryForce(\''+eid+'\',this)">✓ అవును, Save చేయి</button>'
+        +'<button class="btn ghost sm" style="flex:1;font-size:12px" onclick="this.closest(\'.ccard\').remove()">✗ Cancel</button>'
       +'</div></div>';
     return;
   }
