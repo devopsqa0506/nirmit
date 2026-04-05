@@ -2547,8 +2547,8 @@ function confirmEntry(eid, btn) {
         +(dup.description?' ('+escH(dup.description)+')':'')+'. మళ్ళీ same order వచ్చిందా?'
       +'</div>'
       +'<div style="display:flex;gap:8px">'
-        +'<button class="btn amb sm" style="flex:1;font-size:12px" onclick="confirmEntryForce(\''+eid+'\',this)">✓ అవును, Save చేయి</button>'
-        +'<button class="btn ghost sm" style="flex:1;font-size:12px" onclick="this.closest(\'.ccard\').remove()">✗ Cancel</button>'
+        +'<button class="btn amb sm" style="flex:1;font-size:12px" data-eid="'+eid+'" onclick="confirmEntryForce(this.dataset.eid,this)">✓ అవును, Save చేయి</button>'
+        +'<button class="btn ghost sm" style="flex:1;font-size:12px" onclick="this.closest(&quot;.ccard&quot;).remove()">✗ Cancel</button>'
       +'</div></div>';
     return;
   }
@@ -2655,8 +2655,8 @@ async function callGemini(imageData, imageMime, docPromptOverride) {
         +'<div class="crow"><span class="ck">Balance after</span><span class="cv '+(bal>0?'bad':bal<0?'ok':'')+'">'
           +rup(Math.abs(bal))+' '+(bal>0?'మీరు ఇవ్వాలి':bal<0?'advance':'Settled ✓')+'</span></div>'
         +'<div class="cacts">'
-          +'<button class="btn amb sm" style="flex:1" onclick="confirmEntry(\''+eid+'\',this)">✓ Save to Sheet</button>'
-          +'<button class="btn ghost sm" onclick="this.closest(\'.ccard\').remove()">✗</button>'
+          +'<button class="btn amb sm" style="flex:1" data-eid="'+eid+'" onclick="confirmEntry(this.dataset.eid,this)">✓ Save to Sheet</button>'
+          +'<button class="btn ghost sm" onclick="this.closest(&quot;.ccard&quot;).remove()">✗</button>'
         +'</div>'
       +'</div>';
     });
@@ -3428,7 +3428,7 @@ function buildBillConfirmCard(result, docId) {
     + liHtml
     +'<div class="cacts" style="margin-top:10px">'
       +'<button class="btn amb sm" style="flex:1" onclick="confirmBillEntry(\''+entryJson+'\',this)">✓ Add to Ledger</button>'
-      +'<button class="btn ghost sm" onclick="this.closest(\'.ccard\').remove()">✗ Skip</button>'
+      +'<button class="btn ghost sm" onclick="this.closest(&quot;.ccard&quot;).remove()">✗ Skip</button>'
     +'</div>'
   +'</div>';
 }
