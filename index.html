@@ -1730,7 +1730,10 @@ function launchApp() {
 // GOOGLE SHEETS SYNC
 // ════════════════════════════════════════════════════════
 var isSyncing = false;
-var _pendingEntries = {}; // keyed by unique id for confirm cards
+var _pendingEntries = (function(){ try{ return JSON.parse(sessionStorage.getItem("_pe")||"{}"); }catch(e){ return {}; } })();
+function _peSave(){ try{ sessionStorage.setItem("_pe", JSON.stringify(_pendingEntries)); }catch(e){} }
+function _peDel(k){ delete _pendingEntries[k]; _peSave(); }
+function _peSet(k,v){ _pendingEntries[k]=v; _peSave(); }
 
 function setSyncStatus(s) {
   var dot = document.getElementById('sync-dot');
@@ -1940,7 +1943,7 @@ function addEntry(entry) {
       lastPriceUnit: entry.priceUnit || entry.unit || '',
       lastPriceDate: entry.date,
       source: 'entry',
-      silent: true
+      silent: false
     });
   }
 }
@@ -1956,7 +1959,7 @@ function upsertContact(opts) {
 
   var name    = opts.name.trim().substring(0, 80);
   var phone   = '';
-  if (opts.phone) {
+  if (opts.phone && opts.phone !== 'null' && opts.phone !== null) {
     var ph = String(opts.phone).replace(/[^0-9]/g, '');
     if (/^[6-9][0-9]{9}$/.test(ph)) phone = ph;
   }
@@ -2439,9 +2442,11 @@ function findDuplicateOrder(entry) {
     return e.type === 'order'
       && e.date === d
       && Number(e.amount || 0) === amt
-      && (e.vendor || '').toLowerCase().trim() === vnd;
+      && (e.vendor || '').toLowerCase().trim() === vnd
+      && (e.description || '').toLowerCase().trim() === (entry.description || '').toLowerCase().trim();
   }) || null;
 }
+
 
 function confirmEntry(eid, btn) {
   var entry = _pendingEntries[eid];
@@ -2465,16 +2470,16 @@ function confirmEntry(eid, btn) {
   }
 
   addEntry(entry);
-  delete _pendingEntries[eid];
-  btn.closest('.cacts').innerHTML = '<span class="ok">✓ Entries Sheet లో Saved!</span>';
-  toast('✓ Saved to Entries Sheet!', 'ok');
+  _peDel(eid);
+  btn.closest('.cacts').innerHTML = '<span class="ok">✓ Entries &amp; Contacts Sheet లో Saved!</span>';
+  toast('✓ Saved to Entries &amp; Contacts!', 'ok');
 }
 
 function confirmEntryForce(eid, btn) {
   var entry = _pendingEntries[eid];
   if (!entry) { btn.closest('.cacts').innerHTML = '<span class="bad">⚠️ Already saved or expired</span>'; return; }
   addEntry(entry);
-  delete _pendingEntries[eid];
+  _peDel(eid);
   btn.closest('.cacts').innerHTML = '<span class="ok">✓ Saved! (duplicate confirmed)</span>';
   toast('✓ Saved to Entries Sheet!', 'ok');
 }
@@ -2556,7 +2561,7 @@ async function callGemini(imageData, imageMime, docPromptOverride) {
     var html = display;
     parsedEntries.forEach(function(entry){
       var eid = 'e_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      _pendingEntries[eid] = entry;
+      _peSet(eid, entry);
       var bal = entry.type==='order' ? getBalance(entry.vendor)+Number(entry.amount) : getBalance(entry.vendor)-Number(entry.amount);
       html += '<div class="ccard">'
         +'<div class="ccard-t">'+(entry.type==='payment'?'💰 Payment':'📦 Order')+' — Confirm?</div>'
