@@ -1493,8 +1493,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
     <input type="hidden" id="ln-edit-id">
 
     <!-- Step 1: Borrowed From -->
-    <label class="fl">Borrowed From *</label>
-    <select class="fi" id="ln-type" onchange="onLoanTypeChange()">
+    <label class="fl" style="text-align:center;margin-bottom:8px">Borrowed From *</label>
+    <select class="fi" id="ln-type" onchange="onLoanTypeChange()" style="text-align:center;padding-left:auto;padding-right:auto">
       <option value="">— Select Source —</option>
       <option value="bank">🏦 Banks / Institutions</option>
       <option value="handloan">🤝 Hand Loan</option>
@@ -1571,22 +1571,30 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
     <div class="mt">💳 Add Repayment</div>
     <div id="pmt-loan-info" style="background:rgba(232,93,122,0.07);border:1px solid rgba(232,93,122,0.2);border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--tx2)"></div>
     <input type="hidden" id="pmt-loan-id">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label class="fl">Date Paid *</label><input class="fi" id="pmt-date" type="date"></div>
-      <div><label class="fl">Amount Paid (₹) *</label><input class="fi fi-mono" id="pmt-amount" type="number" placeholder="10000" oninput="calcPmtSplit()"></div>
-    </div>
-    <div style="background:var(--s3);border:1px solid var(--bd);border-radius:10px;padding:11px 13px;margin-bottom:10px">
-      <div style="font-size:12px;color:var(--tx3);margin-bottom:8px">Auto-calculated split (editable):</div>
+    
+    <!-- Principal Payment Section -->
+    <div style="background:rgba(58,232,200,0.06);border:1px solid rgba(58,232,200,0.2);border-radius:10px;padding:10px 13px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:10px">💰 Principal Payment</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div><label class="fl">Interest Portion (₹)</label><input class="fi fi-mono" id="pmt-interest" type="number" placeholder="0" style="font-size:13px"></div>
-        <div><label class="fl">Principal Portion (₹)</label><input class="fi fi-mono" id="pmt-principal-part" type="number" placeholder="0" style="font-size:13px"></div>
+        <div><label class="fl">Date *</label><input class="fi" id="pmt-prin-date" type="date"></div>
+        <div><label class="fl">Amount (₹)</label><input class="fi fi-mono" id="pmt-prin-amount" type="number" placeholder="0"></div>
       </div>
     </div>
+    
+    <!-- Interest Payment Section -->
+    <div style="background:rgba(232,93,122,0.06);border:1px solid rgba(232,93,122,0.2);border-radius:10px;padding:10px 13px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:var(--rose);margin-bottom:10px">📊 Interest Payment</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><label class="fl">Date *</label><input class="fi" id="pmt-int-date" type="date"></div>
+        <div><label class="fl">Amount (₹)</label><input class="fi fi-mono" id="pmt-int-amount" type="number" placeholder="0"></div>
+      </div>
+    </div>
+    
     <label class="fl">Notes (optional)</label>
     <input class="fi" id="pmt-notes" placeholder="ఉదా: EMI, partial payment">
     <div style="display:flex;gap:9px;margin-top:4px">
       <button class="btn ghost full" onclick="closeModal('add-payment')">Cancel</button>
-      <button class="btn rose full" onclick="savePayment()">✓ Save Payment</button>
+      <button class="btn rose full" onclick="savePaymentV2()">✓ Save Payment</button>
     </div>
   </div>
 </div>
@@ -5236,9 +5244,12 @@ function filterContacts(f) {
 // AI chat chip: ask AI about cheapest vendor for a category
 function askCheapest(category) {
   showSc('chat');
-  var inp = document.getElementById('chat-in');
-  inp.value = category + ' కి చౌకగా ఎవరు ఇస్తారు? last price, date, phone చెప్పు';
-  sendMsg();
+  setTimeout(function() {
+    var inp = document.getElementById('chat-in');
+    if (!inp) return;
+    inp.value = category + ' కి చౌకగా ఎవరు ఇస్తారు? last price, date, phone చెప్పు';
+    sendMsg();
+  }, 100);
 }
 
 function renderContacts() {
@@ -6529,15 +6540,21 @@ function calcHandLoanInterest() {
   var principal = Number(document.getElementById('ln-principal').value) || 0;
   var rate      = Number(document.getElementById('ln-hl-rate').value) || 0;
   var intPaid   = Number(document.getElementById('ln-hl-int-paid').value) || 0;
+  var loanDate  = document.getElementById('ln-date').value;
   var track     = document.getElementById('ln-hl-track');
   if (!track) return;
   // Show tracking panel only when editing (edit-id is set)
   var isEdit = !!(document.getElementById('ln-edit-id') && document.getElementById('ln-edit-id').value);
   track.style.display = isEdit ? 'block' : 'none';
   if (isEdit && principal > 0 && rate > 0) {
-    var totalInt = Math.round(principal * rate / 100);
-    var balance  = Math.max(totalInt - intPaid, 0);
-    document.getElementById('ln-hl-total-int').textContent   = rup(totalInt);
+    // Calculate prorated interest till today
+    var startDate = new Date(loanDate);
+    var today = new Date();
+    var daysElapsed = Math.max(Math.floor((today - startDate) / (1000 * 60 * 60 * 24)), 0);
+    var annualInt = Math.round(principal * rate / 100);
+    var proratedInt = Math.round(annualInt * daysElapsed / 365);
+    var balance  = Math.max(proratedInt - intPaid, 0);
+    document.getElementById('ln-hl-total-int').textContent   = rup(proratedInt) + ' (till today)';
     document.getElementById('ln-hl-int-balance').textContent = rup(balance);
   }
 }
@@ -6635,87 +6652,100 @@ function saveLoan() {
 function openAddPayment(loanId) {
   var loan = (state.loans||[]).find(function(l){ return l.id===loanId; });
   if (!loan) return;
-  document.getElementById('pmt-loan-id').value = loanId;
+  var el1 = document.getElementById('pmt-loan-id');
+  var el2 = document.getElementById('pmt-loan-info');
+  var el3 = document.getElementById('pmt-prin-date');
+  var el4 = document.getElementById('pmt-int-date');
+  var el5 = document.getElementById('pmt-prin-amount');
+  var el6 = document.getElementById('pmt-int-amount');
+  var el7 = document.getElementById('pmt-notes');
+  if (!el1 || !el2 || !el3 || !el4 || !el5 || !el6 || !el7) { toast('Payment modal missing','err'); return; }
+  
+  el1.value = loanId;
   var pmts = (state.loanPayments||[]).filter(function(p){ return p.loanId===loanId; });
-  var paidPrincipal = pmts.reduce(function(s,p){ return s+Number(p.principalPart||0); },0);
+  var paidPrincipal = pmts.reduce(function(s,p){ return s+Number(p.principalAmount||0); },0);
   var outstanding = loan.principal - paidPrincipal;
-  document.getElementById('pmt-loan-info').innerHTML =
+  el2.innerHTML =
     '<b style="color:var(--rose)">'+escH(loan.name)+'</b> &nbsp;·&nbsp; '
     +'Principal: '+rup(loan.principal)+' &nbsp;·&nbsp; '
     +'Outstanding: <b style="color:var(--rose)">'+rup(outstanding)+'</b>'
     +(loan.rate?'<br>Rate: '+loan.rate+(loan.rateType==='pm'?' % p.m.':loan.rateType==='pa'?' % p.a.':(loan.rateType==='flat'?' flat/month':'')):'');
-  // Set today's date
-  document.getElementById('pmt-date').value = new Date().toISOString().slice(0,10);
-  document.getElementById('pmt-amount').value='';
-  document.getElementById('pmt-interest').value='';
-  document.getElementById('pmt-principal-part').value='';
-  document.getElementById('pmt-notes').value='';
+  // Set today's date for both
+  var today = new Date().toISOString().slice(0,10);
+  el3.value = today;
+  el4.value = today;
+  el5.value='';
+  el6.value='';
+  el7.value='';
   openModal('add-payment');
 }
 
-// ── Auto-calculate interest/principal split ──
-function calcPmtSplit() {
-  var loanId  = document.getElementById('pmt-loan-id').value;
-  var loan    = (state.loans||[]).find(function(l){ return l.id===loanId; });
-  if (!loan || !loan.rate || loan.rateType==='0') {
-    document.getElementById('pmt-interest').value=0;
-    var amt=Number(document.getElementById('pmt-amount').value)||0;
-    document.getElementById('pmt-principal-part').value=amt;
-    return;
-  }
-  var pmts = (state.loanPayments||[]).filter(function(p){ return p.loanId===loanId; });
-  var paidPrin = pmts.reduce(function(s,p){ return s+Number(p.principalPart||0); },0);
-  var outstanding = Math.max(loan.principal - paidPrin, 0);
-  var amt = Number(document.getElementById('pmt-amount').value)||0;
-  var monthlyRate = loan.rateType==='pm' ? loan.rate/100
-                  : loan.rateType==='pa' ? loan.rate/100/12
-                  : 0;
-  var intPortion = loan.rateType==='flat' ? loan.rate
-                 : Math.round(outstanding * monthlyRate);
-  intPortion = Math.min(intPortion, amt);
-  var prinPortion = Math.max(amt - intPortion, 0);
-  document.getElementById('pmt-interest').value      = intPortion;
-  document.getElementById('pmt-principal-part').value = prinPortion;
-}
+// ── Save Payment V2 (separate interest + principal with dates) ──
+function savePaymentV2() {
+  var el1 = document.getElementById('pmt-loan-id');
+  var el2 = document.getElementById('pmt-prin-date');
+  var el3 = document.getElementById('pmt-prin-amount');
+  var el4 = document.getElementById('pmt-int-date');
+  var el5 = document.getElementById('pmt-int-amount');
+  var el6 = document.getElementById('pmt-notes');
+  if (!el1 || !el2 || !el3 || !el4 || !el5 || !el6) { toast('Payment form error','err'); return; }
+  
+  var loanId  = el1.value;
+  var prinDate = el2.value;
+  var prinAmount = Number(el3.value)||0;
+  var intDate = el4.value;
+  var intAmount = Number(el5.value)||0;
+  var notes   = el6.value.trim();
 
-// ── Save Payment ──
-function savePayment() {
-  var loanId  = document.getElementById('pmt-loan-id').value;
-  var date    = document.getElementById('pmt-date').value;
-  var amount  = Number(document.getElementById('pmt-amount').value)||0;
-  var intPart = Number(document.getElementById('pmt-interest').value)||0;
-  var prinPart= Number(document.getElementById('pmt-principal-part').value)||0;
-  var notes   = document.getElementById('pmt-notes').value.trim();
-
-  if (!date)   { toast('Date select చేయండి','err'); return; }
-  if (!amount) { toast('Amount enter చేయండి','err'); return; }
-
-  var pmt = {
-    id:            'pmt_'+Date.now(),
-    loanId:        loanId,
-    date:          date,
-    amount:        amount,
-    interestPart:  intPart,
-    principalPart: prinPart,
-    notes:         notes
-  };
+  if (!prinAmount && !intAmount) { toast('At least one amount enter చేయండి','err'); return; }
+  if (prinAmount && !prinDate) { toast('Principal date select చేయండి','err'); return; }
+  if (intAmount && !intDate) { toast('Interest date select చేయండి','err'); return; }
 
   if (!state.loanPayments) state.loanPayments=[];
-  state.loanPayments.push(pmt);
 
-  // If principal is fully paid, mark loan closed
+  // Add principal payment if amount > 0
+  if (prinAmount > 0) {
+    var prinPmt = {
+      id:            'pmt_'+Date.now()+'_p',
+      loanId:        loanId,
+      date:          prinDate,
+      type:          'principal',
+      principalAmount: prinAmount,
+      notes:         notes
+    };
+    state.loanPayments.push(prinPmt);
+    pushToSheet('LoanPayments',
+      ['id','loanId','date','type','principalAmount','interestAmount','notes'],
+      [prinPmt.id, prinPmt.loanId, prinPmt.date, 'principal', prinAmount, 0, notes]
+    );
+  }
+
+  // Add interest payment if amount > 0
+  if (intAmount > 0) {
+    var intPmt = {
+      id:            'pmt_'+Date.now()+'_i',
+      loanId:        loanId,
+      date:          intDate,
+      type:          'interest',
+      interestAmount: intAmount,
+      notes:         notes
+    };
+    state.loanPayments.push(intPmt);
+    pushToSheet('LoanPayments',
+      ['id','loanId','date','type','principalAmount','interestAmount','notes'],
+      [intPmt.id, intPmt.loanId, intPmt.date, 'interest', 0, intAmount, notes]
+    );
+  }
+
+  // Check if principal is fully paid
   var loan = (state.loans||[]).find(function(l){ return l.id===loanId; });
   if (loan) {
     var totalPrinPaid = state.loanPayments.filter(function(p){ return p.loanId===loanId; })
-      .reduce(function(s,p){ return s+Number(p.principalPart||0); },0);
+      .reduce(function(s,p){ return s+Number(p.principalAmount||0); },0);
     if (totalPrinPaid >= loan.principal) { loan.status='closed'; }
   }
 
   saveData();
-  pushToSheet('LoanPayments',
-    ['id','loanId','date','amount','interestPart','principalPart','notes'],
-    [pmt.id, pmt.loanId, pmt.date, pmt.amount, pmt.interestPart, pmt.principalPart, pmt.notes]
-  );
   closeModal('add-payment');
   toast('Payment saved ✓','ok');
   renderLoanList();
@@ -6731,7 +6761,7 @@ function deletePayment(pmtId) {
   var loan = (state.loans||[]).find(function(l){ return l.id===pmt.loanId; });
   if (loan && loan.status==='closed') {
     var totalPrin = state.loanPayments.filter(function(p){ return p.loanId===loan.id; })
-      .reduce(function(s,p){ return s+Number(p.principalPart||0); },0);
+      .reduce(function(s,p){ return s+Number(p.principalAmount||0); },0);
     if (totalPrin < loan.principal) loan.status='active';
   }
   saveData();
@@ -6773,8 +6803,8 @@ function renderLoanList() {
   var totalBorrowed=0, totalOutstanding=0, totalIntPaid=0, totalPrinPaid=0;
   loans.forEach(function(loan) {
     var pmts = (state.loanPayments||[]).filter(function(p){ return p.loanId===loan.id; });
-    var paidPrin = pmts.reduce(function(s,p){ return s+Number(p.principalPart||0); },0);
-    var paidInt  = pmts.reduce(function(s,p){ return s+Number(p.interestPart||0); },0);
+    var paidPrin = pmts.reduce(function(s,p){ return s+Number(p.principalAmount||0); },0);
+    var paidInt  = pmts.reduce(function(s,p){ return s+Number(p.interestAmount||0); },0);
     totalBorrowed    += Number(loan.principal||0);
     totalOutstanding += Math.max(loan.principal-paidPrin, 0);
     totalIntPaid     += paidInt;
@@ -6794,9 +6824,9 @@ function renderLoanList() {
   var html='';
   loans.forEach(function(loan, idx) {
     var pmts = (state.loanPayments||[]).filter(function(p){ return p.loanId===loan.id; });
-    var paidPrin = pmts.reduce(function(s,p){ return s+Number(p.principalPart||0); },0);
-    var paidInt  = pmts.reduce(function(s,p){ return s+Number(p.interestPart||0); },0);
-    var paidTotal= pmts.reduce(function(s,p){ return s+Number(p.amount||0); },0);
+    var paidPrin = pmts.reduce(function(s,p){ return s+Number(p.principalAmount||0); },0);
+    var paidInt  = pmts.reduce(function(s,p){ return s+Number(p.interestAmount||0); },0);
+    var paidTotal= paidPrin + paidInt;
     var outstanding = Math.max(loan.principal - paidPrin, 0);
     var rateStr = loan.rateType==='0'?'Zero Interest':loan.rate+(loan.rateType==='pm'?'% p.m.':loan.rateType==='pa'?'% p.a.':'₹ flat/m');
     var bodyId='lbody_'+idx;
@@ -6828,15 +6858,21 @@ function renderLoanList() {
 
     // HandLoan interest tracking panel
     if (loan.loanType === 'handloan' && loan.rate) {
+      // Calculate interest from loan date till today (prorated)
+      var loanStartDate = new Date(loan.date);
+      var today = new Date();
+      var daysElapsed = Math.floor((today - loanStartDate) / (1000 * 60 * 60 * 24));
       var annualInt  = Math.round(Number(loan.principal) * Number(loan.rate) / 100);
-      var intPaid    = Number(loan.interestPaid||0);
-      var intBalance = Math.max(annualInt - intPaid, 0);
+      var accruedInt = Math.round(annualInt * daysElapsed / 365);
+      var intPaid    = pmts.reduce(function(s,p){ return s+Number(p.interestAmount||0); },0);
+      var intBalance = Math.max(accruedInt - intPaid, 0);
       html += '<div style="background:rgba(232,93,122,0.06);border:1px solid rgba(232,93,122,0.2);border-radius:9px;padding:9px 12px;margin-bottom:10px">'
-        +'<div style="font-size:10px;color:var(--tx3);font-weight:600;margin-bottom:6px">INTEREST TRACKING (Annual @ '+loan.rate+'%)</div>'
+        +'<div style="font-size:10px;color:var(--tx3);font-weight:600;margin-bottom:6px">INTEREST TRACKING (@ '+loan.rate+'% p.a., Till Today)</div>'
         +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
-          +'<div><div style="font-size:11px;color:var(--tx3)">Annual Interest</div><div style="font-family:JetBrains Mono;font-size:13px;font-weight:700;color:var(--amb)">'+rup(annualInt)+'</div></div>'
+          +'<div><div style="font-size:11px;color:var(--tx3)">Annual Rate</div><div style="font-family:JetBrains Mono;font-size:13px;font-weight:700;color:var(--amb)">'+rup(annualInt)+'</div></div>'
+          +'<div><div style="font-size:11px;color:var(--tx3)">Accrued ('+daysElapsed+' days)</div><div style="font-family:JetBrains Mono;font-size:13px;font-weight:700;color:var(--amb)">'+rup(accruedInt)+'</div></div>'
           +'<div><div style="font-size:11px;color:var(--tx3)">Interest Paid</div><div style="font-family:JetBrains Mono;font-size:13px;font-weight:700;color:var(--sage)">'+rup(intPaid)+'</div></div>'
-          +'<div><div style="font-size:11px;color:var(--tx3)">Interest Balance</div><div style="font-family:JetBrains Mono;font-size:13px;font-weight:700;color:var(--rose)">'+rup(intBalance)+'</div></div>'
+          +'<div style="grid-column:1/-1"><div style="font-size:11px;color:var(--tx3)">Interest Balance</div><div style="font-family:JetBrains Mono;font-size:13px;font-weight:700;color:var(--rose)">'+rup(intBalance)+'</div></div>'
         +'</div>'
       +'</div>';
     }
@@ -6877,18 +6913,20 @@ function renderLoanList() {
       }
     }
 
-    // Repayment rows (non-EMI or ad-hoc)
-    var nonEmiPmts = pmts.filter(function(p){return !p.isEmi;});
-    if (nonEmiPmts.length) {
-      html += '<div style="font-size:12px;font-weight:700;color:var(--tx2);margin:8px 0 4px">Repayments:</div>';
-      var sortedPmts = nonEmiPmts.slice().sort(function(a,b){ return a.date.localeCompare(b.date); });
+    // Repayment rows - Chronological mixed list (Principal + Interest)
+    var allPmts = pmts.filter(function(p){return !p.isEmi;});
+    if (allPmts.length) {
+      html += '<div style="font-size:12px;font-weight:700;color:var(--tx2);margin:8px 0 4px">💳 Repayments (by date):</div>';
+      var sortedPmts = allPmts.slice().sort(function(a,b){ return a.date.localeCompare(b.date); });
       sortedPmts.forEach(function(p) {
+        var typeIcon = p.type==='principal' ? '💰' : '📊';
+        var typeColor = p.type==='principal' ? 'var(--teal)' : 'var(--rose)';
+        var amt = p.type==='principal' ? (p.principalAmount||0) : (p.interestAmount||0);
         html += '<div class="pmt-row">'
-          +'<span class="pmt-date">'+p.date+'</span>'
-          +'<span class="pmt-amt">'+rup(p.amount)+'</span>'
-          +(p.interestPart>0?'<span class="pmt-int">Int: '+rup(p.interestPart)+'</span>':'')
-          +(p.principalPart>0?'<span class="pmt-prin">Prin: '+rup(p.principalPart)+'</span>':'')
-          +(p.notes&&p.notes!=='EMI'?'<span style="font-size:11px;color:var(--tx3)">'+escH(p.notes)+'</span>':'')
+          +'<span style="font-size:12px;color:'+typeColor+'">'+typeIcon+' '+p.date+'</span>'
+          +'<span class="pmt-amt">'+rup(amt)+'</span>'
+          +(p.type==='principal'?'<span style="font-size:11px;color:var(--teal);font-weight:600">Principal</span>':'<span style="font-size:11px;color:var(--rose);font-weight:600">Interest</span>')
+          +(p.notes?'<span style="font-size:11px;color:var(--tx3)">'+escH(p.notes)+'</span>':'')
           +'<button class="pmt-del" onclick="deletePayment(\''+p.id+'\')">🗑️</button>'
         +'</div>';
       });
