@@ -870,6 +870,15 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
         <div id="overall-profit">
           <div class="empty"><div class="ei">📊</div><div class="et">Projects add చేసిన తర్వాత profit summary కనపడుతుంది</div></div>
         </div>
+        <!-- Project Expenditure -->
+        <div class="seg-t" style="margin-top:14px">📊 Project Expenditure</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          <button class="btn rose full" onclick="openModal('add-proj-expense')">+ Add Expense</button>
+          <button class="btn teal full" onclick="openModal('add-proj-income')">+ Add Income</button>
+        </div>
+        <div id="proj-exp-list">
+          <div class="empty"><div class="ei">📊</div><div class="et">Projects add అయిన తర్వాత expenditure కనపడుతుంది</div></div>
+        </div>
       </div>
     </div>
 
@@ -962,7 +971,6 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
         <!-- Tab Bar -->
         <div class="fin-tabs">
           <div class="fin-tab on" id="ftab-loans" onclick="switchFinTab('loans')">🏦 Fund Register</div>
-          <div class="fin-tab" id="ftab-expenditure" onclick="switchFinTab('expenditure')">📊 Project Expenditure</div>
           <div class="fin-tab" id="ftab-pl" onclick="switchFinTab('pl')">📈 P&amp;L Summary</div>
         </div>
 
@@ -981,18 +989,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
           </div>
         </div>
 
-        <!-- ── PANEL 2: PROJECT EXPENDITURE ── -->
-        <div class="fin-panel" id="fpanel-expenditure">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-            <button class="btn rose full" onclick="openModal('add-proj-expense')">+ Add Expense</button>
-            <button class="btn teal full" onclick="openModal('add-proj-income')">+ Add Income</button>
-          </div>
-          <div id="proj-exp-list">
-            <div class="empty"><div class="ei">📊</div><div class="et">Projects add అయిన తర్వాత expenditure కనపడుతుంది</div></div>
-          </div>
-        </div>
-
-        <!-- ── PANEL 3: P&L SUMMARY ── -->
+        <!-- ── PANEL 2: P&L SUMMARY ── -->
         <div class="fin-panel" id="fpanel-pl">
           <!-- Overall summary -->
           <div id="pl-overall" style="margin-bottom:12px"></div>
@@ -4162,6 +4159,7 @@ function addPlotRow(existingPlot) {
     type: 'plot',
     status: 'planned',
     salePrice: 0, buyer: '', advanceReceived: 0,
+    partialPayments: [],
     constructionCost: 0,
     phases: {foundation:0,structure:0,roof:0,electrical:0,plumbing:0,finishing:0}
   };
@@ -4270,6 +4268,7 @@ function saveProject() {
       salePrice: ext.salePrice || 0,
       buyer: ext.buyer || '',
       advanceReceived: ext.advanceReceived || 0,
+      partialPayments: ext.partialPayments || [],
       constructionCost: ext.constructionCost || 0,
       phases: ext.phases || {foundation:0,structure:0,roof:0,electrical:0,plumbing:0,finishing:0}
     };
@@ -4338,7 +4337,8 @@ function openEditProject(projId) {
   _pendingPlots = (proj.plots||[]).map(function(p) {
     return { id:p.id, plotNo:p.plotNo, sizeInCents:p.sizeInCents, type:p.type||'plot',
              status:p.status, salePrice:p.salePrice, buyer:p.buyer,
-             advanceReceived:p.advanceReceived||0, constructionCost:p.constructionCost||0,
+             advanceReceived:p.advanceReceived||0, partialPayments:p.partialPayments||[],
+             constructionCost:p.constructionCost||0,
              phases:p.phases||{foundation:0,structure:0,roof:0,electrical:0,plumbing:0,finishing:0} };
   });
   renderPlotRows();
@@ -4364,7 +4364,10 @@ function renderProjects() {
     var constructionCost = plots.filter(function(p){ return p.type==='house'; })
                                .reduce(function(s,p){ return s+Number(p.constructionCost||0); },0);
     var soldPlots = plots.filter(function(p){ return p.status==='sold'; });
-    var totalSaleReceived = soldPlots.reduce(function(s,p){ return s+(Number(p.salePrice||0)+Number(p.advanceReceived||0)); },0);
+    var totalSaleReceived = soldPlots.reduce(function(s,p){
+      var ppSum = (p.partialPayments||[]).reduce(function(ps,pp){ return ps+Number(pp.amount||0); },0);
+      return s + Number(p.advanceReceived||0) + ppSum;
+    },0);
     var totalExpSale = plots.reduce(function(s,p){ return s+Number(p.salePrice||0); },0);
     var totalCentsSold = soldPlots.reduce(function(s,p){ return s+Number(p.sizeInCents||0); },0);
     var totalCentsLeft = Number(proj.totalCents||0) - totalCentsSold;
@@ -4520,8 +4523,41 @@ function openPlotByIndex(el) {
     +'data-pi="'+pi+'" data-pli="'+pli+'" onchange="updatePlotField(this,\'advanceReceived\',\'num\')">'
     +'<label class="fl" style="margin-top:9px">Buyer Name</label>'
     +'<input type="text" class="fi" value="'+escH(plt.buyer||'')+'" placeholder="Buyer పేరు" '
-    +'data-pi="'+pi+'" data-pli="'+pli+'" onchange="updatePlotField(this,\'buyer\',\'text\')">'
-    +'<button class="btn amb full" style="margin-top:12px" onclick="closeModal(\'house-modal\');renderProjects()">✓ Done</button>';
+    +'data-pi="'+pi+'" data-pli="'+pli+'" onchange="updatePlotField(this,\'buyer\',\'text\')">';
+
+  // Partial Payments section
+  var pps = plt.partialPayments || [];
+  body += '<div class="seg-t" style="margin-top:14px">💳 Partial Payments</div>';
+  if (pps.length) {
+    pps.forEach(function(pp, ppIdx) {
+      body += '<div style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:6px;align-items:center;margin-bottom:6px">'
+        +'<input type="text" class="fi" value="'+escH(pp.desc||'')+'" placeholder="Description" '
+          +'data-pi="'+pi+'" data-pli="'+pli+'" data-ppidx="'+ppIdx+'" '
+          +'onchange="updatePartialPayment(this,'+pi+','+pli+','+ppIdx+',\'desc\',\'text\')" style="font-size:12px">'
+        +'<input type="number" class="fi fi-mono" value="'+(pp.amount||'')+'" placeholder="Amount" '
+          +'data-pi="'+pi+'" data-pli="'+pli+'" data-ppidx="'+ppIdx+'" '
+          +'onchange="updatePartialPayment(this,'+pi+','+pli+','+ppIdx+',\'amount\',\'num\')" style="font-size:12px">'
+        +'<input type="date" class="fi" value="'+(pp.date||'')+'" '
+          +'data-pi="'+pi+'" data-pli="'+pli+'" data-ppidx="'+ppIdx+'" '
+          +'onchange="updatePartialPayment(this,'+pi+','+pli+','+ppIdx+',\'date\',\'text\')" style="font-size:12px">'
+        +'<button onclick="deletePartialPayment('+pi+','+pli+','+ppIdx+')" '
+          +'style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:16px;padding:4px">🗑️</button>'
+      +'</div>';
+    });
+    var ppTotal = pps.reduce(function(s,pp){ return s+Number(pp.amount||0); },0);
+    body += '<div style="font-size:12px;color:var(--tx2);text-align:right;margin-bottom:4px">Partial Payments Total: <b style="font-family:JetBrains Mono;color:var(--sage)">'+rup(ppTotal)+'</b></div>';
+  } else {
+    body += '<div style="font-size:12px;color:var(--tx3);margin-bottom:6px">No partial payments yet</div>';
+  }
+  body += '<button class="btn ghost sm" style="width:100%;margin-bottom:4px" onclick="addPartialPayment('+pi+','+pli+')">+ Add Partial Payment</button>';
+
+  var advTotal = Number(plt.advanceReceived||0) + (plt.partialPayments||[]).reduce(function(s,pp){ return s+Number(pp.amount||0); },0);
+  body += '<div style="background:rgba(122,200,90,0.08);border:1px solid rgba(122,200,90,0.25);border-radius:9px;padding:8px 12px;margin-top:4px;display:flex;justify-content:space-between;align-items:center">'
+    +'<span style="font-size:12px;font-weight:700;color:var(--tx1)">Project Received</span>'
+    +'<span style="font-family:JetBrains Mono;font-size:13px;font-weight:700;color:var(--sage)">'+rup(advTotal)+'</span>'
+  +'</div>';
+
+  body += '<button class="btn amb full" style="margin-top:12px" onclick="closeModal(\'house-modal\');renderProjects()">✓ Done</button>';
 
   document.getElementById('house-modal-body').innerHTML = body;
   openModal('house-modal');
@@ -4546,6 +4582,31 @@ function updatePlotPhase(el) {
   var tot = document.getElementById('hm-total');
   if (tot) tot.textContent = rup(total);
   saveData();
+}
+
+function addPartialPayment(pi, pli) {
+  var plt = state.projects[pi].plots[pli];
+  if (!plt.partialPayments) plt.partialPayments = [];
+  plt.partialPayments.push({ id:'pp_'+Date.now(), desc:'', amount:0, date:new Date().toISOString().slice(0,10) });
+  saveData();
+  // Re-open plot modal to show new entry
+  var fakeEl = {dataset:{proj:pi,plot:pli}, closest:function(){ return document.querySelector('[data-pi="'+pi+'"][data-pli="'+pli+'"]'); }};
+  openPlotByIndex({dataset:{proj:String(pi),plot:String(pli)}});
+}
+
+function updatePartialPayment(el, pi, pli, ppIdx, field, type) {
+  var plt = state.projects[pi].plots[pli];
+  if (!plt.partialPayments || !plt.partialPayments[ppIdx]) return;
+  plt.partialPayments[ppIdx][field] = type==='num' ? (Number(el.value)||0) : el.value;
+  saveData();
+}
+
+function deletePartialPayment(pi, pli, ppIdx) {
+  var plt = state.projects[pi].plots[pli];
+  if (!plt.partialPayments) return;
+  plt.partialPayments.splice(ppIdx, 1);
+  saveData();
+  openPlotByIndex({dataset:{proj:String(pi),plot:String(pli)}});
 }
 
 // Legacy stubs (keep in case old data references these — no-op now)
@@ -4601,7 +4662,10 @@ function renderOverallProfit(projects) {
                        .reduce(function(s,pl){ return s+Number(pl.constructionCost||0); },0);
     totalExpSale += plots.reduce(function(s,pl){ return s+Number(pl.salePrice||0); },0);
     totalReceived += plots.filter(function(pl){ return pl.status==='sold'; })
-                         .reduce(function(s,pl){ return s+Number(pl.salePrice||0)+Number(pl.advanceReceived||0); },0);
+                         .reduce(function(s,pl){
+                           var ppSum = (pl.partialPayments||[]).reduce(function(ps,pp){ return ps+Number(pp.amount||0); },0);
+                           return s + Number(pl.advanceReceived||0) + ppSum;
+                         },0);
   });
   var totalInvest = totalLand+totalConst;
   var expProfit = totalExpSale-totalLand;
@@ -5210,10 +5274,10 @@ function showSc(name) {
     setTimeout(function(){ var c=document.getElementById('chat-msgs'); c.scrollTop=c.scrollHeight; }, 80);
     if (!document.getElementById('chat-msgs').children.length) injectWelcome();
   }
-  if (name==='projects') renderProjects();
+  if (name==='projects') { renderProjects(); renderProjExp(); }
   if (name==='contacts') renderContacts();
   if (name==='settings') updateSettingsUI();
-  if (name==='finance') { renderLoanList(); renderProjExp(); renderPL(); }
+  if (name==='finance') { renderLoanList(); renderPL(); }
 }
 
 function openModal(id) {
@@ -5221,7 +5285,7 @@ function openModal(id) {
   if (id==='add-proj-expense') { var d=document.getElementById('pexp-date'); if(d&&!d.value) d.value=new Date().toISOString().slice(0,10); }
   if (id==='add-proj-income')  { var d2=document.getElementById('inc-date'); if(d2&&!d2.value) d2.value=new Date().toISOString().slice(0,10); }
   if (id==='add-loan') { var d3=document.getElementById('ln-date'); if(d3&&!d3.value) d3.value=new Date().toISOString().slice(0,10); }
-  if (id==='add-project' && !document.getElementById('p-edit-id').value) { clearLandPaymentRows(); clearPlotRows(); }
+  if (id==='add-project' && !document.getElementById('p-edit-id').value) { clearLandPaymentRows(); }
   document.getElementById(id).classList.add('on');
 }
 function closeModal(id) { document.getElementById(id).classList.remove('on'); }
@@ -5919,13 +5983,12 @@ if (!state.landPayments) state.landPayments = [];
 
 // ── Tab switcher ──
 function switchFinTab(tab) {
-  ['loans','expenditure','pl'].forEach(function(t) {
+  ['loans','pl'].forEach(function(t) {
     document.getElementById('ftab-'+t).classList.toggle('on', t===tab);
     document.getElementById('fpanel-'+t).classList.toggle('on', t===tab);
   });
-  if (tab==='loans')        renderLoanList();
-  if (tab==='expenditure')  renderProjExp();
-  if (tab==='pl')           renderPL();
+  if (tab==='loans') renderLoanList();
+  if (tab==='pl')    renderPL();
 }
 
 // ── Save Loan ──
