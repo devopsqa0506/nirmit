@@ -7193,7 +7193,7 @@ function renderLoanList() {
         var sch = schedForLoan.find(function(s){return s.origDate===dStr;}) || {origDate:dStr, date:dStr, amount:loan.emi, paid:false, interestPart:0, principalPart:0};
         // Calculate interest/principal if not stored
         if (!sch.interestPart && !sch.principalPart && sch.amount) {
-          var existingPmts = (state.loanPayments||[]).filter(function(p){ return p.loanId===loanId && !p.isEmi; });
+          var existingPmts = (state.loanPayments||[]).filter(function(p){ return p.loanId===loan.id && !p.isEmi; });
           var paidPrin = existingPmts.reduce(function(s,p){ return s+Number(p.principalAmount||p.principalPart||0); },0);
           var outstandingBal = Math.max(Number(loan.principal||0) - paidPrin, 0);
           var mRate = loan.rateType==='pm' ? Number(loan.rate||0)/100
