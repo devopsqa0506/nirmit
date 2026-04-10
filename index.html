@@ -5161,6 +5161,7 @@ function addConstructionExpense(pi, pli) {
   if (!plt.constructionExpenses) plt.constructionExpenses = [];
   plt.constructionExpenses.push({ id:'ce_'+Date.now(), desc:'', amount:0, date:'' });
   saveData();
+  updateAdvancesReceivedTotal();
   openPlotByIndex({dataset:{proj:String(pi),plot:String(pli)}});
 }
 function updateConstructionExpense(pi, pli, idx, field, type, el) {
@@ -5168,13 +5169,17 @@ function updateConstructionExpense(pi, pli, idx, field, type, el) {
   if (!plt.constructionExpenses || !plt.constructionExpenses[idx]) return;
   plt.constructionExpenses[idx][field] = type==='num' ? (Number(el.value)||0) : el.value;
   saveData();
-  if (field==='amount') recalcHouseTotals(pi, pli);
+  if (field==='amount') {
+    recalcHouseTotals(pi, pli);
+    updateAdvancesReceivedTotal();
+  }
 }
 function deleteConstructionExpense(pi, pli, idx) {
   var plt = state.projects[pi].plots[pli];
   if (!plt.constructionExpenses) return;
   plt.constructionExpenses.splice(idx, 1);
   saveData();
+  updateAdvancesReceivedTotal();
   openPlotByIndex({dataset:{proj:String(pi),plot:String(pli)}});
 }
 
@@ -5184,6 +5189,7 @@ function addMiscExpense(pi, pli) {
   if (!plt.miscExpenses) plt.miscExpenses = [];
   plt.miscExpenses.push({ id:'me_'+Date.now(), type:'Registration', amount:0, date:'' });
   saveData();
+  updateAdvancesReceivedTotal();
   openPlotByIndex({dataset:{proj:String(pi),plot:String(pli)}});
 }
 function updateMiscExpense(pi, pli, idx, field, type, el) {
@@ -5191,13 +5197,17 @@ function updateMiscExpense(pi, pli, idx, field, type, el) {
   if (!plt.miscExpenses || !plt.miscExpenses[idx]) return;
   plt.miscExpenses[idx][field] = type==='num' ? (Number(el.value)||0) : el.value;
   saveData();
-  if (field==='amount') recalcHouseTotals(pi, pli);
+  if (field==='amount') {
+    recalcHouseTotals(pi, pli);
+    updateAdvancesReceivedTotal();
+  }
 }
 function deleteMiscExpense(pi, pli, idx) {
   var plt = state.projects[pi].plots[pli];
   if (!plt.miscExpenses) return;
   plt.miscExpenses.splice(idx, 1);
   saveData();
+  updateAdvancesReceivedTotal();
   openPlotByIndex({dataset:{proj:String(pi),plot:String(pli)}});
 }
 
@@ -5207,6 +5217,7 @@ function addOtherExpense(pi, pli) {
   if (!plt.otherExpenses) plt.otherExpenses = [];
   plt.otherExpenses.push({ id:'oe_'+Date.now(), desc:'', amount:0, date:'' });
   saveData();
+  updateAdvancesReceivedTotal();
   openPlotByIndex({dataset:{proj:String(pi),plot:String(pli)}});
 }
 function updateOtherExpense(pi, pli, idx, field, type, el) {
@@ -5214,13 +5225,17 @@ function updateOtherExpense(pi, pli, idx, field, type, el) {
   if (!plt.otherExpenses || !plt.otherExpenses[idx]) return;
   plt.otherExpenses[idx][field] = type==='num' ? (Number(el.value)||0) : el.value;
   saveData();
-  if (field==='amount') recalcHouseTotals(pi, pli);
+  if (field==='amount') {
+    recalcHouseTotals(pi, pli);
+    updateAdvancesReceivedTotal();
+  }
 }
 function deleteOtherExpense(pi, pli, idx) {
   var plt = state.projects[pi].plots[pli];
   if (!plt.otherExpenses) return;
   plt.otherExpenses.splice(idx, 1);
   saveData();
+  updateAdvancesReceivedTotal();
   openPlotByIndex({dataset:{proj:String(pi),plot:String(pli)}});
 }
 
@@ -7466,6 +7481,7 @@ function saveLandPayment() {
   );
   closeModal('add-land-payment');
   toast('Land payment saved ✓','ok');
+  updateAdvancesReceivedTotal();
   renderProjExp();
   renderPL();
 }
@@ -7475,6 +7491,7 @@ function deleteLandPayment(pmtId) {
   if (!confirm('Delete this land payment?')) return;
   state.landPayments = (state.landPayments||[]).filter(function(p){ return p.id!==pmtId; });
   saveData();
+  updateAdvancesReceivedTotal();
   renderProjExp();
   renderPL();
   toast('Payment deleted','ok');
