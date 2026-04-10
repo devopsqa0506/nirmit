@@ -5279,10 +5279,11 @@ function renderExpenditureScreen() {
   }
 
   var totalLandPaid = 0, totalConstruction = 0, totalMisc = 0;
-  var totalPlots = 0, totalSold = 0;
+  var totalSold = 0, totalPlotsCnt = 0;
   var totalAdvancesReceived = 0, totalExpectedReceivable = 0;
   var totalInterestPaid = 0;
   var totalProfit = 0;
+  var totalLandCostRemaining = 0;
 
   (state.loanPayments||[]).forEach(function(lp){
     totalInterestPaid += Number(lp.interest||0);
@@ -5292,9 +5293,13 @@ function renderExpenditureScreen() {
     var landPaid = (state.landPayments||[]).filter(function(p){ return p.projId===proj.id; })
                    .reduce(function(s,p){ return s+Number(p.amount||0); },0);
     totalLandPaid += landPaid;
+    
+    var totalCents = Number(proj.totalCents||0);
+    var landCostTotal = Number(proj.landCost||0) || (totalCents * Number(proj.pricePerCent||0));
+    totalLandCostRemaining += Math.max(landCostTotal - landPaid, 0);
 
     (proj.plots||[]).forEach(function(plt) {
-      totalPlots++;
+      totalPlotsCnt++;
       if (!plt.constructionExpenses) {
         plt.constructionExpenses = [{ id:'ce_0', desc:'Advance Construction', amount: plt.constructionCost||0, date:'' }];
         plt.miscExpenses = [];
@@ -5316,9 +5321,9 @@ function renderExpenditureScreen() {
         totalExpectedReceivable += Math.max(pending, 0);
         var centRateForProj = proj.totalCents > 0 ? (landPaid / proj.totalCents) : 0;
         var landCostForPlot = centRateForProj * Number(plt.sizeInCents||0);
-        // Plot type: profit = SoldPrice - (PlotSize × DealCentRate). House: includes construction.
+        // PLOT: Profit = Sale - (Land + Misc). HOUSE: + Construction
         var plotProfit = plt.type === 'plot'
-          ? salePrice - landCostForPlot
+          ? salePrice - (landCostForPlot + miscTotal + otherTotal)
           : salePrice - (landCostForPlot + constTotal + miscTotal + otherTotal);
         totalProfit += plotProfit;
       }
@@ -5334,13 +5339,13 @@ function renderExpenditureScreen() {
     + '</div>'
     + '<div class="profit-summary">'
     + '<div class="ps-box"><div class="pl">Paid For Land</div><div class="pv" style="color:var(--amb)">'+rup(totalLandPaid)+'</div></div>'
-    + '<div class="ps-box"><div class="pl">Total Plots</div><div class="pv" style="color:var(--sky)">'+totalPlots+'</div></div>'
-    + '<div class="ps-box"><div class="pl">Sold</div><div class="pv" style="color:var(--sage)">'+totalSold+'</div></div>'
+    + '<div class="ps-box"><div class="pl">Land Balance</div><div class="pv" style="color:var(--rose)">'+rup(totalLandCostRemaining)+'</div></div>'
+    + '<div class="ps-box"><div class="pl">Plot Info</div><div class="pv" style="color:var(--sage)">'+totalSold+'/'+totalPlotsCnt+'</div></div>'
     + '</div>'
     + '<div class="profit-summary">'
      + '<div class="ps-box"><div class="pl">Advances Received</div><div class="pv" style="color:var(--teal)">'+rup(totalAdvancesReceived)+'</div></div>'
     + '<div class="ps-box"><div class="pl">Expected Receivable</div><div class="pv" style="color:var(--amb)">'+rup(totalExpectedReceivable)+'</div></div>'
-    + '<div class="ps-box"><div class="pl">Total Profit (Sold)</div><div class="pv" style="color:'+(totalProfit>0?'var(--sage)':'var(--rose)')+'">'+rup(totalProfit)+'</div></div>'
+    + '<div class="ps-box"><div class="pl">Total Profit</div><div class="pv" style="color:'+(totalProfit>0?'var(--sage)':'var(--rose)')+'">'+rup(totalProfit)+'</div></div>'
     + '</div>';
 
   var html = '';
@@ -5386,7 +5391,7 @@ function toggleExpDetail(el) {
 // ── Real-time profit calc for plot (SOLD status only) ──
 function updatePlotProfitDisplay() {
   var projects = state.projects||[];
-  var currProj = projects.length > 0 ? projects[0] : null; // active project
+  var currProj = projects.length > 0 ? projects[0] : null;
   if (!currProj) return;
   
   var profitEl = document.getElementById('pp-display');
@@ -5405,13 +5410,15 @@ function updatePlotProfitDisplay() {
     
     var salePrice = Number(plt.salePrice||0);
     var plotLand = centRate * Number(plt.sizeInCents||0);
-    var plotConst = plt.type === 'house' 
-      ? (plt.constructionExpenses||[]).reduce(function(s,e){ return s+Number(e.amount||0); },0) : 0;
     var plotMisc = (plt.miscExpenses||[]).reduce(function(s,e){ return s+Number(e.amount||0); },0);
     var plotOther = (plt.otherExpenses||[]).reduce(function(s,e){ return s+Number(e.amount||0); },0);
-    var totalCost = plotLand + plotConst + plotMisc + plotOther;
     
-    var profit = salePrice - totalCost;
+    // PLOT: Land + Misc. HOUSE: + Construction
+    var costBasis = plt.type === 'plot'
+      ? plotLand + plotMisc + plotOther
+      : plotLand + (plt.constructionExpenses||[]).reduce(function(s,e){ return s+Number(e.amount||0); },0) + plotMisc + plotOther;
+    
+    var profit = salePrice - costBasis;
     totalProfit += profit;
   });
   
