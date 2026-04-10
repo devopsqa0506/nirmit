@@ -7312,7 +7312,10 @@ function deletePayment(pmtId) {
   if (!confirm('Delete this payment?')) return;
   var pmt = (state.loanPayments||[]).find(function(p){ return p.id===pmtId; });
   if (!pmt) return;
+  
+  // Delete from state
   state.loanPayments = state.loanPayments.filter(function(p){ return p.id!==pmtId; });
+  
   // Re-check loan status
   var loan = (state.loans||[]).find(function(l){ return l.id===pmt.loanId; });
   if (loan && loan.status==='closed') {
@@ -7321,6 +7324,15 @@ function deletePayment(pmtId) {
     if (totalPrin < loan.principal) loan.status='active';
   }
   saveData();
+  
+  // Delete from sheet
+  if (pmtId && cfg.scriptUrl && cfg.sheetId) {
+    fetch(cfg.scriptUrl, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'LoanPayments', matchCol:'id', matchVal:pmtId})
+    });
+  }
+  
   renderLoanList();
   toast('Payment deleted','ok');
 }
@@ -7328,9 +7340,25 @@ function deletePayment(pmtId) {
 // ── Delete Loan ──
 function deleteLoan(loanId) {
   if (!confirm('Delete this loan and all its payments?')) return;
+  
+  // Delete from state
   state.loans = (state.loans||[]).filter(function(l){ return l.id!==loanId; });
   state.loanPayments = (state.loanPayments||[]).filter(function(p){ return p.loanId!==loanId; });
   saveData();
+  
+  // Delete from sheet
+  if (loanId && cfg.scriptUrl && cfg.sheetId) {
+    fetch(cfg.scriptUrl, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'Loans', matchCol:'id', matchVal:loanId})
+    });
+    // Delete all payments for this loan
+    fetch(cfg.scriptUrl, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'LoanPayments', matchCol:'loanId', matchVal:loanId})
+    });
+  }
+  
   renderLoanList();
   toast('Loan deleted','ok');
 }
@@ -7628,8 +7656,19 @@ function saveLandPayment() {
 // ── Delete Land Payment ──
 function deleteLandPayment(pmtId) {
   if (!confirm('Delete this land payment?')) return;
+  
+  // Delete from state
   state.landPayments = (state.landPayments||[]).filter(function(p){ return p.id!==pmtId; });
   saveData();
+  
+  // Delete from sheet
+  if (pmtId && cfg.scriptUrl && cfg.sheetId) {
+    fetch(cfg.scriptUrl, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'LandPayments', matchCol:'id', matchVal:pmtId})
+    });
+  }
+  
   updateAdvancesReceivedTotal();
   renderProjExp();
   renderPL();
@@ -7805,8 +7844,19 @@ function renderProjExp() {
 
 function deleteProjIncome(incId) {
   if (!confirm('Delete this income entry?')) return;
+  
+  // Delete from state
   state.projIncome = (state.projIncome||[]).filter(function(i){ return i.id!==incId; });
   saveData();
+  
+  // Delete from sheet
+  if (incId && cfg.scriptUrl && cfg.sheetId) {
+    fetch(cfg.scriptUrl, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'ProjectIncome', matchCol:'id', matchVal:incId})
+    });
+  }
+  
   renderProjExp();
   renderPL();
   toast('Income entry deleted','ok');
@@ -8018,8 +8068,19 @@ function saveProjExpense() {
 
 function deleteProjExpense(expId) {
   if (!confirm('Delete this expense?')) return;
+  
+  // Delete from state
   state.projExpenses = (state.projExpenses||[]).filter(function(e){ return e.id!==expId; });
   saveData();
+  
+  // Delete from sheet
+  if (expId && cfg.scriptUrl && cfg.sheetId) {
+    fetch(cfg.scriptUrl, {
+      method:'POST', mode:'no-cors',
+      body: JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'ProjectExpenses', matchCol:'id', matchVal:expId})
+    });
+  }
+  
   renderProjExp();
   renderPL();
   toast('Expense deleted','ok');
