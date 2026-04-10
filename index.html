@@ -5320,18 +5320,17 @@ function renderExpenditureScreen() {
 
   summaryEl.innerHTML = '<div class="profit-summary">'
     + '<div class="ps-box"><div class="pl">Total Invested</div><div class="pv" style="color:var(--rose)">'+rup(totalInvested)+'</div></div>'
-    + '<div class="ps-box"><div class="pl">Land Paid</div><div class="pv" style="color:var(--amb)">'+rup(totalLandPaid)+'</div></div>'
     + '<div class="ps-box"><div class="pl">Construction</div><div class="pv" style="color:var(--sky)">'+rup(totalConstruction)+'</div></div>'
     + '<div class="ps-box"><div class="pl">Misc</div><div class="pv" style="color:var(--teal)">'+rup(totalMisc)+'</div></div>'
     + '</div>'
     + '<div class="profit-summary">'
+    + '<div class="ps-box"><div class="pl">Paid For Land</div><div class="pv" style="color:var(--amb)">'+rup(totalLandPaid)+'</div></div>'
     + '<div class="ps-box"><div class="pl">Total Plots</div><div class="pv" style="color:var(--sky)">'+totalPlots+'</div></div>'
     + '<div class="ps-box"><div class="pl">Sold</div><div class="pv" style="color:var(--sage)">'+totalSold+'</div></div>'
-    + '<div class="ps-box"><div class="pl">Advances Received</div><div class="pv" style="color:var(--teal)">'+rup(totalAdvancesReceived)+'</div></div>'
-    + '<div class="ps-box"><div class="pl">Expected Receivable</div><div class="pv" style="color:var(--amb)">'+rup(totalExpectedReceivable)+'</div></div>'
     + '</div>'
     + '<div class="profit-summary">'
-    + '<div class="ps-box"><div class="pl">Interest Paid</div><div class="pv" style="color:var(--rose)">'+rup(totalInterestPaid)+'</div></div>'
+     + '<div class="ps-box"><div class="pl">Advances Received</div><div class="pv" style="color:var(--teal)">'+rup(totalAdvancesReceived)+'</div></div>'
+    + '<div class="ps-box"><div class="pl">Expected Receivable</div><div class="pv" style="color:var(--amb)">'+rup(totalExpectedReceivable)+'</div></div>'
     + '<div class="ps-box"><div class="pl">Total Profit (Sold)</div><div class="pv" style="color:'+(totalProfit>0?'var(--sage)':'var(--rose)')+'">'+rup(totalProfit)+'</div></div>'
     + '</div>';
 
