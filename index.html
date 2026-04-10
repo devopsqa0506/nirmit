@@ -2185,6 +2185,30 @@ function showAmtLabel(val, elId) {
   if (el) el.textContent = val ? amtWords(val) : '';
 }
 
+// Update plot profit instantly as user types sale price
+function updatePlotProfitInstant(pi, pli, salePriceVal) {
+  var proj = state.projects[pi];
+  var plt = proj && proj.plots[pli];
+  if (!plt || plt.status !== 'sold') return;
+  
+  var constTotal = (plt.constructionExpenses||[]).reduce(function(s,e){ return s+Number(e.amount||0); },0);
+  var _dealCentRate = proj.totalCents > 0 ? (Number(proj.landCost||0) / proj.totalCents) : 0;
+  var _landCostForPlt = _dealCentRate * Number(plt.sizeInCents||0);
+  var _miscForPlt = (plt.miscExpenses||[]).reduce(function(s,e){ return s+Number(e.amount||0); },0);
+  var _otherForPlt = (plt.otherExpenses||[]).reduce(function(s,e){ return s+Number(e.amount||0); },0);
+  var _costBasis = plt.type === 'plot'
+    ? _landCostForPlt + _miscForPlt + _otherForPlt
+    : _landCostForPlt + constTotal + _miscForPlt + _otherForPlt;
+  var salePrice = Number(salePriceVal)||0;
+  var plotProfit = salePrice - _costBasis;
+  var profitColor = plotProfit >= 0 ? 'var(--sage)' : 'var(--rose)';
+  var profitEl = document.getElementById('hm-plot-profit');
+  if (profitEl) {
+    profitEl.textContent = rup(plotProfit);
+    profitEl.style.color = profitColor;
+  }
+}
+
 // Proper Indian number formatting: 1,00,000 / 12,73,000 / 1,27,30,000
 function fmtIN(n) {
   n = Math.abs(Number(n)||0);
@@ -5014,7 +5038,7 @@ function openPlotByIndex(el) {
   if (isSold) {
     body += '<label class="fl" style="margin-top:9px">Sale Price (₹)</label>'
       +'<input type="number" class="fi fi-mono" id="hm-sale-price" value="'+(plt.salePrice||'')+'" placeholder="Actual sale price" '
-      +'data-pi="'+pi+'" data-pli="'+pli+'" onchange="updatePlotField(this,\'salePrice\',\'num\')" oninput="showAmtLabel(this.value,\'sp-words\')">'
+      +'data-pi="'+pi+'" data-pli="'+pli+'" onchange="updatePlotField(this,\'salePrice\',\'num\')" oninput="showAmtLabel(this.value,\'sp-words\'); updatePlotProfitInstant('+pi+','+pli+',this.value)">'
       +'<div id="sp-words" style="font-size:12px;font-weight:600;color:var(--amb);margin-top:3px;min-height:16px">'+(plt.salePrice?amtWords(plt.salePrice):'')+'</div>'
       +'<label class="fl" style="margin-top:9px">Advance Received (₹)</label>'
       +'<input type="number" class="fi fi-mono" id="hm-adv-rcvd" value="'+(plt.advanceReceived||'')+'" placeholder="Token / advance amount" '
