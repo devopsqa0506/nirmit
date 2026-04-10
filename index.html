@@ -6729,15 +6729,15 @@ function toggleEmiPaid(loanId, origDate) {
   if (!loan) return;
   var entry = state.emiSchedule.find(function(s){return s.loanId===loanId && s.origDate===origDate;});
   if (!entry) {
-    entry = { id:'sch_'+Date.now(), loanId:loanId, origDate:origDate, date:origDate, amount:loan.emi||0, paid:false };
+    entry = { id:'sch_'+Date.now(), loanId:loanId, origDate:origDate, date:origDate, amount:loan.emi||0, paid:false, interestPart:0, principalPart:0 };
     state.emiSchedule.push(entry);
   }
   entry.paid = !entry.paid;
   if (entry.paid) {
     // Calculate interest/principal split based on current outstanding balance (bank logic)
     var existingPmts = (state.loanPayments||[]).filter(function(p){ return p.loanId===loanId; });
-    var paidPrinSoFar = existingPmts.reduce(function(s,p){ return s+Number(p.principalPart||0); },0);
-    var outstandingBal = Math.max(Number(loan.principal||0) - paidPrinSoFar, 0);
+    var paidPrin = existingPmts.reduce(function(s,p){ return s+Number(p.principalAmount||p.principalPart||0); },0);
+    var outstandingBal = Math.max(Number(loan.principal||0) - paidPrin, 0);
     var mRate = loan.rateType==='pm' ? Number(loan.rate||0)/100
               : loan.rateType==='pa' ? Number(loan.rate||0)/100/12
               : 0;
@@ -6746,14 +6746,17 @@ function toggleEmiPaid(loanId, origDate) {
                 : Math.round(outstandingBal * mRate);
     intPart = Math.min(intPart, entry.amount);
     var prinPart = Math.max(entry.amount - intPart, 0);
-    var pmt = { id:'pmt_emi_'+Date.now(), loanId:loanId, date:entry.date, amount:entry.amount,
-                interestPart:intPart, principalPart:prinPart, notes:'EMI', isEmi:true, emiOrigDate:origDate };
+    entry.interestPart = intPart;
+    entry.principalPart = prinPart;
+    // Create payment with NEW schema: principalAmount, interestAmount
+    var pmt = { id:'pmt_emi_'+Date.now(), loanId:loanId, date:entry.date, type:'emi',
+                principalAmount:prinPart, interestAmount:intPart, notes:'EMI', isEmi:true, emiOrigDate:origDate };
     if (!state.loanPayments) state.loanPayments=[];
     state.loanPayments.push(pmt);
     entry.pmtId = pmt.id;
     pushToSheet('LoanPayments',
-      ['id','loanId','date','amount','interestPart','principalPart','notes'],
-      [pmt.id, pmt.loanId, pmt.date, pmt.amount, intPart, prinPart, 'EMI']
+      ['id','loanId','date','type','principalAmount','interestAmount','notes'],
+      [pmt.id, pmt.loanId, pmt.date, 'emi', prinPart, intPart, 'EMI']
     );
   } else {
     if (entry.pmtId) {
@@ -7172,26 +7175,41 @@ function renderLoanList() {
       // If startD is before loan.date, advance one month
       if (startD < new Date(loan.date)) startD.setMonth(startD.getMonth()+1);
       var now = new Date(); now.setDate(1);
-      var maxD = loan.termMonths
-        ? new Date(new Date(loan.date).getFullYear(), new Date(loan.date).getMonth() + loan.termMonths, 1)
-        : new Date(now.getFullYear(), now.getMonth()+2, 1);
+      // LIMIT: Show from startD+1month to current month only
+      var fromD = new Date(startD); fromD.setMonth(fromD.getMonth()+1);
+      var toD = new Date(now);
 
-      html += '<div style="font-size:12px;font-weight:700;color:var(--tx2);margin:8px 0 4px">📅 EMI Schedule:</div>'
-        +'<div style="display:grid;grid-template-columns:2fr 2fr 1fr;gap:3px;margin-bottom:3px;padding:0 2px">'
+      html += '<div style="font-size:12px;font-weight:700;color:var(--tx2);margin:8px 0 4px">📅 EMI Schedule ('+fromD.toISOString().slice(0,7)+' to '+toD.toISOString().slice(0,7)+'):</div>'
+        +'<div style="display:grid;grid-template-columns:1.5fr 1.2fr 1.2fr 0.8fr;gap:3px;margin-bottom:3px;padding:0 2px">'
           +'<span style="font-size:10px;color:var(--tx3)">Date</span>'
-          +'<span style="font-size:10px;color:var(--tx3)">Amount</span>'
+          +'<span style="font-size:10px;color:var(--tx3)">Interest</span>'
+          +'<span style="font-size:10px;color:var(--tx3)">Principal</span>'
           +'<span style="font-size:10px;color:var(--tx3)">Paid</span>'
         +'</div>';
 
-      var d = new Date(startD);
-      while (d <= maxD) {
+      var d = new Date(fromD);
+      while (d <= toD) {
         var dStr = d.toISOString().slice(0,10);
-        var sch = schedForLoan.find(function(s){return s.origDate===dStr;}) || {origDate:dStr, date:dStr, amount:loan.emi, paid:false};
-        html += '<div style="display:grid;grid-template-columns:2fr 2fr 1fr;gap:3px;align-items:center;margin-bottom:3px">'
+        var sch = schedForLoan.find(function(s){return s.origDate===dStr;}) || {origDate:dStr, date:dStr, amount:loan.emi, paid:false, interestPart:0, principalPart:0};
+        // Calculate interest/principal if not stored
+        if (!sch.interestPart && !sch.principalPart && sch.amount) {
+          var existingPmts = (state.loanPayments||[]).filter(function(p){ return p.loanId===loanId && !p.isEmi; });
+          var paidPrin = existingPmts.reduce(function(s,p){ return s+Number(p.principalAmount||p.principalPart||0); },0);
+          var outstandingBal = Math.max(Number(loan.principal||0) - paidPrin, 0);
+          var mRate = loan.rateType==='pm' ? Number(loan.rate||0)/100
+                    : loan.rateType==='pa' ? Number(loan.rate||0)/100/12
+                    : 0;
+          sch.interestPart = (loan.rateType==='0' || !loan.rate) ? 0
+                           : loan.rateType==='flat' ? Number(loan.rate||0)
+                           : Math.round(outstandingBal * mRate);
+          sch.interestPart = Math.min(sch.interestPart, sch.amount);
+          sch.principalPart = Math.max(sch.amount - sch.interestPart, 0);
+        }
+        html += '<div style="display:grid;grid-template-columns:1.5fr 1.2fr 1.2fr 0.8fr;gap:3px;align-items:center;margin-bottom:3px">'
           +'<input type="date" class="fi" value="'+sch.date+'" style="font-size:11px;margin:0;padding:3px 5px" '
             +'onchange="updateEmiEntry(\''+loan.id+'\',\''+dStr+'\',\'date\',this.value)">'
-          +'<input type="number" class="fi fi-mono" value="'+sch.amount+'" style="font-size:11px;margin:0;padding:3px 5px" '
-            +'onchange="updateEmiEntry(\''+loan.id+'\',\''+dStr+'\',\'amount\',this.value)">'
+          +'<div style="font-size:11px;color:var(--rose);font-family:JetBrains Mono;font-weight:600;padding:0 5px">'+rup(sch.interestPart||0)+'</div>'
+          +'<div style="font-size:11px;color:var(--teal);font-family:JetBrains Mono;font-weight:600;padding:0 5px">'+rup(sch.principalPart||0)+'</div>'
           +'<input type="checkbox" '+(sch.paid?'checked':'')+' '
             +'onchange="toggleEmiPaid(\''+loan.id+'\',\''+dStr+'\')" '
             +'style="width:18px;height:18px;cursor:pointer;accent-color:var(--teal)">'
