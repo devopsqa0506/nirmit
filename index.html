@@ -5262,31 +5262,27 @@ function syncProjectIncome(projId) {
   var proj = (state.projects||[]).find(function(p){ return p.id===projId; });
   if (!proj) return;
   
-  // Delete old income entries for this project
+  // Delete old income entries — wait before appending to avoid race condition
   fetch(cfg.scriptUrl, {
     method:'POST',
     body:JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'ProjectIncome', matchCol:'projId', matchVal:projId})
-  }).catch(function(){});
-  
-  // Re-sync all income from plots
-  (proj.plots||[]).forEach(function(plt) {
-    // Advance received
-    if (plt.advanceReceived && plt.advanceReceived > 0) {
-      var advId = 'adv_' + plt.id + '_' + Date.now();
-      pushToSheet('ProjectIncome',
-        ['id','projId','projectName','plotId','plotNo','incomeType','amount','date','buyerName','notes'],
-        [advId, projId, proj.name, plt.id, plt.plotNo||'', 'advance', plt.advanceReceived, plt.date||today(), plt.buyer||'', 'Advance received']
-      );
-    }
-    
-    // Partial payments
-    (plt.partialPayments||[]).forEach(function(pp) {
-      if (pp.amount && pp.amount > 0) {
+  }).catch(function(){}).then(function() {
+    (proj.plots||[]).forEach(function(plt) {
+      if (plt.advanceReceived && plt.advanceReceived > 0) {
+        var advId = 'adv_' + plt.id + '_' + Date.now();
         pushToSheet('ProjectIncome',
           ['id','projId','projectName','plotId','plotNo','incomeType','amount','date','buyerName','notes'],
-          [pp.id, projId, proj.name, plt.id, plt.plotNo||'', 'partial_payment', pp.amount, pp.date||today(), plt.buyer||'', pp.desc||'Partial payment']
+          [advId, projId, proj.name, plt.id, plt.plotNo||'', 'advance', plt.advanceReceived, plt.date||today(), plt.buyer||'', 'Advance received']
         );
       }
+      (plt.partialPayments||[]).forEach(function(pp) {
+        if (pp.amount && pp.amount > 0) {
+          pushToSheet('ProjectIncome',
+            ['id','projId','projectName','plotId','plotNo','incomeType','amount','date','buyerName','notes'],
+            [pp.id, projId, proj.name, plt.id, plt.plotNo||'', 'partial_payment', pp.amount, pp.date||today(), plt.buyer||'', pp.desc||'Partial payment']
+          );
+        }
+      });
     });
   });
 }
