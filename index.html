@@ -5551,7 +5551,7 @@ function renderAgreementAlerts(projects) {
 
 function renderOverallProfit(projects) {
   var el = document.getElementById('overall-profit');
-  if (!projects||!projects.length) { el.innerHTML=''; return; }
+  if (!projects||!projects.length) { if (el) el.innerHTML=''; return; }
   var totalLand=0, totalConst=0, totalExpSale=0, totalReceived=0;
   projects.forEach(function(p){
     totalLand += Number(p.landCost||0) || (Number(p.totalCents||0)*Number(p.pricePerCent||0));
