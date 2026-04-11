@@ -4799,9 +4799,9 @@ function clearPlotRows() {
 var _pendingLandPmts = []; // [{id,date,amount,notes}]
 
 function calcLandTotal() {
-  var cents = Number(document.getElementById('p-cents').value) || 0;
-  var ppc   = sanitizeAmount(document.getElementById('p-price-per-cent').value);
-  var total = Math.round(cents * ppc);
+  var cents = parseInt(document.getElementById('p-cents').value) || 0;
+  var ppc   = parseInt(document.getElementById('p-price-per-cent').value) || 0;
+  var total = cents * ppc;  // Integer multiplication, no rounding needed
   document.getElementById('p-landtotal-display').textContent = '₹' + fmtIN(total);
   document.getElementById('p-landcost').value = total;
   var wordsEl = document.getElementById('p-landtotal-words');
@@ -4831,7 +4831,7 @@ function renderLandPaymentRows() {
 }
 
 function updateLandPaidTotal() {
-  var total = _pendingLandPmts.reduce(function(s,p){ return s+sanitizeAmount(p.amount); }, 0);
+  var total = _pendingLandPmts.reduce(function(s,p){ return s+parseInt(p.amount)||0; }, 0);
   var el = document.getElementById('p-landpaid-display');
   if (el) el.textContent = '₹' + fmtIN(total);
   var wordsEl = document.getElementById('p-landpaid-words');
@@ -4906,7 +4906,7 @@ function saveProject() {
   }
   _pendingLandPmts.forEach(function(row) {
     if (row.amount > 0 && row.date) {
-      var pmt = { id: row.id, projId: proj.id, date: row.date, amount: sanitizeAmount(row.amount), notes: row.notes||'' };
+      var pmt = { id: row.id, projId: proj.id, date: row.date, amount: parseInt(row.amount)||0, notes: row.notes||'' };
       state.landPayments.push(pmt);
       pushToSheet('LandPayments',
         ['id','projId','date','amount','notes'],
