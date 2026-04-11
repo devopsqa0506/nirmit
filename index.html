@@ -1778,7 +1778,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
       <div style="font-size:12px;font-weight:700;color:var(--teal);margin-bottom:10px">💰 Principal Payment</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div><label class="fl">Date *</label><input class="fi" id="pmt-prin-date" type="date"></div>
-        <div><label class="fl">Amount (₹)</label><input class="fi fi-mono" id="pmt-prin-amount" type="number" placeholder="0"></div>
+        <div><label class="fl">Amount (₹)</label><input class="fi fi-mono" id="pmt-prin-amount" type="text" inputmode="numeric" placeholder="0"></div>
       </div>
     </div>
     
@@ -1787,7 +1787,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
       <div style="font-size:12px;font-weight:700;color:var(--rose);margin-bottom:10px">📊 Interest Payment</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div><label class="fl">Date *</label><input class="fi" id="pmt-int-date" type="date"></div>
-        <div><label class="fl">Amount (₹)</label><input class="fi fi-mono" id="pmt-int-amount" type="number" placeholder="0"></div>
+        <div><label class="fl">Amount (₹)</label><input class="fi fi-mono" id="pmt-int-amount" type="text" inputmode="numeric" placeholder="0"></div>
       </div>
     </div>
     
@@ -1872,7 +1872,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
     <input type="hidden" id="lp-proj-id">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div><label class="fl">Date *</label><input class="fi" id="lp-date" type="date"></div>
-      <div><label class="fl">Amount Paid (₹) *</label><input class="fi fi-mono" id="lp-amount" type="number" placeholder="500000"></div>
+      <div><label class="fl">Amount Paid (₹) *</label><input class="fi fi-mono" id="lp-amount" type="text" inputmode="numeric" placeholder="500000"></div>
     </div>
     <label class="fl">Notes (optional)</label>
     <input class="fi" id="lp-notes" placeholder="ఉదా: 1st installment, Registration day payment">
@@ -4822,7 +4822,7 @@ function renderLandPaymentRows() {
   _pendingLandPmts.forEach(function(row, i) {
     html += '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px" data-lp-idx="'+i+'">'
       +'<input class="fi fi-mono" type="date" value="'+row.date+'" oninput="_pendingLandPmts['+i+'].date=this.value;updateLandPaidTotal()" style="flex:0 0 130px;margin-bottom:0;font-size:13px">'
-      +'<input class="fi fi-mono" type="number" placeholder="Amount ₹" value="'+(row.amount||'')+'" oninput="_pendingLandPmts['+i+'].amount=Number(this.value)||0;updateLandPaidTotal()" style="flex:1;margin-bottom:0;font-size:13px">'
+      +'<input class="fi fi-mono" type="text" inputmode="numeric" placeholder="Amount ₹" value="'+(row.amount||'')+'" oninput="_pendingLandPmts['+i+'].amount=parseInt((this.value||\'0\').trim().replace(/,/g,\'\'),10)||0;updateLandPaidTotal()" style="flex:1;margin-bottom:0;font-size:13px">'
       +'<input class="fi" type="text" placeholder="Note" value="'+(row.notes||'')+'" oninput="_pendingLandPmts['+i+'].notes=this.value" style="flex:1;margin-bottom:0;font-size:13px">'
       +'<button type="button" onclick="_pendingLandPmts.splice('+i+',1);renderLandPaymentRows();updateLandPaidTotal()" style="background:none;border:none;color:var(--rose);font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0">×</button>'
     +'</div>';
@@ -5421,42 +5421,37 @@ function syncProjectPlots(projId) {
   var proj = (state.projects||[]).find(function(p){ return p.id===projId; });
   if (!proj) return;
   
-  // Delete old ProjectExpenses for this project
+  // Delete old ProjectExpenses, THEN append new ones
   fetch(cfg.scriptUrl, {
     method:'POST',
     body:JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'ProjectExpenses', matchCol:'projId', matchVal:projId})
+  }).then(function() {
+    var expRows = [];
+    (proj.plots||[]).forEach(function(plt) {
+      (plt.constructionExpenses||[]).forEach(function(exp) {
+        expRows.push([exp.id, projId, plt.id, 'construction', 'Construction', exp.desc||'', exp.amount||0, exp.date||'']);
+      });
+      (plt.miscExpenses||[]).forEach(function(exp) {
+        expRows.push([exp.id, projId, plt.id, 'misc', exp.type||'Misc', '', exp.amount||0, exp.date||'']);
+      });
+      (plt.otherExpenses||[]).forEach(function(exp) {
+        expRows.push([exp.id, projId, plt.id, 'other', 'Other', exp.desc||'', exp.amount||0, exp.date||'']);
+      });
+    });
+    
+    if (expRows.length > 0) {
+      fetch(cfg.scriptUrl, {
+        method:'POST',
+        body:JSON.stringify({
+          action:'batchAppend',
+          sheetId:cfg.sheetId,
+          sheetName:'ProjectExpenses',
+          headers:['id','projId','plotId','type','category','desc','amount','date'],
+          rows:expRows
+        })
+      }).catch(function(){});
+    }
   }).catch(function(){});
-  
-  // Batch all project expenses
-  var expRows = [];
-  (proj.plots||[]).forEach(function(plt) {
-    // Construction expenses
-    (plt.constructionExpenses||[]).forEach(function(exp) {
-      expRows.push([exp.id, projId, plt.id, 'construction', 'Construction', exp.desc||'', exp.amount||0, exp.date||'']);
-    });
-    // Misc expenses
-    (plt.miscExpenses||[]).forEach(function(exp) {
-      expRows.push([exp.id, projId, plt.id, 'misc', exp.type||'Misc', '', exp.amount||0, exp.date||'']);
-    });
-    // Other expenses
-    (plt.otherExpenses||[]).forEach(function(exp) {
-      expRows.push([exp.id, projId, plt.id, 'other', 'Other', exp.desc||'', exp.amount||0, exp.date||'']);
-    });
-  });
-  
-  // Batch append all expenses at once
-  if (expRows.length > 0) {
-    fetch(cfg.scriptUrl, {
-      method:'POST',
-      body:JSON.stringify({
-        action:'batchAppend',
-        sheetId:cfg.sheetId,
-        sheetName:'ProjectExpenses',
-        headers:['id','projId','plotId','type','category','desc','amount','date'],
-        rows:expRows
-      })
-    }).catch(function(){});
-  }
   
   // Update Projects sheet with full plot data
   fetch(cfg.scriptUrl, {
@@ -5472,42 +5467,37 @@ function syncProjectPlots(projId) {
     })
   }).catch(function(){});
   
-  // Delete old income entries for this project
+  // Delete old income entries, THEN append new ones
   fetch(cfg.scriptUrl, {
     method:'POST',
     body:JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'ProjectIncome', matchCol:'projId', matchVal:projId})
-  }).catch(function(){});
-  
-  // Batch all income entries
-  var incomeRows = [];
-  (proj.plots||[]).forEach(function(plt) {
-    // Advance received
-    if (plt.advanceReceived && plt.advanceReceived > 0) {
-      var advId = 'adv_' + plt.id + '_' + Date.now();
-      incomeRows.push([advId, projId, proj.name, plt.id, plt.plotNo||'', 'advance', plt.advanceReceived, plt.date||today(), plt.buyer||'', 'Advance received']);
-    }
-    
-    // Partial payments
-    (plt.partialPayments||[]).forEach(function(pp) {
-      if (pp.amount && pp.amount > 0) {
-        incomeRows.push([pp.id, projId, proj.name, plt.id, plt.plotNo||'', 'partial_payment', pp.amount, pp.date||today(), plt.buyer||'', pp.desc||'Partial payment']);
+  }).then(function() {
+    var incomeRows = [];
+    (proj.plots||[]).forEach(function(plt) {
+      if (plt.advanceReceived && plt.advanceReceived > 0) {
+        var advId = 'adv_' + plt.id + '_' + Date.now();
+        incomeRows.push([advId, projId, proj.name, plt.id, plt.plotNo||'', 'advance', plt.advanceReceived, plt.date||today(), plt.buyer||'', 'Advance received']);
       }
+      (plt.partialPayments||[]).forEach(function(pp) {
+        if (pp.amount && pp.amount > 0) {
+          incomeRows.push([pp.id, projId, proj.name, plt.id, plt.plotNo||'', 'partial_payment', pp.amount, pp.date||today(), plt.buyer||'', pp.desc||'Partial payment']);
+        }
+      });
     });
-  });
-  
-  // Batch append all income rows at once
-  if (incomeRows.length > 0) {
-    fetch(cfg.scriptUrl, {
-      method:'POST',
-      body:JSON.stringify({
-        action:'batchAppend',
-        sheetId:cfg.sheetId,
-        sheetName:'ProjectIncome',
-        headers:['id','projId','projectName','plotId','plotNo','incomeType','amount','date','buyerName','notes'],
-        rows:incomeRows
-      })
-    }).catch(function(){});
-  }
+    
+    if (incomeRows.length > 0) {
+      fetch(cfg.scriptUrl, {
+        method:'POST',
+        body:JSON.stringify({
+          action:'batchAppend',
+          sheetId:cfg.sheetId,
+          sheetName:'ProjectIncome',
+          headers:['id','projId','projectName','plotId','plotNo','incomeType','amount','date','buyerName','notes'],
+          rows:incomeRows
+        })
+      }).catch(function(){});
+    }
+  }).catch(function(){});
 }
 
 
@@ -7621,9 +7611,9 @@ function savePaymentV2() {
   
   var loanId  = el1.value;
   var prinDate = el2.value;
-  var prinAmount = Number(el3.value);
+  var prinAmount = parseInt((el3.value || '0').trim().replace(/,/g, ''), 10) || 0;
   var intDate = el4.value;
-  var intAmount = Number(el5.value);
+  var intAmount = parseInt((el5.value || '0').trim().replace(/,/g, ''), 10) || 0;
   var notes   = el6.value.trim();
 
   if (!prinAmount && !intAmount) { toast('At least one amount enter చేయండి','err'); return; }
@@ -8034,7 +8024,8 @@ function openAddLandPayment(projId) {
 function saveLandPayment() {
   var projId = document.getElementById('lp-proj-id').value;
   var date   = document.getElementById('lp-date').value;
-  var amount = Number(document.getElementById('lp-amount').value);
+  var amountStr = document.getElementById('lp-amount').value.trim().replace(/,/g, '');
+  var amount = parseInt(amountStr, 10) || 0;
   var notes  = document.getElementById('lp-notes').value.trim();
   if (!date)   { toast('Date select చేయండి','err'); return; }
   if (!amount) { toast('Amount enter చేయండి','err'); return; }
@@ -8557,70 +8548,66 @@ function syncPlotLandPayments(projId) {
   var proj = (state.projects||[]).find(function(p){ return p.id===projId; });
   if (!proj || !cfg.scriptUrl || !cfg.sheetId) return;
   
-  // Delete all rows for this project
+  // Delete all rows for this project, THEN append new ones
   fetch(cfg.scriptUrl, {
     method:'POST', mode:'no-cors',
     body: JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'PlotLandPayments', matchCol:'projectId', matchVal:projId})
-  }).catch(function(){});
-  
-  // Batch all plot rows and append in single call
-  var rows = [];
-  (proj.plots||[]).forEach(function(plt) {
-    var plc = plt.plotLandCost !== undefined ? plt.plotLandCost
-      : (proj.totalCents > 0 ? Math.round((Number(proj.landCost||0) / proj.totalCents) * Number(plt.sizeInCents||0)) : 0);
-    rows.push([plt.id, plt.plotNo||'', projId, plt.sizeInCents||0, plc, plt.paidToDate||0, JSON.stringify(plt.adjustmentHistory||[])]);
-  });
-  
-  // Append all rows at once
-  if (rows.length > 0) {
-    var url = cfg.scriptUrl;
-    var payload = JSON.stringify({
-      action:'batchAppend',
-      sheetId:cfg.sheetId,
-      sheetName:'PlotLandPayments',
-      headers:['plotId','plotNo','projectId','plotCents','plotLandCost','paidToDate','adjustmentHistory'],
-      rows:rows
+  }).then(function() {
+    // Only proceed AFTER delete completes
+    var rows = [];
+    (proj.plots||[]).forEach(function(plt) {
+      var plc = plt.plotLandCost !== undefined ? plt.plotLandCost
+        : (proj.totalCents > 0 ? Math.round((Number(proj.landCost||0) / proj.totalCents) * Number(plt.sizeInCents||0)) : 0);
+      rows.push([plt.id, plt.plotNo||'', projId, plt.sizeInCents||0, plc, plt.paidToDate||0, JSON.stringify(plt.adjustmentHistory||[])]);
     });
-    fetch(url, {
-      method:'POST', mode:'no-cors',
-      body: payload
-    }).then(function(){ setSyncStatus('ok'); state.lastSync = new Date().toISOString(); saveData(); }).catch(function(e){ setSyncStatus('err'); console.error('syncPlotLandPayments err:', e); });
-  }
+    
+    if (rows.length > 0) {
+      var url = cfg.scriptUrl;
+      var payload = JSON.stringify({
+        action:'batchAppend',
+        sheetId:cfg.sheetId,
+        sheetName:'PlotLandPayments',
+        headers:['plotId','plotNo','projectId','plotCents','plotLandCost','paidToDate','adjustmentHistory'],
+        rows:rows
+      });
+      fetch(url, {
+        method:'POST', mode:'no-cors',
+        body: payload
+      }).then(function(){ setSyncStatus('ok'); state.lastSync = new Date().toISOString(); saveData(); }).catch(function(e){ setSyncStatus('err'); console.error('syncPlotLandPayments err:', e); });
+    }
+  }).catch(function(){});
 }
 
 function syncLandPayments(projId) {
   if (!cfg.scriptUrl || !cfg.sheetId) return;
   
-  // Delete old LandPayments for this project
+  // Delete old LandPayments for this project, THEN append new ones
   fetch(cfg.scriptUrl, {
     method:'POST', mode:'no-cors',
     body: JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'LandPayments', matchCol:'projId', matchVal:projId})
-  }).catch(function(){});
-  
-  // Get all land payments for this project
-  var pmts = (state.landPayments||[]).filter(function(p){ return p.projId === projId; });
-  
-  // Batch all payment rows
-  var rows = [];
-  pmts.forEach(function(pmt) {
-    rows.push([pmt.id, pmt.projId, pmt.date, pmt.amount, pmt.notes||'']);
-  });
-  
-  // Batch append all rows at once
-  if (rows.length > 0) {
-    var url = cfg.scriptUrl;
-    var payload = JSON.stringify({
-      action:'batchAppend',
-      sheetId:cfg.sheetId,
-      sheetName:'LandPayments',
-      headers:['id','projId','date','amount','notes'],
-      rows:rows
+  }).then(function() {
+    // Only proceed AFTER delete completes
+    var pmts = (state.landPayments||[]).filter(function(p){ return p.projId === projId; });
+    var rows = [];
+    pmts.forEach(function(pmt) {
+      rows.push([pmt.id, pmt.projId, pmt.date, pmt.amount, pmt.notes||'']);
     });
-    fetch(url, {
-      method:'POST', mode:'no-cors',
-      body: payload
-    }).then(function(){ setSyncStatus('ok'); state.lastSync = new Date().toISOString(); saveData(); }).catch(function(e){ setSyncStatus('err'); console.error('syncLandPayments err:', e); });
-  }
+    
+    if (rows.length > 0) {
+      var url = cfg.scriptUrl;
+      var payload = JSON.stringify({
+        action:'batchAppend',
+        sheetId:cfg.sheetId,
+        sheetName:'LandPayments',
+        headers:['id','projId','date','amount','notes'],
+        rows:rows
+      });
+      fetch(url, {
+        method:'POST', mode:'no-cors',
+        body: payload
+      }).then(function(){ setSyncStatus('ok'); state.lastSync = new Date().toISOString(); saveData(); }).catch(function(e){ setSyncStatus('err'); console.error('syncLandPayments err:', e); });
+    }
+  }).catch(function(){});
 }
 
 function renderLandSummaryTable() {
