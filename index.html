@@ -5264,10 +5264,10 @@ function openPlotByIndex(el) {
   });
   body += '<button class="btn ghost sm" style="width:100%;margin-bottom:4px" onclick="addOtherExpense('+pi+','+pli+')">+ Add Other Expense</button>';
 
-  // Expense totals
+  // Expense totals summary
   var centRate = proj.totalCents > 0 ? (Number(proj.landCost||0) / proj.totalCents) : 0;
-  var landCostForPlot = centRate * Number(plt.sizeInCents||0);
-  var landBalance = landCostForPlot - landAdvanceForPlot;
+  var landCostForPlot = plotLandCost;
+  var landBalance = landOutstanding;
   var investLabel = plt.type === 'house' ? '💰 Cost Basis (Land + Build)' : '💰 Cost Basis (Land + Misc)';
   body += '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px 12px;margin-top:8px">'
     +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
