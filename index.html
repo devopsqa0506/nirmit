@@ -6260,16 +6260,17 @@ function generateQR() {
     ctx.textAlign = 'center';
     ctx.fillText('Loading QR...', 110, 110);
 
-    // Load QR via image from Google Charts
+    // Load QR via image from Google Charts (high quality)
     var encodedText = encodeURIComponent(qrText);
     var img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = function(){
       ctx.clearRect(0, 0, 220, 220);
+      // Draw at high quality - use larger source if available
       ctx.drawImage(img, 0, 0, 220, 220);
     };
     img.onerror = function(){
-      // Fallback: use qrserver.com
+      // Fallback: use qrserver.com with size param to get crisp PNG
       var img2 = new Image();
       img2.crossOrigin = 'anonymous';
       img2.onload = function(){
@@ -6289,7 +6290,7 @@ function generateQR() {
         document.getElementById('qr-fallback-text').style.display = 'block';
         document.getElementById('qr-fallback-val').textContent = qrText;
       };
-      img2.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodedText;
+      img2.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&format=png&data=' + encodedText;
     };
     img.src = 'https://chart.googleapis.com/chart?chs=220x220&cht=qr&chl=' + encodedText + '&choe=UTF-8';
 
@@ -6302,9 +6303,10 @@ function saveQRImage() {
   var canvas = document.getElementById('qr-canvas');
   var link = document.createElement('a');
   link.download = 'SiteBook_Setup_QR_' + today().replace(/ /g,'-') + '.png';
+  // Use image/png with highest quality for better QR code readability
   link.href = canvas.toDataURL('image/png');
   link.click();
-  toast('QR Image saved! Google Drive లో upload చేయండి', 'ok');
+  toast('QR Image downloaded! Now: Settings → QR Image Upload చేయండి', 'ok');
 }
 
 function showQRScanner() {
@@ -6409,11 +6411,16 @@ function scanQRFromImage(e) {
       canvas2.getContext('2d').drawImage(img2, 0, 0);
       var imageData2 = canvas2.getContext('2d').getImageData(0, 0, canvas2.width, canvas2.height);
       var code2 = jsQR(imageData2.data, imageData2.width, imageData2.height);
-      if (code2 && code2.data && code2.data.startsWith('SITEBOOK:')) {
-        if (statusEl) { statusEl.textContent = '✅ QR found!'; statusEl.style.color = 'var(--teal)'; }
-        applyQRConfig(code2.data);
+      if (code2 && code2.data) {
+        var scannedData = code2.data.trim();
+        if (scannedData.startsWith('SITEBOOK:')) {
+          if (statusEl) { statusEl.textContent = '✅ QR found!'; statusEl.style.color = 'var(--teal)'; }
+          applyQRConfig(scannedData);
+        } else {
+          if (statusEl) { statusEl.textContent = '❌ Invalid QR: Expected SiteBook format. Got: ' + (scannedData.substring(0,20) || 'empty'); statusEl.style.color = 'var(--rose)'; }
+        }
       } else {
-        if (statusEl) { statusEl.textContent = '❌ Valid SiteBook QR కాదు. SiteBook app Generate QR నుండి తీసిన image select చేయండి.'; statusEl.style.color = 'var(--rose)'; }
+        if (statusEl) { statusEl.textContent = '❌ QR code not detected. Image resolution quality check చేయండి.'; statusEl.style.color = 'var(--rose)'; }
       }
     };
     img2.onerror = function(){
