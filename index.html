@@ -7263,31 +7263,32 @@ function init() {
         // After user authenticates, continue trying to load config
         // We'll check periodically if login succeeded
         var authCheckInterval = setInterval(function() {
-          // If gapi is ready and user is signed in
-          if (gapi && gapi.auth2 && gapi.auth2.getAuthInstance) {
-            var auth = gapi.auth2.getAuthInstance();
-            if (auth && auth.isSignedIn && auth.isSignedIn.get()) {
-              clearInterval(authCheckInterval);
-              console.log('SiteBook: User authenticated, now loading Drive config');
-              
-              // User is authenticated, now try to load config from Drive
-              var tempScriptUrl = STORE.get('temp_script_url');
-              
-              if (tempScriptUrl) {
-                console.log('SiteBook: Loading config from Drive via Apps Script...');
-                loadConfigFromDrive(tempScriptUrl)
-                  .then(function(configData) {
-                    console.log('SiteBook: Drive config loaded successfully');
-                    applyConfigFromDrive(configData);
-                    STORE.set('temp_script_url', configData.scriptUrl);
-                    launchApp();
-                    updateUserUI();
-                    setTimeout(function(){
-                      syncFromSheet();
-                    }, 800);
-                  })
-                  .catch(function(err) {
-                    console.log('SiteBook: Could not load from Drive:', err.message);
+          // Safely check if gapi is ready and user is signed in
+          try {
+            if (typeof gapi !== 'undefined' && gapi && gapi.auth2 && gapi.auth2.getAuthInstance) {
+              var auth = gapi.auth2.getAuthInstance();
+              if (auth && auth.isSignedIn && auth.isSignedIn.get()) {
+                clearInterval(authCheckInterval);
+                console.log('SiteBook: User authenticated, now loading Drive config');
+                
+                // User is authenticated, now try to load config from Drive
+                var tempScriptUrl = STORE.get('temp_script_url');
+                
+                if (tempScriptUrl) {
+                  console.log('SiteBook: Loading config from Drive via Apps Script...');
+                  loadConfigFromDrive(tempScriptUrl)
+                    .then(function(configData) {
+                      console.log('SiteBook: Drive config loaded successfully');
+                      applyConfigFromDrive(configData);
+                      STORE.set('temp_script_url', configData.scriptUrl);
+                      launchApp();
+                      updateUserUI();
+                      setTimeout(function(){
+                        syncFromSheet();
+                      }, 800);
+                    })
+                    .catch(function(err) {
+                      console.log('SiteBook: Could not load from Drive:', err.message);
                     // If no Drive config, show manual setup (QR)
                     console.log('SiteBook: Showing QR/manual setup screen');
                     var setupEl = document.getElementById('setup');
@@ -7306,6 +7307,10 @@ function init() {
                 }
               }
             }
+          }
+          } catch(e) {
+            // gapi not ready yet, will check again
+            console.log('SiteBook: gapi not ready yet, retrying...');
           }
         }, 500); // Check every 500ms
         
