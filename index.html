@@ -477,6 +477,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Telugu',sans-se
 .btn.teal{background:var(--teal);color:var(--bg)}
 .btn.ghost{background:var(--s2);color:var(--tx2);border:1px solid var(--bd)}
 .btn.rose{background:rgba(232,93,122,0.12);color:var(--rose);border:1px solid rgba(232,93,122,0.35)}
+.btn.sky{background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.4)}
 .btn.full{width:100%}
 .btn.sm{padding:7px 12px;font-size:12px;border-radius:8px}
 
@@ -1303,10 +1304,10 @@ input[type=number] { -moz-appearance:textfield; }
           </div>
           <button class="btn ghost sm" onclick="changeClientId()">Set</button>
         </div>
-        <div class="si"><div class="si-ico">📊</div><div class="si-body"><div class="si-t">Google Sheet</div><div class="si-s">Data ఇక్కడ save అవుతుంది</div><div class="si-v" id="cfg-sheet">Not configured</div></div><button class="btn ghost sm" onclick="openSheetInBrowser()">Open ↗</button></div>
-        <div class="si"><div class="si-ico">🔗</div><div class="si-body"><div class="si-t">Apps Script URL</div><div class="si-s">Script URL update చేయండి</div><div class="si-v" id="cfg-script" style="font-size:11px">Not configured</div></div><button class="btn ghost sm" onclick="changeScriptUrl()">Change</button></div>
-        <div class="si"><div class="si-ico">🤖</div><div class="si-body"><div class="si-t">Gemini AI Keys</div><div class="si-s">Free — 15 req/min per key. Multiple keys = more quota</div><div class="si-v" id="cfg-ai">Not configured</div></div><button class="btn ghost sm" onclick="openModal('manage-keys')">Manage</button></div>
-        <div class="si"><div class="si-ico">☁️</div><div class="si-body"><div class="si-t">Sync Status</div><div class="si-s" id="cfg-sync">Last sync: Never</div></div><button class="btn ghost sm" onclick="syncNow()">Sync</button></div>
+        <div class="si"><div class="si-ico">📊</div><div class="si-body"><div class="si-t">Google Sheet</div><div class="si-s">Data ఇక్కడ save అవుతుంది</div><div class="si-v" id="cfg-sheet">Not configured</div></div><button class="btn sky sm" onclick="openSheetInBrowser()">Open ↗</button></div>
+        <div class="si"><div class="si-ico">🔗</div><div class="si-body"><div class="si-t">Apps Script URL</div><div class="si-s">Script URL update చేయండి</div><div class="si-v" id="cfg-script" style="font-size:11px">Not configured</div></div><button class="btn amb sm" onclick="changeScriptUrl()">Change</button></div>
+        <div class="si"><div class="si-ico">🤖</div><div class="si-body"><div class="si-t">Gemini AI Keys</div><div class="si-s">Free — 15 req/min per key. Multiple keys = more quota</div><div class="si-v" id="cfg-ai">Not configured</div></div><button class="btn amb sm" onclick="openModal('manage-keys')">Manage</button></div>
+        <div class="si"><div class="si-ico">☁️</div><div class="si-body"><div class="si-t">Sync Status</div><div class="si-s" id="cfg-sync">Last sync: Never</div></div><button class="btn teal sm" onclick="syncNow()">Sync Now</button></div>
         <div class="si" style="border-color:rgba(58,232,200,0.3)">
           <div class="si-ico">📁</div>
           <div class="si-body">
@@ -1314,7 +1315,7 @@ input[type=number] { -moz-appearance:textfield; }
             <div class="si-s">Documents, Bills, Registrations saved here</div>
           </div>
           <div style="display:flex;gap:6px">
-            <button class="btn ghost sm" style="color:var(--teal);border-color:rgba(58,232,200,0.3)" onclick="getDriveUrl()">Open ↗</button>
+            <button class="btn sky sm" onclick="getDriveUrl()">Open ↗</button>
           </div>
         </div>
         <div class="si"><div class="si-ico">📱</div><div class="si-body"><div class="si-t">New Phone Setup</div><div class="si-s">Same Sheet ID + Gemini Key enter చేయండి</div></div><button class="btn ghost sm" onclick="showGuide()">Guide</button></div>
@@ -5179,7 +5180,7 @@ function openPlotByIndex(el) {
   var centRate = proj.totalCents > 0 ? (Number(proj.landCost||0) / proj.totalCents) : 0;
   var landCostForPlot = centRate * Number(plt.sizeInCents||0);
   var landBalance = landCostForPlot - landAdvanceForPlot;
-  var investLabel = plt.type === 'house' ? '💰 Cost Basis (Land + Build)' : '💰 Cost Basis (Land + Misc)';
+  var investLabel = plt.type === 'house' ? '💰 Total Investment (Land + Build)' : '💰 Total Investment (Land + Misc)';
   body += '<div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:10px 12px;margin-top:8px">'
     +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
       +'<span style="font-size:12px;color:var(--tx2)">🏦 Land Balance (Remaining)</span>'
@@ -5304,11 +5305,11 @@ function syncProjectPlots(projId) {
   var proj = (state.projects||[]).find(function(p){ return p.id===projId; });
   if (!proj) return;
   
-  // Delete old ProjectExpenses for this project — wait before appending
+  // Delete only plot-level expenses (have plotId) — NOT overhead/admin rows (pex_ prefix)
   fetch(cfg.scriptUrl, {
     method:'POST',
     mode:'no-cors',
-    body:JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'ProjectExpenses', matchCol:'projId', matchVal:projId})
+    body:JSON.stringify({action:'deleteRow', sheetId:cfg.sheetId, sheetName:'ProjectExpenses', matchCol:'projId', matchVal:projId, excludeIdPrefix:'pex_'})
   }).catch(function(){}).then(function() {
     // Re-sync all plot expenses
     (proj.plots||[]).forEach(function(plt) {
@@ -8509,8 +8510,8 @@ function saveProjExpense() {
   state.projExpenses.push(exp);
   saveData();
   pushToSheet('ProjectExpenses',
-    ['id','projId','date','amount','category','desc'],
-    [exp.id, exp.projId, exp.date, exp.amount, exp.category, exp.desc]
+    ['id','projId','plotId','type','category','desc','amount','date'],
+    [exp.id, exp.projId, '', 'overhead', exp.category, exp.desc, exp.amount, exp.date]
   );
   closeModal('add-proj-expense');
   // clear fields
